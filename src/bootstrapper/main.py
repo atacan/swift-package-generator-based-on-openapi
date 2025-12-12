@@ -6,6 +6,7 @@ import typer
 from rich.console import Console
 
 from bootstrapper.generators.swift import ensure_package_structure, run_openapi_generator
+from bootstrapper.generators.templates import generate_config_files
 from bootstrapper.transformers.manager import transform_spec
 
 app = typer.Typer(
@@ -133,6 +134,21 @@ def bootstrap(
         console.print("[bold green]✓[/bold green] Created Package.swift")
     else:
         console.print("[bold blue]✓[/bold blue] Package.swift already exists (preserved)")
+
+    # Step 3.5: Generate config files (Makefile, .gitignore, .env, generator configs)
+    with console.status("[bold yellow]Generating config files..."):
+        try:
+            config_results = generate_config_files(target_path, project_name)
+        except Exception as e:
+            console.print(f"[bold red]✗[/bold red] Failed to generate config files: {e}")
+            raise typer.Exit(1)
+
+    # Report which config files were created
+    created_configs = [name for name, created in config_results.items() if created]
+    if created_configs:
+        console.print(f"[bold green]✓[/bold green] Generated config files: {', '.join(created_configs)}")
+    else:
+        console.print("[bold blue]✓[/bold blue] Config files already exist (preserved)")
 
     console.print(
         f"[bold green]✓[/bold green] Created directory structure "
