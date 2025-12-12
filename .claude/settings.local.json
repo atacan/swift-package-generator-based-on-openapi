@@ -5,7 +5,8 @@
       "Bash(touch:*)",
       "Bash(tree:*)",
       "Bash(uv:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(python3:*)"
     ]
   }
 }
