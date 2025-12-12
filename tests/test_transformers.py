@@ -14,24 +14,10 @@ class TestOp1NullAnyOfRemoval:
         """Test that type: null is removed from anyOf arrays."""
         schema = {
             "type": "object",
-            "properties": {
-                "username": {
-                    "anyOf": [
-                        {"type": "string"},
-                        {"type": "null"}
-                    ]
-                }
-            }
+            "properties": {"username": {"anyOf": [{"type": "string"}, {"type": "null"}]}},
         }
 
-        expected = {
-            "type": "object",
-            "properties": {
-                "username": {
-                    "type": "string"
-                }
-            }
-        }
+        expected = {"type": "object", "properties": {"username": {"type": "string"}}}
 
         result = remove_null_anyof(schema)
         assert result == expected
@@ -41,26 +27,13 @@ class TestOp1NullAnyOfRemoval:
         schema = {
             "type": "object",
             "properties": {
-                "value": {
-                    "anyOf": [
-                        {"type": "string"},
-                        {"type": "number"},
-                        {"type": "null"}
-                    ]
-                }
-            }
+                "value": {"anyOf": [{"type": "string"}, {"type": "number"}, {"type": "null"}]}
+            },
         }
 
         expected = {
             "type": "object",
-            "properties": {
-                "value": {
-                    "anyOf": [
-                        {"type": "string"},
-                        {"type": "number"}
-                    ]
-                }
-            }
+            "properties": {"value": {"anyOf": [{"type": "string"}, {"type": "number"}]}},
         }
 
         result = remove_null_anyof(schema)
@@ -71,23 +44,13 @@ class TestOp1NullAnyOfRemoval:
         schema = {
             "type": "object",
             "properties": {
-                "email": {
-                    "anyOf": [
-                        {"type": "string", "format": "email"},
-                        {"type": "null"}
-                    ]
-                }
-            }
+                "email": {"anyOf": [{"type": "string", "format": "email"}, {"type": "null"}]}
+            },
         }
 
         expected = {
             "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "format": "email"
-                }
-            }
+            "properties": {"email": {"type": "string", "format": "email"}},
         }
 
         result = remove_null_anyof(schema)
@@ -99,23 +62,15 @@ class TestOp1NullAnyOfRemoval:
             "type": "object",
             "properties": {
                 "status": {
-                    "anyOf": [
-                        {"type": "string", "enum": ["active", "inactive"]},
-                        {"type": "null"}
-                    ],
-                    "default": None
+                    "anyOf": [{"type": "string", "enum": ["active", "inactive"]}, {"type": "null"}],
+                    "default": None,
                 }
-            }
+            },
         }
 
         expected = {
             "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "enum": ["active", "inactive"]
-                }
-            }
+            "properties": {"status": {"type": "string", "enum": ["active", "inactive"]}},
         }
 
         result = remove_null_anyof(schema)
@@ -127,27 +82,17 @@ class TestOp1NullAnyOfRemoval:
             "type": "object",
             "properties": {
                 "data": {
-                    "anyOf": [
-                        {"type": "string"},
-                        {"type": "number"},
-                        {"type": "null"}
-                    ],
-                    "default": None
+                    "anyOf": [{"type": "string"}, {"type": "number"}, {"type": "null"}],
+                    "default": None,
                 }
-            }
+            },
         }
 
         expected = {
             "type": "object",
             "properties": {
-                "data": {
-                    "anyOf": [
-                        {"type": "string"},
-                        {"type": "number"}
-                    ],
-                    "default": None
-                }
-            }
+                "data": {"anyOf": [{"type": "string"}, {"type": "number"}], "default": None}
+            },
         }
 
         result = remove_null_anyof(schema)
@@ -163,30 +108,16 @@ class TestOp1NullAnyOfRemoval:
             "properties": {
                 "nested": {
                     "type": "object",
-                    "properties": {
-                        "inner": {
-                            "anyOf": [
-                                {"type": "boolean"},
-                                {"type": "null"}
-                            ]
-                        }
-                    }
+                    "properties": {"inner": {"anyOf": [{"type": "boolean"}, {"type": "null"}]}},
                 }
-            }
+            },
         }
 
         expected = {
             "type": "object",
             "properties": {
-                "nested": {
-                    "type": "object",
-                    "properties": {
-                        "inner": {
-                            "type": "boolean"
-                        }
-                    }
-                }
-            }
+                "nested": {"type": "object", "properties": {"inner": {"type": "boolean"}}}
+            },
         }
 
         result = remove_null_anyof(schema)
@@ -196,14 +127,7 @@ class TestOp1NullAnyOfRemoval:
         """Test that anyOf without null type is unchanged."""
         schema = {
             "type": "object",
-            "properties": {
-                "multi": {
-                    "anyOf": [
-                        {"type": "string"},
-                        {"type": "number"}
-                    ]
-                }
-            }
+            "properties": {"multi": {"anyOf": [{"type": "string"}, {"type": "number"}]}},
         }
 
         expected = schema.copy()
@@ -213,25 +137,9 @@ class TestOp1NullAnyOfRemoval:
 
     def test_anyof_only_null_becomes_null_type(self):
         """Test that anyOf with only null becomes a null type."""
-        schema = {
-            "type": "object",
-            "properties": {
-                "nullable_only": {
-                    "anyOf": [
-                        {"type": "null"}
-                    ]
-                }
-            }
-        }
+        schema = {"type": "object", "properties": {"nullable_only": {"anyOf": [{"type": "null"}]}}}
 
-        expected = {
-            "type": "object",
-            "properties": {
-                "nullable_only": {
-                    "type": "null"
-                }
-            }
-        }
+        expected = {"type": "object", "properties": {"nullable_only": {"type": "null"}}}
 
         result = remove_null_anyof(schema)
         assert result == expected
@@ -241,52 +149,27 @@ class TestOp1NullAnyOfRemoval:
         schema = {
             "type": "object",
             "properties": {
-                "field1": {
-                    "anyOf": [
-                        {"type": "string"},
-                        {"type": "null"}
-                    ],
-                    "default": None
-                },
+                "field1": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": None},
                 "field2": {
                     "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {"type": "integer"},
-                            {"type": "null"}
-                        ]
-                    }
+                    "items": {"anyOf": [{"type": "integer"}, {"type": "null"}]},
                 },
                 "field3": {
                     "anyOf": [
                         {"type": "object", "properties": {"name": {"type": "string"}}},
-                        {"type": "null"}
+                        {"type": "null"},
                     ]
-                }
-            }
+                },
+            },
         }
 
         expected = {
             "type": "object",
             "properties": {
-                "field1": {
-                    "type": "string"
-                },
-                "field2": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "field3": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
+                "field1": {"type": "string"},
+                "field2": {"type": "array", "items": {"type": "integer"}},
+                "field3": {"type": "object", "properties": {"name": {"type": "string"}}},
+            },
         }
 
         result = remove_null_anyof(schema)
@@ -300,13 +183,13 @@ class TestOp1NullAnyOfRemoval:
                 "title": {
                     "anyOf": [
                         {"type": "string", "minLength": 1, "maxLength": 100},
-                        {"type": "null"}
+                        {"type": "null"},
                     ],
                     "description": "The title field",
-                    "example": "Example Title"
+                    "example": "Example Title",
                 }
             },
-            "required": ["title"]
+            "required": ["title"],
         }
 
         expected = {
@@ -317,10 +200,10 @@ class TestOp1NullAnyOfRemoval:
                     "minLength": 1,
                     "maxLength": 100,
                     "description": "The title field",
-                    "example": "Example Title"
+                    "example": "Example Title",
                 }
             },
-            "required": ["title"]
+            "required": ["title"],
         }
 
         result = remove_null_anyof(schema)
@@ -332,24 +215,11 @@ class TestOp2ConstToEnum:
 
     def test_const_string_converted_to_enum(self):
         """Test that const with string value is converted to enum."""
-        schema = {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "const": "active"
-                }
-            }
-        }
+        schema = {"type": "object", "properties": {"status": {"type": "string", "const": "active"}}}
 
         expected = {
             "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "enum": ["active"]
-                }
-            }
+            "properties": {"status": {"type": "string", "enum": ["active"]}},
         }
 
         result = convert_const_to_enum(schema)
@@ -357,74 +227,29 @@ class TestOp2ConstToEnum:
 
     def test_const_number_converted_to_enum(self):
         """Test that const with number value is converted to enum."""
-        schema = {
-            "type": "object",
-            "properties": {
-                "version": {
-                    "type": "number",
-                    "const": 1.0
-                }
-            }
-        }
+        schema = {"type": "object", "properties": {"version": {"type": "number", "const": 1.0}}}
 
-        expected = {
-            "type": "object",
-            "properties": {
-                "version": {
-                    "type": "number",
-                    "enum": [1.0]
-                }
-            }
-        }
+        expected = {"type": "object", "properties": {"version": {"type": "number", "enum": [1.0]}}}
 
         result = convert_const_to_enum(schema)
         assert result == expected
 
     def test_const_integer_converted_to_enum(self):
         """Test that const with integer value is converted to enum."""
-        schema = {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer",
-                    "const": 42
-                }
-            }
-        }
+        schema = {"type": "object", "properties": {"count": {"type": "integer", "const": 42}}}
 
-        expected = {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer",
-                    "enum": [42]
-                }
-            }
-        }
+        expected = {"type": "object", "properties": {"count": {"type": "integer", "enum": [42]}}}
 
         result = convert_const_to_enum(schema)
         assert result == expected
 
     def test_const_boolean_converted_to_enum(self):
         """Test that const with boolean value is converted to enum."""
-        schema = {
-            "type": "object",
-            "properties": {
-                "enabled": {
-                    "type": "boolean",
-                    "const": True
-                }
-            }
-        }
+        schema = {"type": "object", "properties": {"enabled": {"type": "boolean", "const": True}}}
 
         expected = {
             "type": "object",
-            "properties": {
-                "enabled": {
-                    "type": "boolean",
-                    "enum": [True]
-                }
-            }
+            "properties": {"enabled": {"type": "boolean", "enum": [True]}},
         }
 
         result = convert_const_to_enum(schema)
@@ -432,23 +257,9 @@ class TestOp2ConstToEnum:
 
     def test_const_null_converted_to_enum(self):
         """Test that const with null value is converted to enum."""
-        schema = {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "const": None
-                }
-            }
-        }
+        schema = {"type": "object", "properties": {"value": {"const": None}}}
 
-        expected = {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "enum": [None]
-                }
-            }
-        }
+        expected = {"type": "object", "properties": {"value": {"enum": [None]}}}
 
         result = convert_const_to_enum(schema)
         assert result == expected
@@ -457,12 +268,7 @@ class TestOp2ConstToEnum:
         """Test that const key is removed after conversion."""
         schema = {
             "type": "object",
-            "properties": {
-                "literal": {
-                    "type": "string",
-                    "const": "fixed_value"
-                }
-            }
+            "properties": {"literal": {"type": "string", "const": "fixed_value"}},
         }
 
         result = convert_const_to_enum(schema)
@@ -476,14 +282,9 @@ class TestOp2ConstToEnum:
             "properties": {
                 "nested": {
                     "type": "object",
-                    "properties": {
-                        "inner": {
-                            "type": "string",
-                            "const": "nested_value"
-                        }
-                    }
+                    "properties": {"inner": {"type": "string", "const": "nested_value"}},
                 }
-            }
+            },
         }
 
         expected = {
@@ -491,14 +292,9 @@ class TestOp2ConstToEnum:
             "properties": {
                 "nested": {
                     "type": "object",
-                    "properties": {
-                        "inner": {
-                            "type": "string",
-                            "enum": ["nested_value"]
-                        }
-                    }
+                    "properties": {"inner": {"type": "string", "enum": ["nested_value"]}},
                 }
-            }
+            },
         }
 
         result = convert_const_to_enum(schema)
@@ -509,27 +305,15 @@ class TestOp2ConstToEnum:
         schema = {
             "type": "object",
             "properties": {
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "const": "fixed_tag"
-                    }
-                }
-            }
+                "tags": {"type": "array", "items": {"type": "string", "const": "fixed_tag"}}
+            },
         }
 
         expected = {
             "type": "object",
             "properties": {
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "enum": ["fixed_tag"]
-                    }
-                }
-            }
+                "tags": {"type": "array", "items": {"type": "string", "enum": ["fixed_tag"]}}
+            },
         }
 
         result = convert_const_to_enum(schema)
@@ -540,37 +324,19 @@ class TestOp2ConstToEnum:
         schema = {
             "type": "object",
             "properties": {
-                "field1": {
-                    "type": "string",
-                    "const": "value1"
-                },
-                "field2": {
-                    "type": "number",
-                    "const": 123
-                },
-                "field3": {
-                    "type": "boolean",
-                    "const": False
-                }
-            }
+                "field1": {"type": "string", "const": "value1"},
+                "field2": {"type": "number", "const": 123},
+                "field3": {"type": "boolean", "const": False},
+            },
         }
 
         expected = {
             "type": "object",
             "properties": {
-                "field1": {
-                    "type": "string",
-                    "enum": ["value1"]
-                },
-                "field2": {
-                    "type": "number",
-                    "enum": [123]
-                },
-                "field3": {
-                    "type": "boolean",
-                    "enum": [False]
-                }
-            }
+                "field1": {"type": "string", "enum": ["value1"]},
+                "field2": {"type": "number", "enum": [123]},
+                "field3": {"type": "boolean", "enum": [False]},
+            },
         }
 
         result = convert_const_to_enum(schema)
@@ -585,9 +351,9 @@ class TestOp2ConstToEnum:
                     "type": "string",
                     "const": "v1",
                     "description": "API version identifier",
-                    "example": "v1"
+                    "example": "v1",
                 }
-            }
+            },
         }
 
         expected = {
@@ -597,9 +363,9 @@ class TestOp2ConstToEnum:
                     "type": "string",
                     "enum": ["v1"],
                     "description": "API version identifier",
-                    "example": "v1"
+                    "example": "v1",
                 }
-            }
+            },
         }
 
         result = convert_const_to_enum(schema)
@@ -609,12 +375,7 @@ class TestOp2ConstToEnum:
         """Test that schemas without const are unchanged."""
         schema = {
             "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "enum": ["option1", "option2"]
-                }
-            }
+            "properties": {"name": {"type": "string", "enum": ["option1", "option2"]}},
         }
 
         expected = schema.copy()
@@ -634,15 +395,10 @@ class TestOp3NullableTo31:
                 "schemas": {
                     "User": {
                         "type": "object",
-                        "properties": {
-                            "name": {
-                                "type": "string",
-                                "nullable": True
-                            }
-                        }
+                        "properties": {"name": {"type": "string", "nullable": True}},
                     }
                 }
-            }
+            },
         }
 
         result = convert_nullable_to_3_1(schema)
@@ -663,15 +419,10 @@ class TestOp3NullableTo31:
                 "schemas": {
                     "Product": {
                         "type": "object",
-                        "properties": {
-                            "price": {
-                                "type": "number",
-                                "nullable": True
-                            }
-                        }
+                        "properties": {"price": {"type": "number", "nullable": True}},
                     }
                 }
-            }
+            },
         }
 
         result = convert_nullable_to_3_1(schema)
@@ -688,15 +439,10 @@ class TestOp3NullableTo31:
                 "schemas": {
                     "Item": {
                         "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "string",
-                                "nullable": False
-                            }
-                        }
+                        "properties": {"id": {"type": "string", "nullable": False}},
                     }
                 }
-            }
+            },
         }
 
         result = convert_nullable_to_3_1(schema)
@@ -717,12 +463,12 @@ class TestOp3NullableTo31:
                             "name": {
                                 "type": "string",
                                 # Invalid in 3.1, but we don't touch 3.1 specs
-                                "nullable": True
+                                "nullable": True,
                             }
-                        }
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = convert_nullable_to_3_1(schema)
@@ -739,15 +485,10 @@ class TestOp3NullableTo31:
                     "schemas": {
                         "Test": {
                             "type": "object",
-                            "properties": {
-                                "field": {
-                                    "type": "string",
-                                    "nullable": True
-                                }
-                            }
+                            "properties": {"field": {"type": "string", "nullable": True}},
                         }
                     }
-                }
+                },
             }
 
             result = convert_nullable_to_3_1(schema)
@@ -766,23 +507,15 @@ class TestOp3NullableTo31:
                     "Address": {
                         "type": "object",
                         "properties": {
-                            "street": {
-                                "type": "string",
-                                "nullable": True
-                            },
+                            "street": {"type": "string", "nullable": True},
                             "details": {
                                 "type": "object",
-                                "properties": {
-                                    "apartment": {
-                                        "type": "string",
-                                        "nullable": True
-                                    }
-                                }
-                            }
-                        }
+                                "properties": {"apartment": {"type": "string", "nullable": True}},
+                            },
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = convert_nullable_to_3_1(schema)
@@ -809,12 +542,12 @@ class TestOp3NullableTo31:
                                 "format": "email",
                                 "nullable": True,
                                 "description": "User email address",
-                                "example": "user@example.com"
+                                "example": "user@example.com",
                             }
-                        }
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = convert_nullable_to_3_1(schema)
@@ -837,15 +570,12 @@ class TestOp3NullableTo31:
                         "properties": {
                             "items": {
                                 "type": "array",
-                                "items": {
-                                    "type": "string",
-                                    "nullable": True
-                                }
+                                "items": {"type": "string", "nullable": True},
                             }
-                        }
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = convert_nullable_to_3_1(schema)
@@ -863,22 +593,13 @@ class TestOp3NullableTo31:
                     "User": {
                         "type": "object",
                         "properties": {
-                            "name": {
-                                "type": "string",
-                                "nullable": True
-                            },
-                            "age": {
-                                "type": "integer",
-                                "nullable": True
-                            },
-                            "active": {
-                                "type": "boolean",
-                                "nullable": True
-                            }
-                        }
+                            "name": {"type": "string", "nullable": True},
+                            "age": {"type": "integer", "nullable": True},
+                            "active": {"type": "boolean", "nullable": True},
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = convert_nullable_to_3_1(schema)
@@ -893,17 +614,8 @@ class TestOp3NullableTo31:
         schema = {
             "openapi": "3.0.0",
             "components": {
-                "schemas": {
-                    "User": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
+                "schemas": {"User": {"type": "object", "properties": {"id": {"type": "string"}}}}
+            },
         }
 
         expected = schema.copy()
@@ -918,12 +630,7 @@ class TestOp3NullableTo31:
                 "schemas": {
                     "Test": {
                         "type": "object",
-                        "properties": {
-                            "field": {
-                                "type": "string",
-                                "nullable": True
-                            }
-                        }
+                        "properties": {"field": {"type": "string", "nullable": True}},
                     }
                 }
             }
@@ -948,15 +655,10 @@ class TestOp4FormatByteFix:
                 "schemas": {
                     "File": {
                         "type": "object",
-                        "properties": {
-                            "data": {
-                                "type": "string",
-                                "format": "byte"
-                            }
-                        }
+                        "properties": {"data": {"type": "string", "format": "byte"}},
                     }
                 }
-            }
+            },
         }
 
         result = fix_byte_format(schema)
@@ -974,15 +676,10 @@ class TestOp4FormatByteFix:
                 "schemas": {
                     "File": {
                         "type": "object",
-                        "properties": {
-                            "data": {
-                                "type": "string",
-                                "format": "byte"
-                            }
-                        }
+                        "properties": {"data": {"type": "string", "format": "byte"}},
                     }
                 }
-            }
+            },
         }
 
         result = fix_byte_format(schema)
@@ -1001,15 +698,10 @@ class TestOp4FormatByteFix:
                     "schemas": {
                         "Test": {
                             "type": "object",
-                            "properties": {
-                                "file": {
-                                    "type": "string",
-                                    "format": "byte"
-                                }
-                            }
+                            "properties": {"file": {"type": "string", "format": "byte"}},
                         }
                     }
-                }
+                },
             }
 
             result = fix_byte_format(schema)
@@ -1027,22 +719,13 @@ class TestOp4FormatByteFix:
                     "User": {
                         "type": "object",
                         "properties": {
-                            "email": {
-                                "type": "string",
-                                "format": "email"
-                            },
-                            "date": {
-                                "type": "string",
-                                "format": "date-time"
-                            },
-                            "binary": {
-                                "type": "string",
-                                "format": "binary"
-                            }
-                        }
+                            "email": {"type": "string", "format": "email"},
+                            "date": {"type": "string", "format": "date-time"},
+                            "binary": {"type": "string", "format": "binary"},
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = fix_byte_format(schema)
@@ -1063,17 +746,12 @@ class TestOp4FormatByteFix:
                         "properties": {
                             "attachment": {
                                 "type": "object",
-                                "properties": {
-                                    "content": {
-                                        "type": "string",
-                                        "format": "byte"
-                                    }
-                                }
+                                "properties": {"content": {"type": "string", "format": "byte"}},
                             }
-                        }
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = fix_byte_format(schema)
@@ -1095,15 +773,12 @@ class TestOp4FormatByteFix:
                         "properties": {
                             "attachments": {
                                 "type": "array",
-                                "items": {
-                                    "type": "string",
-                                    "format": "byte"
-                                }
+                                "items": {"type": "string", "format": "byte"},
                             }
-                        }
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = fix_byte_format(schema)
@@ -1121,21 +796,13 @@ class TestOp4FormatByteFix:
                     "Upload": {
                         "type": "object",
                         "properties": {
-                            "file1": {
-                                "type": "string",
-                                "format": "byte"
-                            },
-                            "file2": {
-                                "type": "string",
-                                "format": "byte"
-                            },
-                            "text": {
-                                "type": "string"
-                            }
-                        }
+                            "file1": {"type": "string", "format": "byte"},
+                            "file2": {"type": "string", "format": "byte"},
+                            "text": {"type": "string"},
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = fix_byte_format(schema)
@@ -1160,12 +827,12 @@ class TestOp4FormatByteFix:
                                 "type": "string",
                                 "format": "byte",
                                 "description": "Base64 encoded file data",
-                                "example": "SGVsbG8gV29ybGQ="
+                                "example": "SGVsbG8gV29ybGQ=",
                             }
-                        }
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = fix_byte_format(schema)
@@ -1188,12 +855,12 @@ class TestOp4FormatByteFix:
                             "weird": {
                                 "type": "integer",
                                 # Invalid but we should not crash
-                                "format": "byte"
+                                "format": "byte",
                             }
-                        }
+                        },
                     }
                 }
-            }
+            },
         }
 
         result = fix_byte_format(schema)
@@ -1208,17 +875,8 @@ class TestOp4FormatByteFix:
         schema = {
             "openapi": "3.1.0",
             "components": {
-                "schemas": {
-                    "User": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
+                "schemas": {"User": {"type": "object", "properties": {"name": {"type": "string"}}}}
+            },
         }
 
         expected = schema.copy()
@@ -1234,11 +892,8 @@ class TestOp5CleanRequired:
         """Test that required properties not in properties are removed."""
         schema = {
             "type": "object",
-            "properties": {
-                "name": {"type": "string"},
-                "email": {"type": "string"}
-            },
-            "required": ["name", "email", "phone", "address"]
+            "properties": {"name": {"type": "string"}, "email": {"type": "string"}},
+            "required": ["name", "email", "phone", "address"],
         }
 
         result = clean_required_arrays(schema)
@@ -1252,9 +907,9 @@ class TestOp5CleanRequired:
             "properties": {
                 "id": {"type": "string"},
                 "name": {"type": "string"},
-                "age": {"type": "integer"}
+                "age": {"type": "integer"},
             },
-            "required": ["id", "name"]
+            "required": ["id", "name"],
         }
 
         result = clean_required_arrays(schema)
@@ -1265,10 +920,8 @@ class TestOp5CleanRequired:
         """Test that empty required arrays are removed."""
         schema = {
             "type": "object",
-            "properties": {
-                "name": {"type": "string"}
-            },
-            "required": ["id", "email"]  # None of these exist
+            "properties": {"name": {"type": "string"}},
+            "required": ["id", "email"],  # None of these exist
         }
 
         result = clean_required_arrays(schema)
@@ -1283,12 +936,10 @@ class TestOp5CleanRequired:
             "properties": {
                 "user": {
                     "type": "object",
-                    "properties": {
-                        "name": {"type": "string"}
-                    },
-                    "required": ["name", "email", "phone"]
+                    "properties": {"name": {"type": "string"}},
+                    "required": ["name", "email", "phone"],
                 }
-            }
+            },
         }
 
         result = clean_required_arrays(schema)
@@ -1306,16 +957,14 @@ class TestOp5CleanRequired:
                     "properties": {
                         "level2": {
                             "type": "object",
-                            "properties": {
-                                "name": {"type": "string"}
-                            },
-                            "required": ["name", "invalid"]
+                            "properties": {"name": {"type": "string"}},
+                            "required": ["name", "invalid"],
                         }
                     },
-                    "required": ["level2", "other"]
+                    "required": ["level2", "other"],
                 }
             },
-            "required": ["level1", "missing"]
+            "required": ["level1", "missing"],
         }
 
         result = clean_required_arrays(schema)
@@ -1326,10 +975,7 @@ class TestOp5CleanRequired:
 
     def test_schema_without_properties_unchanged(self):
         """Test that schemas without properties have required removed or unchanged."""
-        schema = {
-            "type": "object",
-            "required": ["something"]
-        }
+        schema = {"type": "object", "required": ["something"]}
 
         result = clean_required_arrays(schema)
 
@@ -1338,12 +984,7 @@ class TestOp5CleanRequired:
 
     def test_schema_without_required_unchanged(self):
         """Test that schemas without required are unchanged."""
-        schema = {
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"}
-            }
-        }
+        schema = {"type": "object", "properties": {"name": {"type": "string"}}}
 
         expected = schema.copy()
 
@@ -1359,13 +1000,11 @@ class TestOp5CleanRequired:
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "properties": {
-                            "id": {"type": "string"}
-                        },
-                        "required": ["id", "name"]
-                    }
+                        "properties": {"id": {"type": "string"}},
+                        "required": ["id", "name"],
+                    },
                 }
-            }
+            },
         }
 
         result = clean_required_arrays(schema)
@@ -1381,21 +1020,16 @@ class TestOp5CleanRequired:
                 "schemas": {
                     "User": {
                         "type": "object",
-                        "properties": {
-                            "name": {"type": "string"}
-                        },
-                        "required": ["name", "email", "id"]
+                        "properties": {"name": {"type": "string"}},
+                        "required": ["name", "email", "id"],
                     },
                     "Product": {
                         "type": "object",
-                        "properties": {
-                            "title": {"type": "string"},
-                            "price": {"type": "number"}
-                        },
-                        "required": ["title", "price", "category"]
-                    }
+                        "properties": {"title": {"type": "string"}, "price": {"type": "number"}},
+                        "required": ["title", "price", "category"],
+                    },
                 }
-            }
+            },
         }
 
         result = clean_required_arrays(schema)
@@ -1413,9 +1047,9 @@ class TestOp5CleanRequired:
             "properties": {
                 "a": {"type": "string"},
                 "b": {"type": "string"},
-                "c": {"type": "string"}
+                "c": {"type": "string"},
             },
-            "required": ["c", "invalid1", "a", "invalid2", "b"]
+            "required": ["c", "invalid1", "a", "invalid2", "b"],
         }
 
         result = clean_required_arrays(schema)
@@ -1428,18 +1062,14 @@ class TestOp5CleanRequired:
             "oneOf": [
                 {
                     "type": "object",
-                    "properties": {
-                        "type": {"type": "string"}
-                    },
-                    "required": ["type", "missing1"]
+                    "properties": {"type": {"type": "string"}},
+                    "required": ["type", "missing1"],
                 },
                 {
                     "type": "object",
-                    "properties": {
-                        "kind": {"type": "string"}
-                    },
-                    "required": ["kind", "missing2"]
-                }
+                    "properties": {"kind": {"type": "string"}},
+                    "required": ["kind", "missing2"],
+                },
             ]
         }
 

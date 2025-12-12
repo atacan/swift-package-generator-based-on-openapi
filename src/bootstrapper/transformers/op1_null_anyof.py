@@ -34,7 +34,8 @@ def _transform_node(data: Any, parent: Any | None, key_in_parent: str | int | No
         if isinstance(any_of_list, list):
             # Remove all {type: "null"} entries
             filtered = [
-                item for item in any_of_list
+                item
+                for item in any_of_list
                 if not (isinstance(item, dict) and item.get("type") == "null")
             ]
 
