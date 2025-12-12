@@ -1,13 +1,14 @@
 """Base utilities for OpenAPI transformation operations."""
 
-from typing import Any, Callable, Optional, Union
+from collections.abc import Callable
+from typing import Any
 
 
 def recursive_walk(
     data: Any,
-    transform_func: Callable[[Any, Optional[Any], Optional[Union[str, int]]], Any],
-    parent: Optional[Any] = None,
-    key_in_parent: Optional[Union[str, int]] = None,
+    transform_func: Callable[[Any, Any | None, str | int | None], Any],
+    parent: Any | None = None,
+    key_in_parent: str | int | None = None,
 ) -> Any:
     """
     Recursively traverse a nested dict/list structure and apply transformations.
@@ -43,13 +44,9 @@ def recursive_walk(
     if isinstance(data, dict):
         # We must list keys because the loop might modify the dict
         for k in list(data.keys()):
-            data[k] = recursive_walk(
-                data[k], transform_func, parent=data, key_in_parent=k
-            )
+            data[k] = recursive_walk(data[k], transform_func, parent=data, key_in_parent=k)
     elif isinstance(data, list):
         for i, item in enumerate(data):
-            data[i] = recursive_walk(
-                item, transform_func, parent=data, key_in_parent=i
-            )
+            data[i] = recursive_walk(item, transform_func, parent=data, key_in_parent=i)
 
     return data

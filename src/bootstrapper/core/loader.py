@@ -2,14 +2,13 @@
 
 import json
 from pathlib import Path
-from typing import Tuple
 
 import yaml
 
 from bootstrapper.config import FileFormat
 
 
-def load_spec(path: Path) -> Tuple[dict, FileFormat]:
+def load_spec(path: Path) -> tuple[dict, FileFormat]:
     """
     Load an OpenAPI specification from a JSON or YAML file.
 
@@ -33,17 +32,14 @@ def load_spec(path: Path) -> Tuple[dict, FileFormat]:
     suffix = path.suffix.lower()
 
     if suffix == ".json":
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
         return data, FileFormat.JSON
 
     elif suffix in (".yaml", ".yml"):
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
         return data, FileFormat.YAML
 
     else:
-        raise ValueError(
-            f"Unsupported file format: {suffix}. "
-            "Expected .json, .yaml, or .yml"
-        )
+        raise ValueError(f"Unsupported file format: {suffix}. Expected .json, .yaml, or .yml")
