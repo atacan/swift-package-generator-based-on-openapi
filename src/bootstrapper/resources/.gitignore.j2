@@ -1,0 +1,31 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+*.xcodeproj
+*.xcworkspace
+
+# Generated Sources (from swift-openapi-generator)
+Sources/{{ project_name }}Types/GeneratedSources/
+Sources/{{ project_name }}Client/GeneratedSources/
+
+# Environment files (keep .env.example, ignore actual .env)
+.env
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Python (if using the bootstrapper locally)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Temporary files
+*.swp
+*.tmp
+*~
