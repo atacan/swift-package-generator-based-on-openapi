@@ -10,7 +10,14 @@
       "Bash(bd dep add:*)",
       "Bash(bd list:*)",
       "Bash(bd dep tree:*)",
-      "Bash(bd show:*)"
+      "Bash(bd show:*)",
+      "Bash(touch:*)",
+      "Bash(tree:*)",
+      "Bash(uv:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv pip list:*)",
+      "Bash(uv add:*)",
+      "Bash(cat:*)"
     ]
   }
 }
