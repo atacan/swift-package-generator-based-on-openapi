@@ -13,12 +13,11 @@ help:
 generate:
 	@echo "Generating Swift code from OpenAPI specification..."
 	swift run swift-openapi-generator generate \
-		--config openapi-generator-config.yaml \
+		--config openapi-generator-config-types.yaml \
 		openapi.yaml \
 		--output-directory Sources/{{ project_name }}Types/GeneratedSources
 	swift run swift-openapi-generator generate \
-		--mode types \
-		--config openapi-generator-config.yaml \
+		--config openapi-generator-config-client.yaml \
 		openapi.yaml \
 		--output-directory Sources/{{ project_name }}Client/GeneratedSources
 	@echo "Code generation complete!"
