@@ -237,9 +237,7 @@ class TestWriteIfNotExists:
             content = "Test"
 
             # Should not raise an error even though description is not used
-            result = write_if_not_exists(
-                target_path, content, description="custom description"
-            )
+            result = write_if_not_exists(target_path, content, description="custom description")
 
             assert result is True
 
@@ -310,9 +308,7 @@ class TestGenerateConfigFiles:
 
             # Makefile should not be overwritten
             assert results["Makefile"] is False
-            assert (target_dir / "Makefile").read_text(
-                encoding="utf-8"
-            ) == modified_content
+            assert (target_dir / "Makefile").read_text(encoding="utf-8") == modified_content
 
     def test_skip_all_existing_files(self):
         """Test that all existing files are skipped on subsequent runs."""
@@ -382,14 +378,14 @@ class TestGenerateConfigFiles:
             generate_config_files(target_dir, project_name)
 
             # Check that project name appears in YAML config files
-            types_config = (
-                target_dir / "openapi-generator-config-types.yaml"
-            ).read_text(encoding="utf-8")
+            types_config = (target_dir / "openapi-generator-config-types.yaml").read_text(
+                encoding="utf-8"
+            )
             assert project_name in types_config
 
-            client_config = (
-                target_dir / "openapi-generator-config-client.yaml"
-            ).read_text(encoding="utf-8")
+            client_config = (target_dir / "openapi-generator-config-client.yaml").read_text(
+                encoding="utf-8"
+            )
             assert project_name in client_config
 
     def test_creates_target_directory_if_missing(self):
