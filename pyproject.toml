@@ -1,0 +1,50 @@
+[project]
+name = "swift-openapi-bootstrapper"
+version = "0.1.0"
+description = "A Python CLI utility to bootstrap and maintain Swift Packages based on OpenAPI specifications"
+readme = "README.md"
+authors = [
+    { name = "atacan", email = "atacandur@icloud.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.12.0",
+    "rich>=13.7.0",
+    "pyyaml>=6.0",
+    "jinja2>=3.1.0",
+    "pydantic>=2.5.0",
+]
+
+[project.scripts]
+swift-bootstrapper = "bootstrapper.main:app"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "ruff>=0.1.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bootstrapper"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "ruff>=0.14.9",
+]
