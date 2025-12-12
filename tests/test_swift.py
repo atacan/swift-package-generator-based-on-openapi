@@ -363,9 +363,7 @@ class TestRunOpenAPIGenerator:
             (target_dir / "openapi.json").write_text("{}")
 
             # Should not fail even without mocking (will fail gracefully)
-            results = run_openapi_generator(
-                target_dir, "TestProject", "openapi.json"
-            )
+            results = run_openapi_generator(target_dir, "TestProject", "openapi.json")
 
             assert isinstance(results, dict)
             assert "types_generated" in results
