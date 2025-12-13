@@ -2,13 +2,19 @@
   "permissions": {
     "allow": [
       "Bash(bd:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(git stash:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(python3:*)",
       "Bash(touch:*)",
       "Bash(tree:*)",
-      "Bash(uv:*)",
-      "Bash(cat:*)",
-      "Bash(python3:*)",
-      "Bash(find:*)",
-      "Bash(ls:*)"
+      "Bash(uv:*)"
     ]
   }
 }
