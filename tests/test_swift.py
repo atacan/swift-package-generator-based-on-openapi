@@ -635,6 +635,7 @@ class TestCreateInitialSwiftFiles:
             assert preserved_content == user_content
             assert "USER MODIFIED CONTENT" in preserved_content
 
+    @pytest.mark.slow
     @pytest.mark.skipif(
         not Path("/usr/bin/swift").exists() and not Path("/usr/local/bin/swift").exists(),
         reason="Swift toolchain not available",
