@@ -60,6 +60,11 @@ bd automatically syncs with git:
    uv run pytest
    ```
 
+   To include slow tests (e.g., swift build verification):
+   ```bash
+   uv run pytest -m ""
+   ```
+
 3. **Lint & Format**: Check code quality
    ```bash
    uv run ruff check .
