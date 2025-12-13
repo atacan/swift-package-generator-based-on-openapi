@@ -5,6 +5,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
+from bootstrapper.generators.security import generate_authentication_middleware
 from bootstrapper.generators.swift import ensure_package_structure, run_openapi_generator
 from bootstrapper.generators.templates import generate_config_files
 from bootstrapper.transformers.manager import transform_spec
@@ -135,6 +136,16 @@ def bootstrap(
     else:
         console.print("[bold blue]✓[/bold blue] Package.swift already exists (preserved)")
 
+    # Report Swift file creation
+    if any(
+        [
+            structure_results.get("types_file"),
+            structure_results.get("client_file"),
+            structure_results.get("tests_file"),
+        ]
+    ):
+        console.print("[bold green]✓[/bold green] Created initial Swift files")
+
     # Step 3.5: Generate config files (Makefile, .gitignore, .env, generator configs)
     with console.status("[bold yellow]Generating config files..."):
         try:
@@ -157,6 +168,28 @@ def bootstrap(
         f"Client: {structure_results['client_dir']}, "
         f"Tests: {structure_results['tests_dir']})"
     )
+
+    # Step 3.6: Generate AuthenticationMiddleware if security schemes defined
+    with console.status("[bold yellow]Analyzing security schemes..."):
+        try:
+            auth_results = generate_authentication_middleware(
+                target_path, project_name, openapi_file=output_file.name
+            )
+        except Exception as e:
+            console.print(f"[bold red]✗[/bold red] Failed to analyze security: {e}")
+            raise typer.Exit(1)
+
+    # Report results
+    if auth_results["generated"]:
+        console.print(
+            f"[bold green]✓[/bold green] Generated AuthenticationMiddleware.swift "
+            f"({auth_results['reason']})"
+        )
+    elif "already exists" in auth_results["reason"]:
+        console.print(
+            "[bold blue]✓[/bold blue] AuthenticationMiddleware.swift already exists (preserved)"
+        )
+    # Silent skip if no security schemes (normal/expected)
 
     # Step 4: Run OpenAPI generator
     with console.status("[bold yellow]Running Swift OpenAPI Generator..."):
