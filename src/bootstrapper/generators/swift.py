@@ -8,7 +8,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
-from bootstrapper.generators.templates import render_template
+from bootstrapper.generators.templates import render_template, write_if_not_exists
 
 
 def ensure_package_structure(target_dir: Path, project_name: str) -> dict[str, bool]:
@@ -68,6 +68,50 @@ def ensure_package_structure(target_dir: Path, project_name: str) -> dict[str, b
         gitkeep_path = dir_path / ".gitkeep"
         if not gitkeep_path.exists():
             gitkeep_path.touch()
+
+    return results
+
+
+def create_initial_swift_files(target_dir: Path, project_name: str) -> dict[str, bool]:
+    """Create initial Swift files in each target to satisfy SPM.
+
+    Creates minimal placeholder Swift files that allow swift build to succeed
+    before code generation. Files contain only safe imports (no generated code
+    references) and are created once then preserved on updates.
+
+    Args:
+        target_dir: The package root directory
+        project_name: The name of the Swift package
+
+    Returns:
+        Dictionary indicating which files were created:
+        - "types_file": True if created, False if existed
+        - "client_file": True if created, False if existed
+        - "tests_file": True if created, False if existed
+    """
+    # Create context for template rendering
+    context = {"project_name": project_name}
+
+    results = {}
+
+    # Create Types file
+    types_file_path = target_dir / "Sources" / f"{project_name}Types" / f"{project_name}Types.swift"
+    types_content = render_template("TypesFile.swift.j2", context)
+    results["types_file"] = write_if_not_exists(types_file_path, types_content, "Types Swift file")
+
+    # Create Client file
+    client_file_path = (
+        target_dir / "Sources" / f"{project_name}Client" / f"{project_name}Client.swift"
+    )
+    client_content = render_template("ClientFile.swift.j2", context)
+    results["client_file"] = write_if_not_exists(
+        client_file_path, client_content, "Client Swift file"
+    )
+
+    # Create Tests file
+    tests_file_path = target_dir / "Tests" / f"{project_name}Tests" / f"{project_name}Tests.swift"
+    tests_content = render_template("TestsFile.swift.j2", context)
+    results["tests_file"] = write_if_not_exists(tests_file_path, tests_content, "Tests Swift file")
 
     return results
 
