@@ -65,7 +65,9 @@ def write_if_not_exists(target_path: Path, content: str, description: str = "fil
     return True
 
 
-def generate_config_files(target_dir: Path, project_name: str) -> dict[str, bool]:
+def generate_config_files(
+    target_dir: Path, project_name: str, file_format: str = ".yaml"
+) -> dict[str, bool]:
     """Generate all config files from templates in the target directory.
 
     Only creates files that don't already exist to preserve user edits.
@@ -73,11 +75,20 @@ def generate_config_files(target_dir: Path, project_name: str) -> dict[str, bool
     Args:
         target_dir: Directory where config files should be written
         project_name: Name of the Swift package project
+        file_format: File extension of the original OpenAPI spec (".yaml", ".yml", or ".json")
 
     Returns:
         Dictionary mapping filename to whether it was created (True) or skipped (False)
     """
     context = {"project_name": project_name}
+
+    # Determine overlay file based on format
+    if file_format == ".json":
+        overlay_filename = "openapi-overlay.json"
+        overlay_template = "overlay.json.j2"
+    else:
+        overlay_filename = "openapi-overlay.yaml"
+        overlay_template = "overlay.yaml.j2"
 
     # Define all templates and their output paths
     templates = {
@@ -86,8 +97,11 @@ def generate_config_files(target_dir: Path, project_name: str) -> dict[str, bool
         ".env.example": ".env.example.j2",
         "openapi-generator-config-types.yaml": "openapi-generator-config-types.yaml.j2",
         "openapi-generator-config-client.yaml": "openapi-generator-config-client.yaml.j2",
-        "openapi-overlay.yaml": "overlay.yaml.j2",
+        overlay_filename: overlay_template,
         ".swift-format": ".swift-format.j2",
+        "AGENTS.md": "AGENTS.md.j2",
+        "CLAUDE.md": "CLAUDE.md.j2",
+        "README.md": "README.md.j2",
         ".claude/skills/openapi-overlay/SKILL.md": ".claude/skills/openapi-overlay/SKILL.md.j2",
     }
 

@@ -357,6 +357,9 @@ class TestGenerateConfigFiles:
                 "openapi-generator-config-client.yaml",
                 "openapi-overlay.yaml",
                 ".swift-format",
+                "AGENTS.md",
+                "CLAUDE.md",
+                "README.md",
                 ".claude/skills/openapi-overlay/SKILL.md",
             }
             assert set(results.keys()) == expected_keys
@@ -432,3 +435,64 @@ class TestGenerateConfigFiles:
             makefile_content = (target_dir / "Makefile").read_text(encoding="utf-8")
             # Makefile typically includes project reference
             assert len(makefile_content) > 0
+
+    def test_json_format_creates_json_overlay(self):
+        """Test that JSON format creates openapi-overlay.json instead of yaml."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            target_dir = Path(tmpdir)
+
+            results = generate_config_files(target_dir, "TestProject", file_format=".json")
+
+            assert "openapi-overlay.json" in results
+            assert "openapi-overlay.yaml" not in results
+            assert (target_dir / "openapi-overlay.json").exists()
+            assert not (target_dir / "openapi-overlay.yaml").exists()
+
+    def test_yaml_format_creates_yaml_overlay(self):
+        """Test that YAML format creates openapi-overlay.yaml."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            target_dir = Path(tmpdir)
+
+            results = generate_config_files(target_dir, "TestProject", file_format=".yaml")
+
+            assert "openapi-overlay.yaml" in results
+            assert "openapi-overlay.json" not in results
+            assert (target_dir / "openapi-overlay.yaml").exists()
+            assert not (target_dir / "openapi-overlay.json").exists()
+
+    def test_yml_format_creates_yaml_overlay(self):
+        """Test that .yml format creates openapi-overlay.yaml."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            target_dir = Path(tmpdir)
+
+            results = generate_config_files(target_dir, "TestProject", file_format=".yml")
+
+            assert "openapi-overlay.yaml" in results
+            assert (target_dir / "openapi-overlay.yaml").exists()
+
+    def test_default_format_is_yaml(self):
+        """Test that default format creates yaml overlay."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            target_dir = Path(tmpdir)
+
+            # Call without file_format parameter
+            results = generate_config_files(target_dir, "TestProject")
+
+            assert "openapi-overlay.yaml" in results
+            assert (target_dir / "openapi-overlay.yaml").exists()
+
+    def test_json_overlay_is_valid_json(self):
+        """Test that generated JSON overlay is valid JSON."""
+        import json
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            target_dir = Path(tmpdir)
+
+            generate_config_files(target_dir, "TestProject", file_format=".json")
+
+            overlay_path = target_dir / "openapi-overlay.json"
+            content = overlay_path.read_text(encoding="utf-8")
+            # Should not raise
+            parsed = json.loads(content)
+            assert "overlay" in parsed
+            assert "actions" in parsed
