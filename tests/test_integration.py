@@ -215,12 +215,19 @@ class TestFullPipelineYAML:
         # In 3.0.0, format: byte should remain
         assert avatar_field.get("format") == "byte"
 
+        # Test op3 + op5: nullable properties should be removed from required
+        # email has nullable: true, so it should be removed from required
+        email_field = user_response["properties"]["email"]
+        assert "nullable" not in email_field  # nullable should be cleaned
+        assert email_field["type"] == "string"  # type should be simple string
+
         # Test op5: required array should be cleaned
         # nonexistent_field should be removed from required
         assert "nonexistent_field" not in user_response.get("required", [])
-        # Valid fields should remain
+        # username should remain (it was nullable via anyOf but op1 cleaned it)
         assert "username" in user_response.get("required", [])
-        assert "email" in user_response.get("required", [])
+        # email should be REMOVED from required because it was nullable: true
+        assert "email" not in user_response.get("required", [])
 
     def test_package_swift_content(self, sample_openapi_yaml):
         """Test that Package.swift contains expected dependencies and targets."""

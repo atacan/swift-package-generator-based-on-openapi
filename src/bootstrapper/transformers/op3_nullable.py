@@ -1,7 +1,13 @@
-"""Operation 3: Convert nullable to OpenAPI 3.1 format.
+"""Operation 3: Handle nullable properties for Swift OpenAPI Generator.
 
-This transformation converts OpenAPI 3.0.x nullable: true properties
-to OpenAPI 3.1 format using type arrays with null.
+This transformation detects nullable properties and removes them from the parent's
+required array. Swift OpenAPI Generator determines nullability based on whether
+a property is in the required array, NOT through nullable: true or type arrays.
+
+This operation:
+1. Detects nullable properties (nullable: true, type arrays with null, oneOf/anyOf with null)
+2. Removes null-related constructs from schemas
+3. Removes nullable properties from parent's required array
 """
 
 from typing import Any
@@ -9,98 +15,166 @@ from typing import Any
 from bootstrapper.transformers.ops_base import recursive_walk
 
 
-def _should_convert_spec(spec: dict) -> bool:
+def _is_nullable_property(schema: dict) -> bool:
     """
-    Determine if the spec should be converted based on OpenAPI version.
+    Determine if a property schema represents a nullable value.
 
     Args:
-        spec: The OpenAPI specification
+        schema: A property schema object
 
     Returns:
-        True if the spec is OpenAPI 3.0.x (or has no version), False otherwise
+        True if the property is nullable via any pattern
     """
-    version = spec.get("openapi", "3.0.0")
+    if not isinstance(schema, dict):
+        return False
 
-    # Parse version string
-    if isinstance(version, str):
-        parts = version.split(".")
-        if len(parts) >= 2:
-            try:
-                major = int(parts[0])
-                minor = int(parts[1])
-                # Only convert for OpenAPI 3.0.x
-                return major == 3 and minor == 0
-            except ValueError:
-                # If parsing fails, default to converting (assume old spec)
-                return True
+    # Pattern 1: OpenAPI 3.0 nullable: true
+    if schema.get("nullable") is True:
+        return True
 
-    # If no version or unparseable, assume it needs conversion
-    return True
+    # Pattern 2: OpenAPI 3.1 type array with null
+    type_value = schema.get("type")
+    if isinstance(type_value, list):
+        return "null" in type_value
+
+    # Pattern 3: oneOf/anyOf containing {type: null}
+    for key in ["oneOf", "anyOf"]:
+        if key in schema and isinstance(schema[key], list):
+            for item in schema[key]:
+                if isinstance(item, dict) and item.get("type") == "null":
+                    return True
+
+    return False
 
 
-def _make_transform_func(should_convert: bool):
+def _clean_null_constructs(schema: dict) -> dict:
     """
-    Create a transform function with the should_convert flag captured.
+    Remove all null-related constructs from a schema.
 
     Args:
-        should_convert: Whether to perform the conversion
+        schema: A property schema object
 
     Returns:
-        A transform function for use with recursive_walk
+        The cleaned schema
     """
+    if not isinstance(schema, dict):
+        return schema
 
-    def _transform_node(data: Any, parent: Any | None, key_in_parent: str | int | None) -> Any:
-        """
-        Transform a single node by converting nullable to type arrays.
+    # Remove nullable: true
+    if "nullable" in schema:
+        del schema["nullable"]
 
-        Args:
-            data: The current node being processed
-            parent: The parent container of this node
-            key_in_parent: The key or index of this node in its parent
+    # Convert type array [someType, null] back to just someType
+    type_value = schema.get("type")
+    if isinstance(type_value, list):
+        non_null_types = [t for t in type_value if t != "null"]
+        if len(non_null_types) == 1:
+            schema["type"] = non_null_types[0]
+        elif len(non_null_types) > 1:
+            schema["type"] = non_null_types
+        elif len(non_null_types) == 0:
+            # Only null type - keep it as is for now
+            pass
 
-        Returns:
-            The transformed node
-        """
-        # Skip if we shouldn't convert this spec
-        if not should_convert:
-            return data
+    # Remove {type: null} from oneOf/anyOf
+    for key in ["oneOf", "anyOf"]:
+        if key in schema and isinstance(schema[key], list):
+            # Filter out null types
+            non_null_items = [item for item in schema[key] if not (isinstance(item, dict) and item.get("type") == "null")]
 
-        # Only process dict nodes
-        if not isinstance(data, dict):
-            return data
+            # If only one item left, unwrap the oneOf/anyOf
+            if len(non_null_items) == 1:
+                # Preserve all properties from the single remaining item
+                remaining_item = non_null_items[0]
+                if isinstance(remaining_item, dict):
+                    # Remove the oneOf/anyOf key
+                    del schema[key]
+                    # Merge properties from the remaining item into schema
+                    for prop_key, prop_value in remaining_item.items():
+                        if prop_key not in schema:  # Don't overwrite existing properties
+                            schema[prop_key] = prop_value
+            elif len(non_null_items) > 1:
+                # Multiple items remain, keep the oneOf/anyOf
+                schema[key] = non_null_items
+            else:
+                # No items left, remove the key
+                del schema[key]
 
-        # Process nullable if present
-        if "nullable" in data:
-            nullable_value = data["nullable"]
+    return schema
 
-            # Remove nullable key
-            del data["nullable"]
 
-            # Only convert if nullable was True
-            if nullable_value is True and "type" in data:
-                current_type = data["type"]
+def _transform_node(data: Any, parent: Any | None, key_in_parent: str | int | None) -> Any:
+    """
+    Transform a single node by handling nullable properties.
 
-                # Only convert if type is a string (not already an array)
-                if isinstance(current_type, str):
-                    # Convert to array with null
-                    data["type"] = [current_type, "null"]
+    This function processes schema objects that have properties and required arrays.
+    For each nullable property, it removes the property from the required array.
 
+    Args:
+        data: The current node being processed
+        parent: The parent container of this node
+        key_in_parent: The key or index of this node in its parent
+
+    Returns:
+        The transformed node
+    """
+    # Only process dict nodes
+    if not isinstance(data, dict):
         return data
 
-    return _transform_node
+    # Check if this node has both properties and required
+    if "properties" in data and "required" in data:
+        properties = data["properties"]
+        required = data["required"]
+
+        # Only process if properties is a dict and required is a list
+        if isinstance(properties, dict) and isinstance(required, list):
+            # Build list of non-nullable property names
+            non_nullable_properties = []
+
+            for prop_name in required:
+                if prop_name in properties:
+                    prop_schema = properties[prop_name]
+                    # If property is not nullable, keep it in required
+                    if not _is_nullable_property(prop_schema):
+                        non_nullable_properties.append(prop_name)
+
+            # Update or remove the required array
+            if non_nullable_properties:
+                data["required"] = non_nullable_properties
+            else:
+                # Remove empty required array
+                del data["required"]
+
+    # Clean null constructs from all property schemas
+    if "properties" in data and isinstance(data["properties"], dict):
+        for prop_name, prop_schema in data["properties"].items():
+            if isinstance(prop_schema, dict):
+                data["properties"][prop_name] = _clean_null_constructs(prop_schema)
+
+    # Also clean null constructs from the current node itself
+    # (in case it's a property schema without nested properties)
+    if "type" in data or "nullable" in data or "oneOf" in data or "anyOf" in data:
+        data = _clean_null_constructs(data)
+
+    return data
 
 
 def convert_nullable_to_3_1(spec: dict) -> dict:
     """
-    Convert nullable: true to OpenAPI 3.1 type arrays throughout the spec.
+    Handle nullable properties for Swift OpenAPI Generator compatibility.
 
     This function:
-    1. Checks the OpenAPI version
-    2. If version < 3.1.0 (or missing):
-       - Finds all 'nullable: true' occurrences
-       - Converts 'type' from string to array [type, "null"]
-       - Removes the 'nullable' key
-    3. If version >= 3.1.0, leaves the spec unchanged
+    1. Detects nullable properties via:
+       - nullable: true (OpenAPI 3.0)
+       - type: [someType, null] (OpenAPI 3.1 array)
+       - oneOf/anyOf with {type: null}
+    2. Removes null constructs from schemas
+    3. Removes nullable properties from parent's required array
+
+    Swift OpenAPI Generator determines nullability based on the required array,
+    not through nullable: true or type arrays. A property NOT in the required
+    array is considered optional (nullable) in Swift.
 
     Args:
         spec: The OpenAPI specification as a dictionary
@@ -111,16 +185,14 @@ def convert_nullable_to_3_1(spec: dict) -> dict:
     Example:
         Before (OpenAPI 3.0.0):
         {
-            "openapi": "3.0.0",
-            "components": {
-                "schemas": {
-                    "User": {
-                        "properties": {
-                            "name": {
-                                "type": "string",
-                                "nullable": true
-                            }
-                        }
+            "SpeechToTextModel": {
+                "type": "object",
+                "required": ["id", "description"],
+                "properties": {
+                    "id": {"type": "string"},
+                    "description": {
+                        "type": "string",
+                        "nullable": true
                     }
                 }
             }
@@ -128,20 +200,14 @@ def convert_nullable_to_3_1(spec: dict) -> dict:
 
         After:
         {
-            "openapi": "3.0.0",
-            "components": {
-                "schemas": {
-                    "User": {
-                        "properties": {
-                            "name": {
-                                "type": ["string", "null"]
-                            }
-                        }
-                    }
+            "SpeechToTextModel": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                    "id": {"type": "string"},
+                    "description": {"type": "string"}
                 }
             }
         }
     """
-    should_convert = _should_convert_spec(spec)
-    transform_func = _make_transform_func(should_convert)
-    return recursive_walk(spec, transform_func)
+    return recursive_walk(spec, _transform_node)

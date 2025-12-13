@@ -385,16 +385,17 @@ class TestOp2ConstToEnum:
 
 
 class TestOp3NullableTo31:
-    """Tests for Operation 3: Convert nullable to OpenAPI 3.1 format."""
+    """Tests for Operation 3: Handle nullable properties for Swift OpenAPI Generator."""
 
-    def test_nullable_string_converted_to_type_array(self):
-        """Test that nullable: true with string is converted to type array."""
+    def test_nullable_string_removed_from_required(self):
+        """Test that nullable: true removes property from required array."""
         schema = {
             "openapi": "3.0.0",
             "components": {
                 "schemas": {
                     "User": {
                         "type": "object",
+                        "required": ["name"],
                         "properties": {"name": {"type": "string", "nullable": True}},
                     }
                 }
@@ -405,21 +406,24 @@ class TestOp3NullableTo31:
 
         # Check that nullable was removed
         assert "nullable" not in result["components"]["schemas"]["User"]["properties"]["name"]
-        # Check that type is now an array with null
-        name_type = result["components"]["schemas"]["User"]["properties"]["name"]["type"]
-        assert isinstance(name_type, list)
-        assert "string" in name_type
-        assert "null" in name_type
+        # Check that type is still string (not array)
+        assert result["components"]["schemas"]["User"]["properties"]["name"]["type"] == "string"
+        # Check that required array is empty or removed
+        assert "required" not in result["components"]["schemas"]["User"] or result["components"]["schemas"]["User"]["required"] == []
 
-    def test_nullable_number_converted(self):
-        """Test that nullable number is converted correctly."""
+    def test_nullable_number_removed_from_required(self):
+        """Test that nullable number is removed from required array."""
         schema = {
             "openapi": "3.0.0",
             "components": {
                 "schemas": {
                     "Product": {
                         "type": "object",
-                        "properties": {"price": {"type": "number", "nullable": True}},
+                        "required": ["name", "price"],
+                        "properties": {
+                            "name": {"type": "string"},
+                            "price": {"type": "number", "nullable": True}
+                        },
                     }
                 }
             },
@@ -429,16 +433,19 @@ class TestOp3NullableTo31:
 
         price_prop = result["components"]["schemas"]["Product"]["properties"]["price"]
         assert "nullable" not in price_prop
-        assert price_prop["type"] == ["number", "null"]
+        assert price_prop["type"] == "number"
+        # Only name should remain in required
+        assert result["components"]["schemas"]["Product"]["required"] == ["name"]
 
-    def test_nullable_false_unchanged(self):
-        """Test that nullable: false is simply removed."""
+    def test_nullable_false_removed_but_stays_required(self):
+        """Test that nullable: false is removed but property stays in required."""
         schema = {
             "openapi": "3.0.0",
             "components": {
                 "schemas": {
                     "Item": {
                         "type": "object",
+                        "required": ["id"],
                         "properties": {"id": {"type": "string", "nullable": False}},
                     }
                 }
@@ -450,20 +457,21 @@ class TestOp3NullableTo31:
         id_prop = result["components"]["schemas"]["Item"]["properties"]["id"]
         assert "nullable" not in id_prop
         assert id_prop["type"] == "string"  # Remains a simple string
+        # Should stay in required since nullable: false
+        assert result["components"]["schemas"]["Item"]["required"] == ["id"]
 
-    def test_openapi_31_spec_unchanged(self):
-        """Test that OpenAPI 3.1+ specs are not modified."""
+    def test_openapi_31_spec_also_processed(self):
+        """Test that OpenAPI 3.1+ specs are also processed (we clean all specs)."""
         schema = {
             "openapi": "3.1.0",
             "components": {
                 "schemas": {
                     "User": {
                         "type": "object",
+                        "required": ["name"],
                         "properties": {
                             "name": {
-                                "type": "string",
-                                # Invalid in 3.1, but we don't touch 3.1 specs
-                                "nullable": True,
+                                "type": ["string", "null"],
                             }
                         },
                     }
@@ -473,18 +481,21 @@ class TestOp3NullableTo31:
 
         result = convert_nullable_to_3_1(schema)
 
-        # Should be unchanged since version is 3.1.0
-        assert result == schema
+        # Type array should be unwrapped and removed from required
+        name_prop = result["components"]["schemas"]["User"]["properties"]["name"]
+        assert name_prop["type"] == "string"
+        assert "required" not in result["components"]["schemas"]["User"] or result["components"]["schemas"]["User"]["required"] == []
 
-    def test_version_detection_3_0_minor_versions(self):
-        """Test that all 3.0.x versions are handled."""
-        for version in ["3.0.0", "3.0.1", "3.0.2", "3.0.3"]:
+    def test_version_detection_all_versions(self):
+        """Test that all OpenAPI versions are handled consistently."""
+        for version in ["3.0.0", "3.0.1", "3.0.2", "3.0.3", "3.1.0"]:
             schema = {
                 "openapi": version,
                 "components": {
                     "schemas": {
                         "Test": {
                             "type": "object",
+                            "required": ["field"],
                             "properties": {"field": {"type": "string", "nullable": True}},
                         }
                     }
@@ -493,23 +504,27 @@ class TestOp3NullableTo31:
 
             result = convert_nullable_to_3_1(schema)
 
-            # Should be converted for all 3.0.x versions
+            # Should be processed for all versions
             field_prop = result["components"]["schemas"]["Test"]["properties"]["field"]
             assert "nullable" not in field_prop
-            assert field_prop["type"] == ["string", "null"]
+            assert field_prop["type"] == "string"
+            # Should be removed from required
+            assert "required" not in result["components"]["schemas"]["Test"] or result["components"]["schemas"]["Test"]["required"] == []
 
     def test_nested_nullable_properties(self):
-        """Test that nested nullable properties are converted."""
+        """Test that nested nullable properties are handled correctly."""
         schema = {
             "openapi": "3.0.0",
             "components": {
                 "schemas": {
                     "Address": {
                         "type": "object",
+                        "required": ["street"],
                         "properties": {
                             "street": {"type": "string", "nullable": True},
                             "details": {
                                 "type": "object",
+                                "required": ["apartment"],
                                 "properties": {"apartment": {"type": "string", "nullable": True}},
                             },
                         },
@@ -521,12 +536,16 @@ class TestOp3NullableTo31:
         result = convert_nullable_to_3_1(schema)
 
         address = result["components"]["schemas"]["Address"]["properties"]
-        assert address["street"]["type"] == ["string", "null"]
+        assert address["street"]["type"] == "string"
         assert "nullable" not in address["street"]
+        # street should be removed from required
+        assert "required" not in result["components"]["schemas"]["Address"] or result["components"]["schemas"]["Address"]["required"] == []
 
         details = address["details"]["properties"]
-        assert details["apartment"]["type"] == ["string", "null"]
+        assert details["apartment"]["type"] == "string"
         assert "nullable" not in details["apartment"]
+        # apartment should be removed from required in nested object
+        assert "required" not in address["details"] or address["details"]["required"] == []
 
     def test_nullable_with_other_properties_preserved(self):
         """Test that other properties are preserved during conversion."""
@@ -536,6 +555,7 @@ class TestOp3NullableTo31:
                 "schemas": {
                     "User": {
                         "type": "object",
+                        "required": ["email"],
                         "properties": {
                             "email": {
                                 "type": "string",
@@ -553,14 +573,16 @@ class TestOp3NullableTo31:
         result = convert_nullable_to_3_1(schema)
 
         email_prop = result["components"]["schemas"]["User"]["properties"]["email"]
-        assert email_prop["type"] == ["string", "null"]
+        assert email_prop["type"] == "string"
         assert email_prop["format"] == "email"
         assert email_prop["description"] == "User email address"
         assert email_prop["example"] == "user@example.com"
         assert "nullable" not in email_prop
+        # Should be removed from required
+        assert "required" not in result["components"]["schemas"]["User"] or result["components"]["schemas"]["User"]["required"] == []
 
     def test_nullable_in_array_items(self):
-        """Test that nullable in array items is converted."""
+        """Test that nullable in array items is cleaned."""
         schema = {
             "openapi": "3.0.0",
             "components": {
@@ -581,17 +603,18 @@ class TestOp3NullableTo31:
         result = convert_nullable_to_3_1(schema)
 
         items_schema = result["components"]["schemas"]["List"]["properties"]["items"]["items"]
-        assert items_schema["type"] == ["string", "null"]
+        assert items_schema["type"] == "string"
         assert "nullable" not in items_schema
 
     def test_multiple_nullable_properties(self):
-        """Test that multiple nullable properties are all converted."""
+        """Test that multiple nullable properties are all handled."""
         schema = {
             "openapi": "3.0.0",
             "components": {
                 "schemas": {
                     "User": {
                         "type": "object",
+                        "required": ["name", "age", "active"],
                         "properties": {
                             "name": {"type": "string", "nullable": True},
                             "age": {"type": "integer", "nullable": True},
@@ -605,16 +628,24 @@ class TestOp3NullableTo31:
         result = convert_nullable_to_3_1(schema)
 
         props = result["components"]["schemas"]["User"]["properties"]
-        assert props["name"]["type"] == ["string", "null"]
-        assert props["age"]["type"] == ["integer", "null"]
-        assert props["active"]["type"] == ["boolean", "null"]
+        assert props["name"]["type"] == "string"
+        assert props["age"]["type"] == "integer"
+        assert props["active"]["type"] == "boolean"
+        # All should be removed from required
+        assert "required" not in result["components"]["schemas"]["User"] or result["components"]["schemas"]["User"]["required"] == []
 
     def test_schema_without_nullable_unchanged(self):
         """Test that schemas without nullable are unchanged."""
         schema = {
             "openapi": "3.0.0",
             "components": {
-                "schemas": {"User": {"type": "object", "properties": {"id": {"type": "string"}}}}
+                "schemas": {
+                    "User": {
+                        "type": "object",
+                        "required": ["id"],
+                        "properties": {"id": {"type": "string"}}
+                    }
+                }
             },
         }
 
@@ -623,14 +654,19 @@ class TestOp3NullableTo31:
         result = convert_nullable_to_3_1(schema)
         assert result == expected
 
-    def test_no_openapi_version_defaults_to_conversion(self):
-        """Test that specs without version field are treated as 3.0.x."""
+    def test_mixed_nullable_and_required_properties(self):
+        """Test schemas with mix of nullable and non-nullable required properties."""
         schema = {
             "components": {
                 "schemas": {
                     "Test": {
                         "type": "object",
-                        "properties": {"field": {"type": "string", "nullable": True}},
+                        "required": ["id", "name", "email"],
+                        "properties": {
+                            "id": {"type": "string"},
+                            "name": {"type": "string", "nullable": True},
+                            "email": {"type": "string"}
+                        },
                     }
                 }
             }
@@ -638,10 +674,11 @@ class TestOp3NullableTo31:
 
         result = convert_nullable_to_3_1(schema)
 
-        # Should convert since we assume it's an old spec
-        field_prop = result["components"]["schemas"]["Test"]["properties"]["field"]
-        assert field_prop["type"] == ["string", "null"]
+        # name should be removed from required, but id and email should remain
+        field_prop = result["components"]["schemas"]["Test"]["properties"]["name"]
+        assert field_prop["type"] == "string"
         assert "nullable" not in field_prop
+        assert result["components"]["schemas"]["Test"]["required"] == ["id", "email"]
 
 
 class TestOp4FormatByteFix:
