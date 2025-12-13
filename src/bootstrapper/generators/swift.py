@@ -27,6 +27,9 @@ def ensure_package_structure(target_dir: Path, project_name: str) -> dict[str, b
         - "types_dir": True if Types directory was created
         - "client_dir": True if Client directory was created
         - "tests_dir": True if Tests directory was created
+        - "types_file": True if Types Swift file was created, False if it already existed
+        - "client_file": True if Client Swift file was created, False if it already existed
+        - "tests_file": True if Tests Swift file was created, False if it already existed
     """
     results = {}
 
@@ -61,6 +64,10 @@ def ensure_package_structure(target_dir: Path, project_name: str) -> dict[str, b
 
     tests_dir.mkdir(parents=True, exist_ok=True)
     results["tests_dir"] = tests_dir.exists()
+
+    # Create initial Swift files to satisfy Swift Package Manager
+    swift_file_results = create_initial_swift_files(target_dir, project_name)
+    results.update(swift_file_results)
 
     # Create .gitkeep files to ensure directories are tracked by git
     # (empty directories aren't tracked by git)

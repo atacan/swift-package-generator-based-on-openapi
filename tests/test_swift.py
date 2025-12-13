@@ -129,7 +129,15 @@ class TestEnsurePackageStructure:
 
             results = ensure_package_structure(target_dir, project_name)
 
-            expected_keys = {"package_swift", "types_dir", "client_dir", "tests_dir"}
+            expected_keys = {
+                "package_swift",
+                "types_dir",
+                "client_dir",
+                "tests_dir",
+                "types_file",
+                "client_file",
+                "tests_file",
+            }
             assert set(results.keys()) == expected_keys
 
     def test_idempotent_on_second_call(self):
