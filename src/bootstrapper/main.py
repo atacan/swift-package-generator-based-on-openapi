@@ -146,7 +146,8 @@ def bootstrap(
     # Report which config files were created
     created_configs = [name for name, created in config_results.items() if created]
     if created_configs:
-        console.print(f"[bold green]✓[/bold green] Generated config files: {', '.join(created_configs)}")
+        config_names = ", ".join(created_configs)
+        console.print(f"[bold green]✓[/bold green] Generated config files: {config_names}")
     else:
         console.print("[bold blue]✓[/bold blue] Config files already exist (preserved)")
 

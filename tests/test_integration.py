@@ -8,14 +8,12 @@ These tests verify the complete end-to-end workflow:
 """
 
 import json
-from pathlib import Path
 
 import pytest
 import yaml
 from typer.testing import CliRunner
 
 from bootstrapper.main import app
-
 
 # Sample broken OpenAPI specification for testing
 BROKEN_OPENAPI_SPEC = {
@@ -181,7 +179,7 @@ class TestFullPipelineYAML:
         runner = CliRunner()
 
         # Run bootstrap command
-        result = runner.invoke(app, [str(sample_openapi_yaml)])
+        runner.invoke(app, [str(sample_openapi_yaml)])
 
         # Load the transformed spec
         output_file = sample_openapi_yaml / "openapi.yaml"
@@ -206,7 +204,6 @@ class TestFullPipelineYAML:
         # Test op3: nullable should be converted (for OpenAPI 3.0)
         # Since this is 3.0.0, nullable: true should remain or be converted
         # depending on our implementation. Let's check it's not the old format
-        email_field = user_response["properties"]["email"]
         # It should not have nullable: true in the output (converted to 3.1 style or handled)
         # Our implementation might keep it or convert it - let's verify it exists
         assert "email" in user_response["properties"]
