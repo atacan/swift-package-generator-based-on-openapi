@@ -446,3 +446,178 @@ class TestEdgeCases:
         # The anyOf with null should be unwrapped
         assert "anyOf" not in user_schema["properties"]["name"]
         assert user_schema["properties"]["name"]["type"] == "string"
+
+
+class TestAuthenticationMiddlewareGeneration:
+    """Test AuthenticationMiddleware.swift generation based on security schemes."""
+
+    def test_bootstrap_with_bearer_auth_generates_middleware(self, tmp_path):
+        """Test that bootstrapping with Bearer auth creates AuthenticationMiddleware."""
+        runner = CliRunner()
+
+        # Create original_openapi.yaml with Bearer auth
+        openapi_content = """
+openapi: 3.1.0
+info:
+  title: Test API
+  version: 1.0.0
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+paths:
+  /test:
+    get:
+      operationId: getTest
+      responses:
+        '200':
+          description: OK
+""".strip()
+        (tmp_path / "original_openapi.yaml").write_text(openapi_content, encoding="utf-8")
+
+        # Run bootstrap command with custom project name for predictable paths
+        result = runner.invoke(app, [str(tmp_path), "--name", "TestProject"])
+
+        # CLI should succeed (generator might fail if swift not available)
+        assert result.exit_code in [0, 1]
+
+        # Verify AuthenticationMiddleware was created
+        auth_file = tmp_path / "Sources" / "TestProjectClient" / "AuthenticationMiddleware.swift"
+        assert auth_file.exists(), "AuthenticationMiddleware.swift should be created"
+
+        # Verify content
+        content = auth_file.read_text(encoding="utf-8")
+        assert "AuthenticationMiddleware" in content, "Should contain middleware struct"
+        assert "Bearer" in content, "Should contain Bearer token logic"
+        assert ".authorization" in content, "Should use Authorization header"
+
+        # Verify CLI output mentions generation
+        assert "AuthenticationMiddleware" in result.stdout
+
+    def test_bootstrap_with_api_key_generates_middleware(self, tmp_path):
+        """Test that bootstrapping with API Key auth creates AuthenticationMiddleware."""
+        runner = CliRunner()
+
+        # Create original_openapi.yaml with API Key auth
+        openapi_content = """
+openapi: 3.1.0
+info:
+  title: Test API
+  version: 1.0.0
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+paths:
+  /test:
+    get:
+      operationId: getTest
+      responses:
+        '200':
+          description: OK
+""".strip()
+        (tmp_path / "original_openapi.yaml").write_text(openapi_content, encoding="utf-8")
+
+        # Run bootstrap command
+        result = runner.invoke(app, [str(tmp_path), "--name", "ApiKeyProject"])
+
+        # CLI should succeed
+        assert result.exit_code in [0, 1]
+
+        # Verify AuthenticationMiddleware was created
+        auth_file = tmp_path / "Sources" / "ApiKeyProjectClient" / "AuthenticationMiddleware.swift"
+        assert auth_file.exists(), "AuthenticationMiddleware.swift should be created"
+
+        # Verify content
+        content = auth_file.read_text(encoding="utf-8")
+        assert "AuthenticationMiddleware" in content, "Should contain middleware struct"
+        assert "x-api-key" in content, "Should contain custom header name (lowercased)"
+        assert "HTTPField.Name" in content, "Should use HTTPField.Name for custom header"
+
+    def test_bootstrap_without_security_no_middleware(self, tmp_path):
+        """Test that no middleware is generated when security schemes are absent."""
+        runner = CliRunner()
+
+        # Create original_openapi.yaml WITHOUT security schemes
+        openapi_content = """
+openapi: 3.1.0
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      operationId: getTest
+      responses:
+        '200':
+          description: OK
+""".strip()
+        (tmp_path / "original_openapi.yaml").write_text(openapi_content, encoding="utf-8")
+
+        # Run bootstrap command
+        result = runner.invoke(app, [str(tmp_path), "--name", "NoAuthProject"])
+
+        # CLI should succeed
+        assert result.exit_code in [0, 1]
+
+        # Verify AuthenticationMiddleware was NOT created
+        auth_file = tmp_path / "Sources" / "NoAuthProjectClient" / "AuthenticationMiddleware.swift"
+        assert not auth_file.exists(), "AuthenticationMiddleware.swift should NOT be created"
+
+        # Verify CLI output does NOT mention AuthenticationMiddleware generation
+        # (silent skip is expected behavior)
+        assert "Generated AuthenticationMiddleware" not in result.stdout
+
+    def test_bootstrap_preserves_existing_middleware(self, tmp_path):
+        """Test that existing AuthenticationMiddleware.swift is preserved on update."""
+        runner = CliRunner()
+
+        # Create original_openapi.yaml with Bearer auth
+        openapi_content = """
+openapi: 3.1.0
+info:
+  title: Test API
+  version: 1.0.0
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+paths:
+  /test:
+    get:
+      operationId: getTest
+      responses:
+        '200':
+          description: OK
+""".strip()
+        (tmp_path / "original_openapi.yaml").write_text(openapi_content, encoding="utf-8")
+
+        # First run: create the middleware
+        result = runner.invoke(app, [str(tmp_path), "--name", "PreserveProject"])
+        assert result.exit_code in [0, 1]
+
+        # Verify middleware was created
+        auth_file = (
+            tmp_path / "Sources" / "PreserveProjectClient" / "AuthenticationMiddleware.swift"
+        )
+        assert auth_file.exists()
+
+        # Modify the file with custom content
+        original_content = auth_file.read_text(encoding="utf-8")
+        custom_content = original_content + "\n// Custom user modification\n"
+        auth_file.write_text(custom_content, encoding="utf-8")
+
+        # Second run: should preserve the file
+        result = runner.invoke(app, [str(tmp_path), "--name", "PreserveProject"])
+        assert result.exit_code in [0, 1]
+
+        # Verify custom modification is preserved
+        preserved_content = auth_file.read_text(encoding="utf-8")
+        assert "// Custom user modification" in preserved_content
+
+        # Verify CLI output mentions preservation
+        assert "already exists" in result.stdout
