@@ -9,6 +9,7 @@ from bootstrapper.generators.security import generate_authentication_middleware
 from bootstrapper.generators.swift import ensure_package_structure, run_openapi_generator
 from bootstrapper.generators.templates import generate_config_files
 from bootstrapper.transformers.manager import transform_spec
+from bootstrapper.transformers.op6_overlay import apply_overlay
 
 app = typer.Typer(
     name="swift-bootstrapper",
@@ -149,7 +150,9 @@ def bootstrap(
     # Step 3.5: Generate config files (Makefile, .gitignore, .env, generator configs)
     with console.status("[bold yellow]Generating config files..."):
         try:
-            config_results = generate_config_files(target_path, project_name)
+            config_results = generate_config_files(
+                target_path, project_name, file_format=original_openapi.suffix
+            )
         except Exception as e:
             console.print(f"[bold red]✗[/bold red] Failed to generate config files: {e}")
             raise typer.Exit(1)
@@ -169,7 +172,23 @@ def bootstrap(
         f"Tests: {structure_results['tests_dir']})"
     )
 
-    # Step 3.6: Generate AuthenticationMiddleware if security schemes defined
+    # Step 3.6: Apply overlay if it exists and has actions
+    with console.status("[bold yellow]Applying overlay..."):
+        try:
+            overlay_results = apply_overlay(target_path, openapi_file=output_file.name)
+        except Exception as e:
+            console.print(f"[bold red]✗[/bold red] Failed to apply overlay: {e}")
+            raise typer.Exit(1)
+
+    # Report results (only show if applied or failed, silent skip for empty overlay)
+    if overlay_results["applied"]:
+        console.print(f"[bold green]✓[/bold green] {overlay_results['reason']}")
+    elif not overlay_results["skipped"]:
+        # Only show warning if it was attempted but failed
+        console.print(f"[bold yellow]![/bold yellow] Overlay: {overlay_results['reason']}")
+    # Silent skip when overlay has no actions (normal/expected case)
+
+    # Step 3.7: Generate AuthenticationMiddleware if security schemes defined
     with console.status("[bold yellow]Analyzing security schemes..."):
         try:
             auth_results = generate_authentication_middleware(
