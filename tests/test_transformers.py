@@ -409,7 +409,8 @@ class TestOp3NullableTo31:
         # Check that type is still string (not array)
         assert result["components"]["schemas"]["User"]["properties"]["name"]["type"] == "string"
         # Check that required array is empty or removed
-        assert "required" not in result["components"]["schemas"]["User"] or result["components"]["schemas"]["User"]["required"] == []
+        user_schema = result["components"]["schemas"]["User"]
+        assert "required" not in user_schema or user_schema["required"] == []
 
     def test_nullable_number_removed_from_required(self):
         """Test that nullable number is removed from required array."""
@@ -422,7 +423,7 @@ class TestOp3NullableTo31:
                         "required": ["name", "price"],
                         "properties": {
                             "name": {"type": "string"},
-                            "price": {"type": "number", "nullable": True}
+                            "price": {"type": "number", "nullable": True},
                         },
                     }
                 }
@@ -484,7 +485,8 @@ class TestOp3NullableTo31:
         # Type array should be unwrapped and removed from required
         name_prop = result["components"]["schemas"]["User"]["properties"]["name"]
         assert name_prop["type"] == "string"
-        assert "required" not in result["components"]["schemas"]["User"] or result["components"]["schemas"]["User"]["required"] == []
+        user_schema = result["components"]["schemas"]["User"]
+        assert "required" not in user_schema or user_schema["required"] == []
 
     def test_version_detection_all_versions(self):
         """Test that all OpenAPI versions are handled consistently."""
@@ -509,7 +511,8 @@ class TestOp3NullableTo31:
             assert "nullable" not in field_prop
             assert field_prop["type"] == "string"
             # Should be removed from required
-            assert "required" not in result["components"]["schemas"]["Test"] or result["components"]["schemas"]["Test"]["required"] == []
+            test_schema = result["components"]["schemas"]["Test"]
+            assert "required" not in test_schema or test_schema["required"] == []
 
     def test_nested_nullable_properties(self):
         """Test that nested nullable properties are handled correctly."""
@@ -539,7 +542,8 @@ class TestOp3NullableTo31:
         assert address["street"]["type"] == "string"
         assert "nullable" not in address["street"]
         # street should be removed from required
-        assert "required" not in result["components"]["schemas"]["Address"] or result["components"]["schemas"]["Address"]["required"] == []
+        addr_schema = result["components"]["schemas"]["Address"]
+        assert "required" not in addr_schema or addr_schema["required"] == []
 
         details = address["details"]["properties"]
         assert details["apartment"]["type"] == "string"
@@ -579,7 +583,8 @@ class TestOp3NullableTo31:
         assert email_prop["example"] == "user@example.com"
         assert "nullable" not in email_prop
         # Should be removed from required
-        assert "required" not in result["components"]["schemas"]["User"] or result["components"]["schemas"]["User"]["required"] == []
+        user_schema = result["components"]["schemas"]["User"]
+        assert "required" not in user_schema or user_schema["required"] == []
 
     def test_nullable_in_array_items(self):
         """Test that nullable in array items is cleaned."""
@@ -632,7 +637,8 @@ class TestOp3NullableTo31:
         assert props["age"]["type"] == "integer"
         assert props["active"]["type"] == "boolean"
         # All should be removed from required
-        assert "required" not in result["components"]["schemas"]["User"] or result["components"]["schemas"]["User"]["required"] == []
+        user_schema = result["components"]["schemas"]["User"]
+        assert "required" not in user_schema or user_schema["required"] == []
 
     def test_schema_without_nullable_unchanged(self):
         """Test that schemas without nullable are unchanged."""
@@ -643,7 +649,7 @@ class TestOp3NullableTo31:
                     "User": {
                         "type": "object",
                         "required": ["id"],
-                        "properties": {"id": {"type": "string"}}
+                        "properties": {"id": {"type": "string"}},
                     }
                 }
             },
@@ -665,7 +671,7 @@ class TestOp3NullableTo31:
                         "properties": {
                             "id": {"type": "string"},
                             "name": {"type": "string", "nullable": True},
-                            "email": {"type": "string"}
+                            "email": {"type": "string"},
                         },
                     }
                 }

@@ -80,7 +80,11 @@ def _clean_null_constructs(schema: dict) -> dict:
     for key in ["oneOf", "anyOf"]:
         if key in schema and isinstance(schema[key], list):
             # Filter out null types
-            non_null_items = [item for item in schema[key] if not (isinstance(item, dict) and item.get("type") == "null")]
+            non_null_items = [
+                item
+                for item in schema[key]
+                if not (isinstance(item, dict) and item.get("type") == "null")
+            ]
 
             # If only one item left, unwrap the oneOf/anyOf
             if len(non_null_items) == 1:
