@@ -227,7 +227,7 @@ class TestFullPipelineYAML:
         runner = CliRunner()
 
         # Run bootstrap command
-        result = runner.invoke(app, [str(sample_openapi_yaml)])
+        runner.invoke(app, [str(sample_openapi_yaml)])
 
         # Load Package.swift
         package_swift = sample_openapi_yaml / "Package.swift"
@@ -252,7 +252,7 @@ class TestFullPipelineYAML:
         runner = CliRunner()
 
         # Run bootstrap command
-        result = runner.invoke(app, [str(sample_openapi_yaml)])
+        runner.invoke(app, [str(sample_openapi_yaml)])
 
         # Load Makefile
         makefile = sample_openapi_yaml / "Makefile"
@@ -269,7 +269,7 @@ class TestFullPipelineYAML:
         runner = CliRunner()
 
         # Run bootstrap command
-        result = runner.invoke(app, [str(sample_openapi_yaml)])
+        runner.invoke(app, [str(sample_openapi_yaml)])
 
         # Load .gitignore
         gitignore = sample_openapi_yaml / ".gitignore"
@@ -336,9 +336,7 @@ class TestFullPipelineYAML:
         runner = CliRunner()
 
         # Run bootstrap with custom project name
-        result = runner.invoke(
-            app, [str(sample_openapi_yaml), "--name", "MyCustomAPI"]
-        )
+        runner.invoke(app, [str(sample_openapi_yaml), "--name", "MyCustomAPI"])
 
         # Check that directories use custom name
         assert (sample_openapi_yaml / "Sources" / "MyCustomAPITypes").exists()
@@ -358,7 +356,7 @@ class TestFullPipelineJSON:
         runner = CliRunner()
 
         # Run bootstrap command
-        result = runner.invoke(app, [str(sample_openapi_json)])
+        runner.invoke(app, [str(sample_openapi_json)])
 
         # Check that the transformed openapi.json was created (not .yaml)
         assert (sample_openapi_json / "openapi.json").exists()
@@ -369,7 +367,7 @@ class TestFullPipelineJSON:
         runner = CliRunner()
 
         # Run bootstrap command
-        result = runner.invoke(app, [str(sample_openapi_json)])
+        runner.invoke(app, [str(sample_openapi_json)])
 
         # Load the transformed spec
         output_file = sample_openapi_json / "openapi.json"
@@ -409,7 +407,7 @@ class TestEdgeCases:
         runner = CliRunner()
 
         # First run
-        result = runner.invoke(app, [str(sample_openapi_yaml)])
+        runner.invoke(app, [str(sample_openapi_yaml)])
 
         # Modify Package.swift
         package_swift = sample_openapi_yaml / "Package.swift"
@@ -418,10 +416,9 @@ class TestEdgeCases:
         package_swift.write_text(modified_content)
 
         # Second run (update scenario)
-        result = runner.invoke(app, [str(sample_openapi_yaml)])
+        runner.invoke(app, [str(sample_openapi_yaml)])
 
         # Check that the modification is still there
-        final_content = package_swift.read_text()
         # Our implementation should preserve existing Package.swift
         # or regenerate it - let's check it exists
         assert package_swift.exists()
@@ -430,7 +427,7 @@ class TestEdgeCases:
         """Test that transformations apply to all schemas, not just the first one."""
         runner = CliRunner()
 
-        result = runner.invoke(app, [str(sample_openapi_yaml)])
+        runner.invoke(app, [str(sample_openapi_yaml)])
 
         output_file = sample_openapi_yaml / "openapi.yaml"
         with output_file.open() as f:
