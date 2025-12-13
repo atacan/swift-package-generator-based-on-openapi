@@ -6,7 +6,8 @@
       "Bash(tree:*)",
       "Bash(uv:*)",
       "Bash(cat:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(find:*)"
     ]
   }
 }
