@@ -35,34 +35,24 @@ let package = Package(
         .target(
             name: "{{ project_name }}Types",
             dependencies: [
-                .product(
-                    name: "OpenAPIRuntime",
-                    package: "swift-openapi-runtime"
-                ),
-            ],
-            path: "Sources/{{ project_name }}Types"
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime")
+            ]
         ),
         // Client target: Contains generated client and custom code
         .target(
             name: "{{ project_name }}Client",
             dependencies: [
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+                .product(name: "OpenAPIAsyncHTTPClient", package: "swift-openapi-async-http-client"),
                 .target(name: "{{ project_name }}Types"),
-                .product(
-                    name: "OpenAPIRuntime",
-                    package: "swift-openapi-runtime"
-                ),
-                .product(
-                    name: "AsyncHTTPClient",
-                    package: "async-http-client"
-                ),
-            ],
-            path: "Sources/{{ project_name }}Client"
+            ]
         ),
         // Tests
         .testTarget(
             name: "{{ project_name }}Tests",
             dependencies: [
                 .target(name: "{{ project_name }}Client"),
+                .product(name: "UsefulThings", package: "UsefulThings"),
             ]
         ),
     ]
