@@ -87,6 +87,8 @@ def generate_config_files(target_dir: Path, project_name: str) -> dict[str, bool
         "openapi-generator-config-types.yaml": "openapi-generator-config-types.yaml.j2",
         "openapi-generator-config-client.yaml": "openapi-generator-config-client.yaml.j2",
         "openapi-overlay.yaml": "overlay.yaml.j2",
+        ".swift-format": ".swift-format.j2",
+        ".claude/skills/openapi-overlay/SKILL.md": ".claude/skills/openapi-overlay/SKILL.md.j2",
     }
 
     results = {}

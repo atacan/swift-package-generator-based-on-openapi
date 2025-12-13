@@ -356,6 +356,8 @@ class TestGenerateConfigFiles:
                 "openapi-generator-config-types.yaml",
                 "openapi-generator-config-client.yaml",
                 "openapi-overlay.yaml",
+                ".swift-format",
+                ".claude/skills/openapi-overlay/SKILL.md",
             }
             assert set(results.keys()) == expected_keys
 
