@@ -601,9 +601,7 @@ paths:
         assert result.exit_code in [0, 1]
 
         # Verify middleware was created in Types target
-        auth_file = (
-            tmp_path / "Sources" / "PreserveProjectTypes" / "AuthenticationMiddleware.swift"
-        )
+        auth_file = tmp_path / "Sources" / "PreserveProjectTypes" / "AuthenticationMiddleware.swift"
         assert auth_file.exists()
 
         # Modify the file with custom content

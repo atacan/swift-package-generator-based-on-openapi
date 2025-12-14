@@ -9,7 +9,7 @@ from bootstrapper.generators.security import generate_authentication_middleware
 from bootstrapper.generators.swift import ensure_package_structure, run_openapi_generator
 from bootstrapper.generators.templates import generate_config_files
 from bootstrapper.transformers.manager import transform_spec
-from bootstrapper.transformers.op6_overlay import apply_overlay
+from bootstrapper.transformers.op7_overlay import apply_overlay
 
 app = typer.Typer(
     name="swift-bootstrapper",

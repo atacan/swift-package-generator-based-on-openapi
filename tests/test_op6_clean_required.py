@@ -1,6 +1,6 @@
 """Tests for Operation 5: Clean required arrays to match properties."""
 
-from bootstrapper.transformers.op5_clean_required import clean_required_arrays
+from bootstrapper.transformers.op6_clean_required import clean_required_arrays
 
 
 class TestOp5CleanRequired:

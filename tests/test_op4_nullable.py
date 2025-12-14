@@ -1,6 +1,6 @@
 """Tests for Operation 3: Handle nullable properties for Swift OpenAPI Generator."""
 
-from bootstrapper.transformers.op3_nullable import convert_nullable_to_3_1
+from bootstrapper.transformers.op4_nullable import convert_nullable_to_3_1
 
 
 class TestOp3NullableTo31:

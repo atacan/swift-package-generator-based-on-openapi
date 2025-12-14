@@ -4,7 +4,7 @@ import json
 import subprocess
 from unittest.mock import MagicMock, patch
 
-from bootstrapper.transformers.op6_overlay import apply_overlay
+from bootstrapper.transformers.op7_overlay import apply_overlay
 
 
 class TestOp6Overlay:

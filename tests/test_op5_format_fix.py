@@ -1,6 +1,6 @@
 """Tests for Operation 4: Convert format byte to contentEncoding base64."""
 
-from bootstrapper.transformers.op4_format_fix import fix_byte_format
+from bootstrapper.transformers.op5_format_fix import fix_byte_format
 
 
 class TestOp4FormatByteFix:

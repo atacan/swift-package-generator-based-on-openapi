@@ -2,7 +2,7 @@
 
 This module coordinates the complete transformation pipeline:
 1. Load the OpenAPI specification from a file
-2. Apply all 5 transformation operations in sequence
+2. Apply all 6 transformation operations in sequence
 3. Save the transformed specification back to a file
 """
 
@@ -12,9 +12,10 @@ from bootstrapper.core.loader import load_spec
 from bootstrapper.core.writer import write_spec
 from bootstrapper.transformers.op1_null_anyof import remove_null_anyof
 from bootstrapper.transformers.op2_const_enum import convert_const_to_enum
-from bootstrapper.transformers.op3_nullable import convert_nullable_to_3_1
-from bootstrapper.transformers.op4_format_fix import fix_byte_format
-from bootstrapper.transformers.op5_clean_required import clean_required_arrays
+from bootstrapper.transformers.op3_float_to_number import convert_float_to_number
+from bootstrapper.transformers.op4_nullable import convert_nullable_to_3_1
+from bootstrapper.transformers.op5_format_fix import fix_byte_format
+from bootstrapper.transformers.op6_clean_required import clean_required_arrays
 
 
 def transform_spec(input_path: Path, output_path: Path) -> None:
@@ -25,10 +26,11 @@ def transform_spec(input_path: Path, output_path: Path) -> None:
     1. Load the spec from input_path (preserves format: JSON/YAML)
     2. Apply Op1: Remove null from anyOf arrays
     3. Apply Op2: Convert const to enum
-    4. Apply Op3: Convert nullable (3.0) to 3.1
-    5. Apply Op4: Fix byte format
-    6. Apply Op5: Clean required arrays
-    7. Save the spec to output_path in the same format as the input
+    4. Apply Op3: Convert float to number
+    5. Apply Op4: Convert nullable (3.0) to 3.1
+    6. Apply Op5: Fix byte format
+    7. Apply Op6: Clean required arrays
+    8. Save the spec to output_path in the same format as the input
 
     Args:
         input_path: Path to the input OpenAPI specification file (.json, .yaml, or .yml)
@@ -44,9 +46,10 @@ def transform_spec(input_path: Path, output_path: Path) -> None:
     # Step 1: Load the specification
     spec, file_format = load_spec(input_path)
 
-    # Step 2-6: Apply all transformations in sequence
+    # Step 2-7: Apply all transformations in sequence
     spec = remove_null_anyof(spec)
     spec = convert_const_to_enum(spec)
+    spec = convert_float_to_number(spec)
     spec = convert_nullable_to_3_1(spec)
     spec = fix_byte_format(spec)
     spec = clean_required_arrays(spec)
