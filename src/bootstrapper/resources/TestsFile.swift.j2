@@ -6,10 +6,10 @@ import {{ project_name }}
 import UsefulThings
 
 struct {{ project_name }}Tests {
-    let client = {
-            let envFileUrl = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent(".env")
-            return try! createClient(apiKey: getEnvironmentVariable("MISTRAL_API_KEY", from: envFileUrl)!)
-    }()
+    // let client = {
+    //         let envFileUrl = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent(".env")
+    //         return try! createClient(apiKey: getEnvironmentVariable("MISTRAL_API_KEY", from: envFileUrl)!)
+    // }()
 
     @Test func example() async throws {
         // let response = try await client.<#method#>(
