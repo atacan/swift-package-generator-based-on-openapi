@@ -2,7 +2,9 @@
 
 Original plan to implement this project:
 
-@history/initial_plan.md
+This project is a Python CLI utility managed by `uv` designed to bootstrap, sanitize, and maintain Swift Packages derived from OpenAPI specifications. Its core logic acts as a middleware pipeline that ingests a raw `original_openapi` file (JSON or YAML), recursively traverses the schema to apply specific structural fixes—such as resolving `anyOf` nullability issues, converting `const` to `enum`, and normalizing OpenAPI 3.0/3.1 differences—and outputs a clean specification compatible with Apple's strict `swift-openapi-generator`.
+
+Beyond schema sanitization, the tool orchestrates the Swift Package Manager infrastructure. It scaffolds a modular directory structure (separating `Client` and `Types` targets), renders essential configuration files (`Package.swift`, `Makefile`, `openapi-generator-config.yaml`) using Jinja2 templates, and executes the necessary shell commands to generate the Swift code. The architecture is idempotent, allowing developers to re-run the tool to update API specifications without overwriting manual project configurations or overlay files.
 
 ## Issue Tracking with bd (beads)
 
