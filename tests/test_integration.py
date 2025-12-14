@@ -271,8 +271,8 @@ class TestFullPipelineYAML:
         assert "generate:" in content
         assert "swift-openapi-generator" in content
 
-    def test_gitignore_ignores_generated_sources(self, sample_openapi_yaml):
-        """Test that .gitignore properly ignores generated files."""
+    def test_gitignore_does_not_ignore_generated_sources(self, sample_openapi_yaml):
+        """Test that GeneratedSources are tracked in git, not ignored."""
         runner = CliRunner()
 
         # Run bootstrap command
@@ -284,8 +284,8 @@ class TestFullPipelineYAML:
 
         content = gitignore.read_text()
 
-        # Check for GeneratedSources in gitignore
-        assert "GeneratedSources" in content
+        # Verify GeneratedSources is NOT ignored - we want these files tracked
+        assert "GeneratedSources" not in content
 
     def test_update_scenario_regenerates_files(self, sample_openapi_yaml):
         """Test that running bootstrap again with updated spec regenerates files correctly.
