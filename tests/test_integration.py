@@ -482,8 +482,8 @@ paths:
         # CLI should succeed (generator might fail if swift not available)
         assert result.exit_code in [0, 1]
 
-        # Verify AuthenticationMiddleware was created
-        auth_file = tmp_path / "Sources" / "TestProject" / "AuthenticationMiddleware.swift"
+        # Verify AuthenticationMiddleware was created in Types target
+        auth_file = tmp_path / "Sources" / "TestProjectTypes" / "AuthenticationMiddleware.swift"
         assert auth_file.exists(), "AuthenticationMiddleware.swift should be created"
 
         # Verify content
@@ -527,8 +527,8 @@ paths:
         # CLI should succeed
         assert result.exit_code in [0, 1]
 
-        # Verify AuthenticationMiddleware was created
-        auth_file = tmp_path / "Sources" / "ApiKeyProject" / "AuthenticationMiddleware.swift"
+        # Verify AuthenticationMiddleware was created in Types target
+        auth_file = tmp_path / "Sources" / "ApiKeyProjectTypes" / "AuthenticationMiddleware.swift"
         assert auth_file.exists(), "AuthenticationMiddleware.swift should be created"
 
         # Verify content
@@ -563,8 +563,8 @@ paths:
         # CLI should succeed
         assert result.exit_code in [0, 1]
 
-        # Verify AuthenticationMiddleware was NOT created
-        auth_file = tmp_path / "Sources" / "NoAuthProject" / "AuthenticationMiddleware.swift"
+        # Verify AuthenticationMiddleware was NOT created in Types target
+        auth_file = tmp_path / "Sources" / "NoAuthProjectTypes" / "AuthenticationMiddleware.swift"
         assert not auth_file.exists(), "AuthenticationMiddleware.swift should NOT be created"
 
         # Verify CLI output does NOT mention AuthenticationMiddleware generation
@@ -600,9 +600,9 @@ paths:
         result = runner.invoke(app, [str(tmp_path), "--name", "PreserveProject"])
         assert result.exit_code in [0, 1]
 
-        # Verify middleware was created
+        # Verify middleware was created in Types target
         auth_file = (
-            tmp_path / "Sources" / "PreserveProject" / "AuthenticationMiddleware.swift"
+            tmp_path / "Sources" / "PreserveProjectTypes" / "AuthenticationMiddleware.swift"
         )
         assert auth_file.exists()
 

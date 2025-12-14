@@ -442,9 +442,9 @@ paths: {}
                 encoding="utf-8",
             )
 
-            # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProject"
-            client_dir.mkdir(parents=True)
+            # Create Types directory
+            types_dir = target_dir / "Sources" / "TestProjectTypes"
+            types_dir.mkdir(parents=True)
 
             # Generate middleware
             result = generate_authentication_middleware(target_dir, "TestProject")
@@ -456,7 +456,7 @@ paths: {}
             assert result["scheme_type"] == "http_bearer"
 
             # Verify file created
-            auth_file = client_dir / "AuthenticationMiddleware.swift"
+            auth_file = types_dir / "AuthenticationMiddleware.swift"
             assert auth_file.exists()
 
             # Verify content
@@ -487,9 +487,9 @@ paths: {}
                 encoding="utf-8",
             )
 
-            # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProject"
-            client_dir.mkdir(parents=True)
+            # Create Types directory
+            types_dir = target_dir / "Sources" / "TestProjectTypes"
+            types_dir.mkdir(parents=True)
 
             # Generate middleware
             result = generate_authentication_middleware(target_dir, "TestProject")
@@ -501,7 +501,7 @@ paths: {}
             assert result["scheme_type"] == "api_key_header"
 
             # Verify file created
-            auth_file = client_dir / "AuthenticationMiddleware.swift"
+            auth_file = types_dir / "AuthenticationMiddleware.swift"
             assert auth_file.exists()
 
             # Verify content (header name should be lowercased)
@@ -526,15 +526,15 @@ paths: {}
                 encoding="utf-8",
             )
 
-            # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProject"
-            client_dir.mkdir(parents=True)
+            # Create Types directory
+            types_dir = target_dir / "Sources" / "TestProjectTypes"
+            types_dir.mkdir(parents=True)
 
             # Try to generate middleware
             result = generate_authentication_middleware(target_dir, "TestProject")
 
             # Verify no file created
-            auth_file = client_dir / "AuthenticationMiddleware.swift"
+            auth_file = types_dir / "AuthenticationMiddleware.swift"
             assert not auth_file.exists()
 
             # Verify return status
@@ -565,12 +565,12 @@ paths: {}
                 encoding="utf-8",
             )
 
-            # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProject"
-            client_dir.mkdir(parents=True)
+            # Create Types directory
+            types_dir = target_dir / "Sources" / "TestProjectTypes"
+            types_dir.mkdir(parents=True)
 
             # Create existing file with custom content
-            auth_file = client_dir / "AuthenticationMiddleware.swift"
+            auth_file = types_dir / "AuthenticationMiddleware.swift"
             custom_content = "// Custom user modifications\nstruct MyCustomAuth {}"
             auth_file.write_text(custom_content, encoding="utf-8")
 
@@ -592,15 +592,15 @@ paths: {}
             target_dir = Path(tmpdir)
 
             # Don't create OpenAPI file
-            # Create Client directory anyway
-            client_dir = target_dir / "Sources" / "TestProject"
-            client_dir.mkdir(parents=True)
+            # Create Types directory anyway
+            types_dir = target_dir / "Sources" / "TestProjectTypes"
+            types_dir.mkdir(parents=True)
 
             # Try to generate middleware
             result = generate_authentication_middleware(target_dir, "TestProject")
 
             # Verify no file created
-            auth_file = client_dir / "AuthenticationMiddleware.swift"
+            auth_file = types_dir / "AuthenticationMiddleware.swift"
             assert not auth_file.exists()
 
             # Verify return status
@@ -636,15 +636,15 @@ paths: {}
                 encoding="utf-8",
             )
 
-            # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProject"
-            client_dir.mkdir(parents=True)
+            # Create Types directory
+            types_dir = target_dir / "Sources" / "TestProjectTypes"
+            types_dir.mkdir(parents=True)
 
             # Try to generate middleware
             result = generate_authentication_middleware(target_dir, "TestProject")
 
             # Verify no file created
-            auth_file = client_dir / "AuthenticationMiddleware.swift"
+            auth_file = types_dir / "AuthenticationMiddleware.swift"
             assert not auth_file.exists()
 
             # Verify return status
@@ -677,9 +677,9 @@ paths: {}
                 encoding="utf-8",
             )
 
-            # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProject"
-            client_dir.mkdir(parents=True)
+            # Create Types directory
+            types_dir = target_dir / "Sources" / "TestProjectTypes"
+            types_dir.mkdir(parents=True)
 
             # Generate middleware with JSON file
             result = generate_authentication_middleware(
@@ -688,7 +688,7 @@ paths: {}
 
             # Verify success
             assert result["generated"] is True
-            auth_file = client_dir / "AuthenticationMiddleware.swift"
+            auth_file = types_dir / "AuthenticationMiddleware.swift"
             assert auth_file.exists()
 
     def test_custom_openapi_filename(self):
@@ -713,9 +713,9 @@ paths: {}
                 encoding="utf-8",
             )
 
-            # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProject"
-            client_dir.mkdir(parents=True)
+            # Create Types directory
+            types_dir = target_dir / "Sources" / "TestProjectTypes"
+            types_dir.mkdir(parents=True)
 
             # Generate middleware with custom filename
             result = generate_authentication_middleware(
@@ -724,5 +724,5 @@ paths: {}
 
             # Verify success
             assert result["generated"] is True
-            auth_file = client_dir / "AuthenticationMiddleware.swift"
+            auth_file = types_dir / "AuthenticationMiddleware.swift"
             assert auth_file.exists()

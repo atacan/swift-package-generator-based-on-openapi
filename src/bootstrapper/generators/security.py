@@ -174,9 +174,9 @@ def generate_authentication_middleware(
     # Render template
     content = render_template("AuthenticationMiddleware.swift.j2", context)
 
-    # Write to Client directory
-    client_dir = target_dir / "Sources" / project_name
-    auth_file = client_dir / "AuthenticationMiddleware.swift"
+    # Write to Types directory
+    types_dir = target_dir / "Sources" / f"{project_name}Types"
+    auth_file = types_dir / "AuthenticationMiddleware.swift"
 
     # Use write_if_not_exists to preserve user edits
     was_created = write_if_not_exists(auth_file, content, "AuthenticationMiddleware.swift")
