@@ -6,6 +6,12 @@ This project is a Python CLI utility managed by `uv` designed to bootstrap, sani
 
 Beyond schema sanitization, the tool orchestrates the Swift Package Manager infrastructure. It scaffolds a modular directory structure (separating `Client` and `Types` targets), renders essential configuration files (`Package.swift`, `Makefile`, `openapi-generator-config.yaml`) using Jinja2 templates, and executes the necessary shell commands to generate the Swift code. The architecture is idempotent, allowing developers to re-run the tool to update API specifications without overwriting manual project configurations or overlay files.
 
+### Transformers
+
+The transformations are inside the "src/bootstrapper/transformers" directory and each of them have dedicated tests.
+The overlay transformation should always be the last one to ensure that all other transformations are applied before the overlay is applied. 
+When you add a new transformer, make sure to first add a test for it in the "tests/bootstrapper/transformers" directory, and move the overlay transformation to be the last one.
+
 ## Issue Tracking with bd (beads)
 
 **IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.
