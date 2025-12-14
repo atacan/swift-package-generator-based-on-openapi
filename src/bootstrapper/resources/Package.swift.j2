@@ -20,8 +20,8 @@ let package = Package(
             targets: ["{{ project_name }}Types"]
         ),
         .library(
-            name: "{{ project_name }}Client",
-            targets: ["{{ project_name }}Client"]
+            name: "{{ project_name }}",
+            targets: ["{{ project_name }}"]
         ),
     ],
     dependencies: [
@@ -40,7 +40,7 @@ let package = Package(
         ),
         // Client target: Contains generated client and custom code
         .target(
-            name: "{{ project_name }}Client",
+            name: "{{ project_name }}",
             dependencies: [
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
                 .product(name: "OpenAPIAsyncHTTPClient", package: "swift-openapi-async-http-client"),
@@ -51,7 +51,7 @@ let package = Package(
         .testTarget(
             name: "{{ project_name }}Tests",
             dependencies: [
-                .target(name: "{{ project_name }}Client"),
+                .target(name: "{{ project_name }}"),
                 .product(name: "UsefulThings", package: "UsefulThings"),
             ]
         ),

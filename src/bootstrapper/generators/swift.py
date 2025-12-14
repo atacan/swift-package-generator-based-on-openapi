@@ -52,7 +52,7 @@ def ensure_package_structure(target_dir: Path, project_name: str) -> dict[str, b
 
     # Create directory structure for targets
     types_dir = target_dir / "Sources" / f"{project_name}Types"
-    client_dir = target_dir / "Sources" / f"{project_name}Client"
+    client_dir = target_dir / "Sources" / project_name
     tests_dir = target_dir / "Tests" / f"{project_name}Tests"
 
     # Create directories if they don't exist
@@ -107,9 +107,7 @@ def create_initial_swift_files(target_dir: Path, project_name: str) -> dict[str,
     results["types_file"] = write_if_not_exists(types_file_path, types_content, "Types Swift file")
 
     # Create Client file
-    client_file_path = (
-        target_dir / "Sources" / f"{project_name}Client" / f"{project_name}Client.swift"
-    )
+    client_file_path = target_dir / "Sources" / project_name / f"{project_name}.swift"
     client_content = render_template("ClientFile.swift.j2", context)
     results["client_file"] = write_if_not_exists(
         client_file_path, client_content, "Client Swift file"
@@ -199,7 +197,7 @@ def run_openapi_generator(
 
     # Generate Client
     client_config = "openapi-generator-config-client.yaml"
-    client_output_dir = target_dir / "Sources" / f"{project_name}Client" / "GeneratedSources"
+    client_output_dir = target_dir / "Sources" / project_name / "GeneratedSources"
 
     try:
         result = subprocess.run(

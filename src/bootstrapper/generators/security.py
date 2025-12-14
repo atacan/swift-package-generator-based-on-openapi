@@ -175,7 +175,7 @@ def generate_authentication_middleware(
     content = render_template("AuthenticationMiddleware.swift.j2", context)
 
     # Write to Client directory
-    client_dir = target_dir / "Sources" / f"{project_name}Client"
+    client_dir = target_dir / "Sources" / project_name
     auth_file = client_dir / "AuthenticationMiddleware.swift"
 
     # Use write_if_not_exists to preserve user edits

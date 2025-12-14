@@ -443,7 +443,7 @@ paths: {}
             )
 
             # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProjectClient"
+            client_dir = target_dir / "Sources" / "TestProject"
             client_dir.mkdir(parents=True)
 
             # Generate middleware
@@ -488,7 +488,7 @@ paths: {}
             )
 
             # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProjectClient"
+            client_dir = target_dir / "Sources" / "TestProject"
             client_dir.mkdir(parents=True)
 
             # Generate middleware
@@ -527,7 +527,7 @@ paths: {}
             )
 
             # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProjectClient"
+            client_dir = target_dir / "Sources" / "TestProject"
             client_dir.mkdir(parents=True)
 
             # Try to generate middleware
@@ -566,7 +566,7 @@ paths: {}
             )
 
             # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProjectClient"
+            client_dir = target_dir / "Sources" / "TestProject"
             client_dir.mkdir(parents=True)
 
             # Create existing file with custom content
@@ -593,7 +593,7 @@ paths: {}
 
             # Don't create OpenAPI file
             # Create Client directory anyway
-            client_dir = target_dir / "Sources" / "TestProjectClient"
+            client_dir = target_dir / "Sources" / "TestProject"
             client_dir.mkdir(parents=True)
 
             # Try to generate middleware
@@ -637,7 +637,7 @@ paths: {}
             )
 
             # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProjectClient"
+            client_dir = target_dir / "Sources" / "TestProject"
             client_dir.mkdir(parents=True)
 
             # Try to generate middleware
@@ -678,7 +678,7 @@ paths: {}
             )
 
             # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProjectClient"
+            client_dir = target_dir / "Sources" / "TestProject"
             client_dir.mkdir(parents=True)
 
             # Generate middleware with JSON file
@@ -714,7 +714,7 @@ paths: {}
             )
 
             # Create Client directory
-            client_dir = target_dir / "Sources" / "TestProjectClient"
+            client_dir = target_dir / "Sources" / "TestProject"
             client_dir.mkdir(parents=True)
 
             # Generate middleware with custom filename

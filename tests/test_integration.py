@@ -159,7 +159,7 @@ class TestFullPipelineYAML:
             project_name = "SwiftAPIWrapper"
 
         assert (sample_openapi_yaml / "Sources" / f"{project_name}Types").exists()
-        assert (sample_openapi_yaml / "Sources" / f"{project_name}Client").exists()
+        assert (sample_openapi_yaml / "Sources" / project_name).exists()
         assert (sample_openapi_yaml / "Tests" / f"{project_name}Tests").exists()
 
         # Check that Makefile, .gitignore, and .env were created
@@ -347,7 +347,7 @@ class TestFullPipelineYAML:
 
         # Check that directories use custom name
         assert (sample_openapi_yaml / "Sources" / "MyCustomAPITypes").exists()
-        assert (sample_openapi_yaml / "Sources" / "MyCustomAPIClient").exists()
+        assert (sample_openapi_yaml / "Sources" / "MyCustomAPI").exists()
 
         # Check Package.swift references custom name
         package_swift = sample_openapi_yaml / "Package.swift"
@@ -483,7 +483,7 @@ paths:
         assert result.exit_code in [0, 1]
 
         # Verify AuthenticationMiddleware was created
-        auth_file = tmp_path / "Sources" / "TestProjectClient" / "AuthenticationMiddleware.swift"
+        auth_file = tmp_path / "Sources" / "TestProject" / "AuthenticationMiddleware.swift"
         assert auth_file.exists(), "AuthenticationMiddleware.swift should be created"
 
         # Verify content
@@ -528,7 +528,7 @@ paths:
         assert result.exit_code in [0, 1]
 
         # Verify AuthenticationMiddleware was created
-        auth_file = tmp_path / "Sources" / "ApiKeyProjectClient" / "AuthenticationMiddleware.swift"
+        auth_file = tmp_path / "Sources" / "ApiKeyProject" / "AuthenticationMiddleware.swift"
         assert auth_file.exists(), "AuthenticationMiddleware.swift should be created"
 
         # Verify content
@@ -564,7 +564,7 @@ paths:
         assert result.exit_code in [0, 1]
 
         # Verify AuthenticationMiddleware was NOT created
-        auth_file = tmp_path / "Sources" / "NoAuthProjectClient" / "AuthenticationMiddleware.swift"
+        auth_file = tmp_path / "Sources" / "NoAuthProject" / "AuthenticationMiddleware.swift"
         assert not auth_file.exists(), "AuthenticationMiddleware.swift should NOT be created"
 
         # Verify CLI output does NOT mention AuthenticationMiddleware generation
@@ -602,7 +602,7 @@ paths:
 
         # Verify middleware was created
         auth_file = (
-            tmp_path / "Sources" / "PreserveProjectClient" / "AuthenticationMiddleware.swift"
+            tmp_path / "Sources" / "PreserveProject" / "AuthenticationMiddleware.swift"
         )
         assert auth_file.exists()
 
