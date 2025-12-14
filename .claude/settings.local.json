@@ -8,13 +8,15 @@
       "Bash(git commit:*)",
       "Bash(git pull:*)",
       "Bash(git push:*)",
+      "Bash(git remote prune:*)",
       "Bash(git stash:*)",
       "Bash(grep:*)",
       "Bash(ls:*)",
       "Bash(python3:*)",
       "Bash(touch:*)",
       "Bash(tree:*)",
-      "Bash(uv:*)"
+      "Bash(uv:*)",
+      "Bash(wait)"
     ]
   }
 }
