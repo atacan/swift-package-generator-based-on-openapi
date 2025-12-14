@@ -1,7 +1,7 @@
-"""Operation 1: Remove null from anyOf arrays.
+"""Operation 1: Remove null from anyOf and oneOf arrays.
 
-This transformation removes type: null entries from anyOf arrays,
-unwraps anyOf when only one type remains, and cleans up default: null
+This transformation removes type: null entries from anyOf and oneOf arrays,
+unwraps anyOf/oneOf when only one type remains, and cleans up default: null
 when the type is no longer nullable.
 """
 
@@ -10,9 +10,59 @@ from typing import Any
 from bootstrapper.transformers.ops_base import recursive_walk
 
 
+def _process_nullable_array(data: dict, key: str) -> dict:
+    """
+    Process anyOf or oneOf array by removing null types.
+
+    Args:
+        data: The schema object containing the array
+        key: Either "anyOf" or "oneOf"
+
+    Returns:
+        The transformed schema object
+    """
+    array_list = data[key]
+
+    # Only process if it's a list
+    if not isinstance(array_list, list):
+        return data
+
+    # Remove all {type: "null"} entries
+    filtered = [
+        item for item in array_list if not (isinstance(item, dict) and item.get("type") == "null")
+    ]
+
+    # If we didn't remove any null types, return unchanged
+    if len(filtered) == len(array_list):
+        return data
+
+    # Handle different cases based on filtered results
+    if len(filtered) == 0:
+        # Edge case: array only had null - keep it as a null type
+        return {"type": "null"}
+    elif len(filtered) == 1:
+        # Unwrap - replace the entire object with the single remaining schema
+        unwrapped = filtered[0].copy()
+        # Preserve other properties from the parent (like description, example)
+        for k, v in data.items():
+            if k != key and k not in unwrapped:
+                unwrapped[k] = v
+        # Remove default: null since type is no longer nullable
+        if "default" in unwrapped and unwrapped["default"] is None:
+            del unwrapped["default"]
+        return unwrapped
+    else:
+        # Multiple items remain - update the array
+        data[key] = filtered
+        # Remove default: null since we removed the null type
+        if "default" in data and data["default"] is None:
+            del data["default"]
+        return data
+
+
 def _transform_node(data: Any, parent: Any | None, key_in_parent: str | int | None) -> Any:
     """
-    Transform a single node by processing anyOf arrays.
+    Transform a single node by processing anyOf and oneOf arrays.
 
     Args:
         data: The current node being processed
@@ -28,39 +78,11 @@ def _transform_node(data: Any, parent: Any | None, key_in_parent: str | int | No
 
     # Process anyOf if present
     if "anyOf" in data:
-        any_of_list = data["anyOf"]
+        data = _process_nullable_array(data, "anyOf")
 
-        # Only process if it's a list
-        if isinstance(any_of_list, list):
-            # Remove all {type: "null"} entries
-            filtered = [
-                item
-                for item in any_of_list
-                if not (isinstance(item, dict) and item.get("type") == "null")
-            ]
-
-            # If we removed null types, update the anyOf
-            if len(filtered) != len(any_of_list):
-                if len(filtered) == 0:
-                    # Edge case: anyOf only had null - keep it as a null type
-                    data = {"type": "null"}
-                elif len(filtered) == 1:
-                    # Unwrap anyOf - replace the entire object with the single remaining schema
-                    unwrapped = filtered[0].copy()
-                    # Preserve other properties from the parent (like description, example)
-                    for key, value in data.items():
-                        if key != "anyOf" and key not in unwrapped:
-                            unwrapped[key] = value
-                    data = unwrapped
-                    # Remove default: null since type is no longer nullable
-                    if "default" in data and data["default"] is None:
-                        del data["default"]
-                else:
-                    # Multiple items remain - update anyOf list
-                    data["anyOf"] = filtered
-                    # Remove default: null since we removed the null type
-                    if "default" in data and data["default"] is None:
-                        del data["default"]
+    # Process oneOf if present
+    if "oneOf" in data:
+        data = _process_nullable_array(data, "oneOf")
 
     return data
 

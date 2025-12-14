@@ -204,3 +204,206 @@ class TestOp1NullAnyOfRemoval:
 
         result = remove_null_anyof(schema)
         assert result == expected
+
+
+class TestOp1NullOneOfRemoval:
+    """Tests for Operation 1: Remove null from oneOf arrays."""
+
+    def test_oneof_with_null_removed(self):
+        """Test that type: null is removed from oneOf arrays and unwrapped."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "username": {"oneOf": [{"$ref": "#/components/schemas/User"}, {"type": "null"}]}
+            },
+        }
+
+        expected = {
+            "type": "object",
+            "properties": {"username": {"$ref": "#/components/schemas/User"}},
+        }
+
+        result = remove_null_anyof(schema)
+        assert result == expected
+
+    def test_oneof_with_null_and_multiple_types(self):
+        """Test oneOf with null and multiple other types - keeps oneOf minus null."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "oneOf": [
+                        {"type": "string"},
+                        {"type": "number"},
+                        {"type": "boolean"},
+                        {"type": "null"},
+                    ]
+                }
+            },
+        }
+
+        expected = {
+            "type": "object",
+            "properties": {
+                "value": {"oneOf": [{"type": "string"}, {"type": "number"}, {"type": "boolean"}]}
+            },
+        }
+
+        result = remove_null_anyof(schema)
+        assert result == expected
+
+    def test_oneof_unwrapped_when_one_item_left(self):
+        """Test that oneOf is unwrapped when only 1 item remains after removing null."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "oneOf": [
+                        {"type": "string", "format": "email", "minLength": 5},
+                        {"type": "null"},
+                    ]
+                }
+            },
+        }
+
+        expected = {
+            "type": "object",
+            "properties": {"email": {"type": "string", "format": "email", "minLength": 5}},
+        }
+
+        result = remove_null_anyof(schema)
+        assert result == expected
+
+    def test_nested_oneof_with_anyof(self):
+        """Test the key nested case: oneOf containing anyOf, then null."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "oneOf": [
+                        {
+                            "anyOf": [
+                                {"$ref": "#/components/schemas/DataModel"},
+                                {"type": "string"},
+                            ]
+                        },
+                        {"type": "null"},
+                    ]
+                }
+            },
+        }
+
+        expected = {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "anyOf": [
+                        {"$ref": "#/components/schemas/DataModel"},
+                        {"type": "string"},
+                    ]
+                }
+            },
+        }
+
+        result = remove_null_anyof(schema)
+        assert result == expected
+
+    def test_oneof_only_null_becomes_null_type(self):
+        """Test that oneOf with only null becomes a null type."""
+        schema = {
+            "type": "object",
+            "properties": {"nullable_only": {"oneOf": [{"type": "null"}]}},
+        }
+
+        expected = {"type": "object", "properties": {"nullable_only": {"type": "null"}}}
+
+        result = remove_null_anyof(schema)
+        assert result == expected
+
+    def test_oneof_preserves_other_properties(self):
+        """Test that description, example, etc. are preserved during transformation."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "oneOf": [
+                        {"type": "string", "enum": ["active", "inactive"]},
+                        {"type": "null"},
+                    ],
+                    "description": "The status field",
+                    "example": "active",
+                }
+            },
+        }
+
+        expected = {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": ["active", "inactive"],
+                    "description": "The status field",
+                    "example": "active",
+                }
+            },
+        }
+
+        result = remove_null_anyof(schema)
+        assert result == expected
+
+    def test_oneof_without_null_unchanged(self):
+        """Test that oneOf without null type is unchanged."""
+        schema = {
+            "type": "object",
+            "properties": {"multi": {"oneOf": [{"type": "string"}, {"type": "number"}]}},
+        }
+
+        expected = schema.copy()
+
+        result = remove_null_anyof(schema)
+        assert result == expected
+
+    def test_nested_oneof_processed(self):
+        """Test that nested oneOf structures are processed correctly."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "nested": {
+                    "type": "object",
+                    "properties": {"inner": {"oneOf": [{"type": "boolean"}, {"type": "null"}]}},
+                }
+            },
+        }
+
+        expected = {
+            "type": "object",
+            "properties": {
+                "nested": {"type": "object", "properties": {"inner": {"type": "boolean"}}}
+            },
+        }
+
+        result = remove_null_anyof(schema)
+        assert result == expected
+
+    def test_oneof_default_null_removed(self):
+        """Test that default: null is removed when oneOf type is no longer nullable."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "oneOf": [
+                        {"type": "string", "enum": ["pending", "completed"]},
+                        {"type": "null"},
+                    ],
+                    "default": None,
+                }
+            },
+        }
+
+        expected = {
+            "type": "object",
+            "properties": {"status": {"type": "string", "enum": ["pending", "completed"]}},
+        }
+
+        result = remove_null_anyof(schema)
+        assert result == expected
