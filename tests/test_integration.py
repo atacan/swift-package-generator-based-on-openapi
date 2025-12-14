@@ -13,7 +13,7 @@ import pytest
 import yaml
 from typer.testing import CliRunner
 
-from bootstrapper.main import app
+from bootstrapper.main import app, derive_project_name
 
 # Sample broken OpenAPI specification for testing
 BROKEN_OPENAPI_SPEC = {
@@ -150,13 +150,8 @@ class TestFullPipelineYAML:
         assert (sample_openapi_yaml / "Package.swift").exists()
 
         # Check that directory structure was created
-        # Derive the project name from directory
-        project_name = "".join(
-            word.capitalize()
-            for word in sample_openapi_yaml.name.replace("-", " ").replace("_", " ").split()
-        )
-        if not project_name:
-            project_name = "SwiftAPIWrapper"
+        # Derive the project name from directory using the same function as main
+        project_name = derive_project_name(sample_openapi_yaml)
 
         assert (sample_openapi_yaml / "Sources" / f"{project_name}Types").exists()
         assert (sample_openapi_yaml / "Sources" / project_name).exists()

@@ -54,9 +54,12 @@ def derive_project_name(target_dir: Path) -> str:
     dir_name = target_dir.resolve().name
 
     # Remove special characters and convert to PascalCase
-    # For now, just remove hyphens and underscores, capitalize each word
+    # Preserve existing uppercase letters while capitalizing first letter of each word
     words = dir_name.replace("-", " ").replace("_", " ").split()
-    project_name = "".join(word.capitalize() for word in words)
+
+    # Capitalize first letter of each word without lowercasing the rest
+    # This preserves names like "AssemblyAI" correctly
+    project_name = "".join(word[0].upper() + word[1:] if word else "" for word in words)
 
     return project_name or "SwiftAPIWrapper"
 

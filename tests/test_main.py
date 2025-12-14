@@ -121,13 +121,31 @@ class TestDeriveProjectName:
         assert result == "MyApiWrapper"
 
     def test_uppercase_directory_name(self, tmp_path):
-        """Test with uppercase directory name."""
+        """Test with uppercase directory name preserves case."""
         test_dir = tmp_path / "MYPROJECT"
         test_dir.mkdir()
 
         result = derive_project_name(test_dir)
 
-        assert result == "Myproject"
+        assert result == "MYPROJECT"
+
+    def test_mixed_case_preserved(self, tmp_path):
+        """Test that mixed case like 'AssemblyAI' is preserved."""
+        test_dir = tmp_path / "AssemblyAI"
+        test_dir.mkdir()
+
+        result = derive_project_name(test_dir)
+
+        assert result == "AssemblyAI"
+
+    def test_mixed_case_with_hyphens(self, tmp_path):
+        """Test that mixed case is preserved with hyphens."""
+        test_dir = tmp_path / "AssemblyAI-wrapper"
+        test_dir.mkdir()
+
+        result = derive_project_name(test_dir)
+
+        assert result == "AssemblyAIWrapper"
 
     def test_empty_string_returns_default(self):
         """Test that empty directory name returns default."""
