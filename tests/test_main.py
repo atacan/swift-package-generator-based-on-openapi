@@ -4,7 +4,8 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from bootstrapper.main import app, derive_project_name, find_original_openapi
+from bootstrapper.config import ProjectConfig
+from bootstrapper.main import app, derive_project_name, find_original_openapi, resolve_project_name
 
 
 class TestFindOriginalOpenAPI:
@@ -204,3 +205,68 @@ class TestCLIBootstrapCommand:
 
         assert result.exit_code == 0
         assert "Bootstrap a Swift package" in result.stdout
+
+
+class TestResolveProjectName:
+    """Test the resolve_project_name function."""
+
+    def test_cli_takes_priority(self, tmp_path):
+        """Test that CLI argument takes highest priority."""
+        config = ProjectConfig(package_name="ConfigName")
+
+        name, source = resolve_project_name(tmp_path, "CLIName", config)
+
+        assert name == "CLIName"
+        assert source == "CLI argument"
+
+    def test_config_takes_priority_over_derived(self, tmp_path):
+        """Test that config takes priority over derived name."""
+        test_dir = tmp_path / "my-project"
+        test_dir.mkdir()
+        config = ProjectConfig(package_name="ConfigName")
+
+        name, source = resolve_project_name(test_dir, None, config)
+
+        assert name == "ConfigName"
+        assert source == "config file"
+
+    def test_falls_back_to_derived(self, tmp_path):
+        """Test that derived name is used when CLI and config are empty."""
+        test_dir = tmp_path / "my-project"
+        test_dir.mkdir()
+        config = ProjectConfig()  # No package_name
+
+        name, source = resolve_project_name(test_dir, None, config)
+
+        assert name == "MyProject"
+        assert source == "auto-derived from directory"
+
+    def test_cli_empty_string_uses_config(self, tmp_path):
+        """Test that empty CLI string falls back to config."""
+        config = ProjectConfig(package_name="ConfigName")
+
+        name, source = resolve_project_name(tmp_path, "", config)
+
+        # Empty string is falsy, so config should be used
+        assert name == "ConfigName"
+        assert source == "config file"
+
+    def test_cli_none_uses_config(self, tmp_path):
+        """Test that None CLI value falls back to config."""
+        config = ProjectConfig(package_name="ConfigName")
+
+        name, source = resolve_project_name(tmp_path, None, config)
+
+        assert name == "ConfigName"
+        assert source == "config file"
+
+    def test_both_empty_uses_derived(self, tmp_path):
+        """Test derivation when both CLI and config are empty."""
+        test_dir = tmp_path / "test-api-client"
+        test_dir.mkdir()
+        config = ProjectConfig()
+
+        name, source = resolve_project_name(test_dir, None, config)
+
+        assert name == "TestApiClient"
+        assert source == "auto-derived from directory"

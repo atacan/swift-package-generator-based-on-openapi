@@ -5,6 +5,13 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
+from bootstrapper.config import (
+    CONFIG_FILENAME,
+    ProjectConfig,
+    check_name_mismatch,
+    load_config,
+    save_config,
+)
 from bootstrapper.generators.security import generate_authentication_middleware
 from bootstrapper.generators.swift import ensure_package_structure, run_openapi_generator
 from bootstrapper.generators.templates import generate_config_files
@@ -64,6 +71,29 @@ def derive_project_name(target_dir: Path) -> str:
     return project_name or "SwiftAPIWrapper"
 
 
+def resolve_project_name(
+    target_dir: Path,
+    cli_name: str | None,
+    config: ProjectConfig,
+) -> tuple[str, str]:
+    """
+    Resolve the project name based on priority order.
+
+    Priority: CLI argument > config file > derived from folder
+
+    Returns:
+        Tuple of (resolved_name, source) where source describes origin
+    """
+    if cli_name:
+        return cli_name, "CLI argument"
+
+    if config.package_name:
+        return config.package_name, "config file"
+
+    derived = derive_project_name(target_dir)
+    return derived, "auto-derived from directory"
+
+
 @app.command()
 def bootstrap(
     target_dir: str = typer.Argument(
@@ -107,10 +137,30 @@ def bootstrap(
 
     console.print(f"[bold green]✓[/bold green] Found: {original_openapi.name}")
 
-    # Derive project name if not provided
-    if not project_name:
-        project_name = derive_project_name(target_path)
-        console.print(f"[dim]Auto-derived project name: {project_name}[/dim]")
+    # Load existing config (if any)
+    config = load_config(target_path)
+
+    # Resolve project name with priority: CLI > config > derived
+    project_name, name_source = resolve_project_name(target_path, project_name, config)
+
+    # Check for mismatch with existing Package.swift
+    mismatch = check_name_mismatch(target_path, project_name)
+    if mismatch:
+        console.print()
+        console.print("[bold yellow]⚠ Warning: Package name mismatch detected[/bold yellow]")
+        console.print(f"  Config file says: {mismatch.config_name}")
+        console.print(f"  Package.swift uses: {mismatch.package_swift_name}")
+        console.print("  Existing files will NOT be renamed. Using Package.swift name.")
+        console.print("  To rename, manually update Package.swift and directory names.")
+        console.print()
+        # Use the existing Package.swift name
+        project_name = mismatch.package_swift_name
+        name_source = "existing Package.swift"
+
+    console.print(f"[dim]Project name: {project_name} ({name_source})[/dim]")
+
+    # Update config with resolved name for saving
+    config.package_name = project_name
 
     # Step 2: Process specification (apply transformations)
     output_file = target_path / f"openapi{original_openapi.suffix}"
@@ -167,6 +217,13 @@ def bootstrap(
         console.print(f"[bold green]✓[/bold green] Generated config files: {config_names}")
     else:
         console.print("[bold blue]✓[/bold blue] Config files already exist (preserved)")
+
+    # Save the project config file (if it doesn't exist)
+    config_created = save_config(target_path, config)
+    if config_created:
+        console.print(f"[bold green]✓[/bold green] Created {CONFIG_FILENAME}")
+    else:
+        console.print(f"[bold blue]✓[/bold blue] {CONFIG_FILENAME} already exists (preserved)")
 
     console.print(
         f"[bold green]✓[/bold green] Created directory structure "

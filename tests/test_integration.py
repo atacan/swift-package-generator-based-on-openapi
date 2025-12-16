@@ -614,3 +614,181 @@ paths:
 
         # Verify CLI output mentions preservation
         assert "already exists" in result.stdout
+
+
+class TestConfigFileWorkflow:
+    """Test the .swift-bootstrapper.yaml config file workflow."""
+
+    def test_config_file_created_on_first_bootstrap(self, tmp_path):
+        """Test that .swift-bootstrapper.yaml is created on first run."""
+        # Setup: Create original_openapi.yaml
+        openapi_file = tmp_path / "original_openapi.yaml"
+        with openapi_file.open("w") as f:
+            yaml.dump(BROKEN_OPENAPI_SPEC, f)
+
+        runner = CliRunner()
+
+        # Run: swift-bootstrapper with --name MyAPI
+        result = runner.invoke(app, [str(tmp_path), "--name", "MyAPI"])
+        assert result.exit_code in [0, 1]
+
+        # Assert: .swift-bootstrapper.yaml exists with package_name: MyAPI
+        config_file = tmp_path / ".swift-bootstrapper.yaml"
+        assert config_file.exists(), "Config file should be created"
+
+        # Verify content
+        with config_file.open() as f:
+            config_data = yaml.safe_load(f)
+
+        assert config_data is not None, "Config should not be empty"
+        assert config_data["package_name"] == "MyAPI", "Config should contain the package name"
+
+        # Verify CLI output mentions creation
+        assert "Created .swift-bootstrapper.yaml" in result.stdout
+
+    def test_config_file_preserved_on_rerun(self, tmp_path):
+        """Test that existing config file is not overwritten."""
+        # Setup: Create original_openapi.yaml
+        openapi_file = tmp_path / "original_openapi.yaml"
+        with openapi_file.open("w") as f:
+            yaml.dump(BROKEN_OPENAPI_SPEC, f)
+
+        # Create existing .swift-bootstrapper.yaml
+        config_file = tmp_path / ".swift-bootstrapper.yaml"
+        original_config = {
+            "package_name": "OriginalName",
+            "custom_field": "custom_value",  # Extra field to verify preservation
+        }
+        with config_file.open("w") as f:
+            yaml.dump(original_config, f)
+
+        runner = CliRunner()
+
+        # Run: swift-bootstrapper (no --name)
+        result = runner.invoke(app, [str(tmp_path)])
+        assert result.exit_code in [0, 1]
+
+        # Assert: Config file unchanged
+        with config_file.open() as f:
+            preserved_config = yaml.safe_load(f)
+
+        assert preserved_config == original_config, "Config file should be preserved exactly"
+        assert (
+            preserved_config["custom_field"] == "custom_value"
+        ), "Custom fields should be preserved"
+
+        # Verify CLI output mentions preservation
+        assert ".swift-bootstrapper.yaml already exists (preserved)" in result.stdout
+
+    def test_config_name_used_when_no_cli(self, tmp_path):
+        """Test that config package_name is used when --name not provided."""
+        # Setup: Create original_openapi.yaml
+        openapi_file = tmp_path / "original_openapi.yaml"
+        with openapi_file.open("w") as f:
+            yaml.dump(BROKEN_OPENAPI_SPEC, f)
+
+        # Create .swift-bootstrapper.yaml with package_name: ConfiguredName
+        config_file = tmp_path / ".swift-bootstrapper.yaml"
+        config_data = {"package_name": "ConfiguredName"}
+        with config_file.open("w") as f:
+            yaml.dump(config_data, f)
+
+        runner = CliRunner()
+
+        # Run: swift-bootstrapper (no --name)
+        result = runner.invoke(app, [str(tmp_path)])
+        assert result.exit_code in [0, 1]
+
+        # Assert: Package structure uses ConfiguredName
+        assert (tmp_path / "Sources" / "ConfiguredNameTypes").exists()
+        assert (tmp_path / "Sources" / "ConfiguredName").exists()
+
+        # Verify CLI output shows config was used
+        assert "ConfiguredName (config file)" in result.stdout
+
+    def test_cli_overrides_config(self, tmp_path):
+        """Test that --name flag overrides config file."""
+        # Setup: Create original_openapi.yaml
+        openapi_file = tmp_path / "original_openapi.yaml"
+        with openapi_file.open("w") as f:
+            yaml.dump(BROKEN_OPENAPI_SPEC, f)
+
+        # Create .swift-bootstrapper.yaml with package_name: ConfigName
+        config_file = tmp_path / ".swift-bootstrapper.yaml"
+        config_data = {"package_name": "ConfigName"}
+        with config_file.open("w") as f:
+            yaml.dump(config_data, f)
+
+        runner = CliRunner()
+
+        # Run: swift-bootstrapper --name CLIName
+        result = runner.invoke(app, [str(tmp_path), "--name", "CLIName"])
+        assert result.exit_code in [0, 1]
+
+        # Assert: Package structure uses CLIName (not ConfigName)
+        assert (tmp_path / "Sources" / "CLINameTypes").exists()
+        assert (tmp_path / "Sources" / "CLIName").exists()
+
+        # ConfigName directories should NOT exist
+        assert not (tmp_path / "Sources" / "ConfigNameTypes").exists()
+        assert not (tmp_path / "Sources" / "ConfigName").exists()
+
+        # Verify CLI output shows CLI argument was used
+        assert "CLIName (CLI argument)" in result.stdout
+
+    def test_mismatch_warning_uses_package_swift_name(self, tmp_path):
+        """Test that mismatched config shows warning and uses Package.swift name."""
+        # Setup: Create original_openapi.yaml
+        openapi_file = tmp_path / "original_openapi.yaml"
+        with openapi_file.open("w") as f:
+            yaml.dump(BROKEN_OPENAPI_SPEC, f)
+
+        # Create Package.swift with name: "ExistingName"
+        package_swift_content = """
+// swift-tools-version:5.9
+import PackageDescription
+
+let package = Package(
+    name: "ExistingName",
+    platforms: [.macOS(.v13)],
+    products: [
+        .library(name: "ExistingNameTypes", targets: ["ExistingNameTypes"]),
+        .library(name: "ExistingName", targets: ["ExistingName"])
+    ],
+    targets: [
+        .target(name: "ExistingNameTypes"),
+        .target(name: "ExistingName")
+    ]
+)
+""".strip()
+        package_swift = tmp_path / "Package.swift"
+        package_swift.write_text(package_swift_content, encoding="utf-8")
+
+        # Create .swift-bootstrapper.yaml with package_name: DifferentName
+        config_file = tmp_path / ".swift-bootstrapper.yaml"
+        config_data = {"package_name": "DifferentName"}
+        with config_file.open("w") as f:
+            yaml.dump(config_data, f)
+
+        runner = CliRunner()
+
+        # Run: swift-bootstrapper (capture output)
+        result = runner.invoke(app, [str(tmp_path)])
+        assert result.exit_code in [0, 1]
+
+        # Assert: Warning message in output
+        assert "Warning: Package name mismatch detected" in result.stdout
+        assert "Config file says: DifferentName" in result.stdout
+        assert "Package.swift uses: ExistingName" in result.stdout
+        assert "Existing files will NOT be renamed" in result.stdout
+
+        # Assert: Package structure uses ExistingName (not DifferentName)
+        assert (tmp_path / "Sources" / "ExistingNameTypes").exists()
+        assert (tmp_path / "Sources" / "ExistingName").exists()
+
+        # DifferentName directories should NOT exist
+        assert not (tmp_path / "Sources" / "DifferentNameTypes").exists()
+        assert not (tmp_path / "Sources" / "DifferentName").exists()
+
+        # Verify CLI output shows Package.swift name was used
+        assert "ExistingName (existing Package.swift)" in result.stdout
