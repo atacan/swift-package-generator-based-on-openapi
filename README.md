@@ -1,182 +1,218 @@
 # Swift OpenAPI Bootstrapper
 
-Python CLI tool that generates and maintains Swift packages from OpenAPI specifications. Sanitizes imperfect OpenAPI files and scaffolds Swift Package Manager infrastructure.
+Generate Swift Packages from OpenAPI specifications. Takes a raw OpenAPI file (YAML or JSON), applies fixes for compatibility with Apple's [swift-openapi-generator](https://github.com/apple/swift-openapi-generator), and scaffolds a complete Swift Package Manager project.
 
-## Installation
+## Prerequisites
+
+- [uv](https://docs.astral.sh/uv/) -- handles Python automatically, no manual Python install needed
+- Swift 5.9+ toolchain (Xcode 15+ on macOS)
+
+## Install
 
 ```bash
-# Install globally with uv
 uv tool install git+https://github.com/atacan/swift-package-generator-based-on-openapi.git
+```
 
-# Verify installation
+This gives you the `swift-bootstrapper` command globally. Verify with:
+
+```bash
 swift-bootstrapper --help
 ```
 
-## First-Time Setup
+To run without installing (one-off usage):
 
-**1. Prepare your project folder**
 ```bash
-mkdir MyAPIWrapper
-cd MyAPIWrapper
+uvx --from git+https://github.com/atacan/swift-package-generator-based-on-openapi.git swift-bootstrapper --help
 ```
 
-**2. Add your OpenAPI file**
-- Name it `original_openapi.yaml` or `original_openapi.json`
-- Place it in the project root
+## Quick Start
 
-**3. Run the bootstrapper**
+### 1. Create a project folder and add your OpenAPI spec
+
 ```bash
-swift-bootstrapper .
+mkdir MyAPIWrapper && cd MyAPIWrapper
 ```
 
-**What gets created:**
-- `openapi.yaml` - Sanitized version (auto-generated, don't edit)
-- `openapi-overlay.yaml` - For manual schema fixes (edit this)
-- `.swift-bootstrapper.yaml` - Package configuration (persists package name)
-- `Package.swift` - Swift package definition with dependencies
-- `Makefile` - Shortcuts for common tasks
-- `.env` - Configuration file for API keys
-- `Sources/` - Generated Swift code structure
+Place your OpenAPI specification in this folder. It must be named one of:
 
-## Updating OpenAPI Spec
+- `original_openapi.yaml`
+- `original_openapi.yml`
+- `original_openapi.json`
 
-When the API provider releases a new version:
+### 2. Run the bootstrapper
 
-**1. Replace the original file**
-```bash
-cp ~/Downloads/new_api_spec.yaml ./original_openapi.yaml
-```
-
-**2. Re-run the bootstrapper**
 ```bash
 swift-bootstrapper .
 ```
 
-The tool will:
-- Re-apply all transformations
-- Preserve your overlay fixes
-- Regenerate Swift code
-- Keep your manual code intact
+That's it. The tool will sanitize the spec, generate all config files, create the Swift package structure, and run `swift-openapi-generator`.
 
-## Using Overlay Files
+### What gets created
 
-When you need to fix schema issues manually:
+```
+MyAPIWrapper/
+├── Package.swift                          # Swift package manifest
+├── Makefile                               # Build shortcuts (make generate, make build, make test)
+├── openapi.yaml                           # Sanitized spec (auto-generated, don't edit)
+├── original_openapi.yaml                  # Your original spec (source of truth)
+├── openapi-overlay.yaml                   # For manual schema fixes (edit this)
+├── openapi-generator-config-types.yaml    # Generator config for Types target
+├── openapi-generator-config-client.yaml   # Generator config for Client target
+├── .swift-bootstrapper.yaml               # Package name configuration
+├── .swift-format                          # Swift formatting rules
+├── .env.example                           # Environment variable template
+├── .gitignore
+├── Sources/
+│   ├── MyAPIWrapperTypes/
+│   │   ├── MyAPIWrapperTypes.swift
+│   │   ├── AuthenticationMiddleware.swift  # Only if spec has security schemes
+│   │   └── GeneratedSources/              # swift-openapi-generator output
+│   └── MyAPIWrapper/
+│       ├── MyAPIWrapper.swift
+│       └── GeneratedSources/
+└── Tests/
+    └── MyAPIWrapperTests/
+        └── MyAPIWrapperTests.swift
+```
 
-**1. Edit `openapi-overlay.yaml`**
+## CLI Usage
+
+```
+swift-bootstrapper [TARGET_DIR] [--name NAME]
+```
+
+| Argument / Option | Default | Description |
+|---|---|---|
+| `TARGET_DIR` | `.` (current directory) | Path to the folder containing `original_openapi.yaml` |
+| `--name`, `-n` | auto-derived from folder name | Custom Swift package name |
+
+### Examples
+
+```bash
+# Bootstrap from current directory, auto-derive package name
+swift-bootstrapper .
+
+# Bootstrap a specific folder
+swift-bootstrapper /path/to/my-api-project
+
+# Specify a custom package name
+swift-bootstrapper . --name MyCustomAPI
+swift-bootstrapper /path/to/project -n AssemblyAI
+```
+
+## Package Naming
+
+The package name is resolved in this priority order:
+
+1. **CLI `--name` flag** (highest priority)
+2. **Existing `Package.swift`** (preserves current name if package already exists)
+3. **`.swift-bootstrapper.yaml` config file**
+4. **Auto-derived from folder name** (default)
+
+Auto-derivation converts the folder name to PascalCase:
+
+| Folder name | Package name |
+|---|---|
+| `my-api-client` | `MyApiClient` |
+| `AssemblyAI` | `AssemblyAI` |
+| `openai_wrapper` | `OpenaiWrapper` |
+
+To set a persistent name without using the CLI flag every time, edit `.swift-bootstrapper.yaml`:
+
+```yaml
+package_name: MyCustomAPI
+```
+
+## Updating an OpenAPI Spec
+
+When the API provider releases a new version, replace the original file and re-run:
+
+```bash
+cp ~/Downloads/updated_spec.yaml ./original_openapi.yaml
+swift-bootstrapper .
+```
+
+The tool is idempotent:
+
+- Re-applies all transformations to produce a fresh `openapi.yaml`
+- Preserves existing files (`Package.swift`, `Makefile`, overlay, your Swift code)
+- Regenerates only the `GeneratedSources/` directories
+
+## Overlay Files
+
+If the automated fixes aren't enough, add manual corrections in `openapi-overlay.yaml`. This file is applied **after** all automated transformations.
+
 ```yaml
 overlay: "1.0.0"
 actions:
   - target: "$.components.schemas.User"
     update:
       required: ["user_id"]
+  - target: "$.paths./api/v1/users.get.responses.200"
+    update:
+      description: "Fixed response description"
 ```
 
-**2. Re-run the bootstrapper**
+Then re-run `swift-bootstrapper .` to apply.
+
+## Automated Spec Fixes
+
+These transformations are applied automatically to make specs compatible with `swift-openapi-generator`:
+
+| Fix | What it does |
+|---|---|
+| Nullable handling | Converts OpenAPI 3.0 `nullable: true` to 3.1 style |
+| anyOf simplification | Removes redundant `type: null` from `anyOf` arrays |
+| const to enum | Converts `const` values to single-element `enum` arrays |
+| Float to number | Normalizes `float` type to `number` |
+| Format fixes | Converts `format: byte` to `contentEncoding: base64` |
+| Required cleanup | Removes invalid entries from `required` arrays |
+| Overlay | Applies manual fixes from `openapi-overlay.yaml` (always last) |
+
+## Makefile Shortcuts
+
+The generated `Makefile` provides these commands inside the Swift project:
+
 ```bash
-swift-bootstrapper .
+make generate       # Regenerate Swift code from the OpenAPI spec
+make build          # Build the Swift package
+make test           # Run Swift tests
+make format         # Run swift-format on Sources and Tests
+make test-on-linux  # Run tests in a Docker container (swift:latest)
+make merge-main     # Merge current branch into main and push
 ```
 
-The overlay is applied **after** automated transformations.
+## File Reference
 
-## Configuring Package Names
-
-The package name is automatically resolved using this priority order:
-
-**Priority: CLI argument > Package.swift > Config file > Auto-derived**
-
-### Setting a Custom Package Name
-
-**Option 1: Using the CLI (highest priority)**
-```bash
-swift-bootstrapper . --name MyCustomAPI
-```
-
-**Option 2: Using the config file**
-
-Edit `.swift-bootstrapper.yaml`:
-```yaml
-package_name: MyCustomAPI
-```
-
-Then re-run:
-```bash
-swift-bootstrapper .
-```
-
-**Option 3: Auto-derive from folder name (default)**
-
-If no name is specified, the tool derives it from your folder:
-- `my-api-client` → `MyApiClient`
-- `AssemblyAI` → `AssemblyAI` (preserves uppercase)
-
-### Name Mismatch Warnings
-
-If you change the package name after the package is created, you'll see a warning:
-
-```
-⚠ Warning: Package name mismatch detected
-  Config file says: NewName
-  Package.swift uses: OldName
-  Existing files will NOT be renamed. Using Package.swift name.
-```
-
-The tool preserves your existing `Package.swift` name to avoid breaking your project. To rename:
-1. Manually update `Package.swift`
-2. Rename directories in `Sources/`
-3. Update `.swift-bootstrapper.yaml`
-
-## Common Workflows
-
-### Update everything after changing files
-```bash
-swift-bootstrapper .
-```
-
-### Use Makefile shortcuts (if generated)
-```bash
-make generate  # Regenerate Swift code
-```
-
-### Check what the tool fixed
-Compare `original_openapi.yaml` with `openapi.yaml` to see applied transformations.
-
-## What Gets Fixed Automatically
-
-1. **Nullable handling**: Converts `nullable: true` to OpenAPI 3.1 style
-2. **anyOf simplification**: Removes redundant `type: null` entries
-3. **const to enum**: Converts `const` to `enum` arrays
-4. **Format fixes**: Updates `format: byte` to `contentEncoding: base64`
-5. **Required cleanup**: Removes invalid entries from `required` arrays
-
-## File Roles
-
-| File | Purpose | Edit? |
-|------|---------|-------|
-| `original_openapi.yaml` | Source of truth from API provider | ✓ Replace when updated |
-| `openapi.yaml` | Sanitized version for Swift tools | ✗ Auto-generated |
-| `openapi-overlay.yaml` | Manual schema corrections | ✓ Add your fixes here |
-| `.swift-bootstrapper.yaml` | Package configuration (name, etc.) | ✓ Edit to customize |
-| `Package.swift` | Swift package configuration | ⚠️ Managed by tool |
-| `Sources/` | Swift code (generated + manual) | Mixed |
+| File | Edit? | Purpose |
+|---|---|---|
+| `original_openapi.yaml` | Replace | Your source OpenAPI spec from the API provider |
+| `openapi.yaml` | No | Auto-generated sanitized spec for Swift tools |
+| `openapi-overlay.yaml` | Yes | Manual schema corrections applied on top |
+| `.swift-bootstrapper.yaml` | Yes | Persists the package name across runs |
+| `Package.swift` | Caution | Created once, then preserved on re-runs |
+| `Makefile` | Caution | Created once, then preserved on re-runs |
+| `Sources/*/GeneratedSources/` | No | Regenerated on every run |
+| `Sources/*/*.swift` | Yes | Your custom Swift code, preserved on re-runs |
 
 ## Development
 
 ```bash
-# Install dependencies
+# Clone and install dependencies
+git clone https://github.com/atacan/swift-package-generator-based-on-openapi.git
+cd swift-package-generator-based-on-openapi
 uv sync
+
+# Run the CLI locally
+uv run swift-bootstrapper --help
 
 # Run tests
 uv run pytest
 
-# Lint
-uv run ruff check .
+# Run all tests including slow integration tests
+uv run pytest -m ""
 
-# Format
+# Lint and format
+uv run ruff check .
 uv run ruff format .
 ```
-
-## Requirements
-
-- Python 3.12+
-- uv package manager
-- Swift 5.9+ (for generated packages)
