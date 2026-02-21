@@ -80,6 +80,9 @@ test-on-linux: ## Run swift tests inside a Docker container
 		$(DOCKER_IMAGE) \
 		swift test
 
+regenerate:
+	uvx --from git+https://github.com/atacan/swift-package-generator-based-on-openapi.git swift-bootstrapper .
+
 generate: ## Generate Swift code from OpenAPI spec
 	@echo "$(YELLOW)Generating Swift code from OpenAPI specification...$(RESET)"
 	swift run swift-openapi-generator generate \
