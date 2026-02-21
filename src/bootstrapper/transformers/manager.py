@@ -21,6 +21,7 @@ from bootstrapper.transformers.op5_format_fix import fix_byte_format
 from bootstrapper.transformers.op6_clean_required import clean_required_arrays
 from bootstrapper.transformers.op7_header_schema_wrap import fix_header_schemas
 from bootstrapper.transformers.op8_multipart_array_ref import fix_multipart_array_refs
+from bootstrapper.transformers.op9_promote_schemas_from_headers import promote_misplaced_schemas
 
 _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
     ("op1: remove null from anyOf/oneOf", remove_null_anyof),
@@ -31,6 +32,7 @@ _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
     ("op6: clean required arrays", clean_required_arrays),
     ("op7: fix header schema wrapping", fix_header_schemas),
     ("op8: fix multipart $ref-to-array", fix_multipart_array_refs),
+    ("op9: promote misplaced schemas from headers", promote_misplaced_schemas),
 ]
 
 
