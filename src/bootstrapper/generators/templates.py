@@ -80,7 +80,8 @@ def generate_config_files(
     Returns:
         Dictionary mapping filename to whether it was created (True) or skipped (False)
     """
-    context = {"project_name": project_name}
+    openapi_filename = "openapi.json" if file_format == ".json" else "openapi.yaml"
+    context = {"project_name": project_name, "openapi_filename": openapi_filename}
 
     # Determine overlay file based on format
     if file_format == ".json":

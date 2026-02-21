@@ -87,11 +87,11 @@ generate: ## Generate Swift code from OpenAPI spec
 	@echo "$(YELLOW)Generating Swift code from OpenAPI specification...$(RESET)"
 	swift run swift-openapi-generator generate \
 		--config openapi-generator-config-types.yaml \
-		openapi.yaml \
+		{{ openapi_filename }} \
 		--output-directory Sources/{{ project_name }}Types/GeneratedSources
 	swift run swift-openapi-generator generate \
 		--config openapi-generator-config-client.yaml \
-		openapi.yaml \
+		{{ openapi_filename }} \
 		--output-directory Sources/{{ project_name }}/GeneratedSources
 	@echo "$(GREEN)Code generation complete!$(RESET)"
 
