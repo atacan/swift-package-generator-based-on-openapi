@@ -165,12 +165,12 @@ def bootstrap(
     # Step 2: Process specification (apply transformations)
     output_file = target_path / f"openapi{original_openapi.suffix}"
 
-    with console.status("[bold yellow]Applying transformations..."):
-        try:
-            transform_spec(original_openapi, output_file)
-        except Exception as e:
-            console.print(f"[bold red]✗[/bold red] Failed to transform spec: {e}")
-            raise typer.Exit(1)
+    console.print("[bold yellow]Applying transformations...[/bold yellow]")
+    try:
+        transform_spec(original_openapi, output_file, console=console)
+    except Exception as e:
+        console.print(f"[bold red]✗[/bold red] Failed to transform spec: {e}")
+        raise typer.Exit(1)
 
     console.print(
         f"[bold green]✓[/bold green] Transformed specification written to: {output_file.name}"

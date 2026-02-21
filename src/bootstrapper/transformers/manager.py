@@ -2,11 +2,14 @@
 
 This module coordinates the complete transformation pipeline:
 1. Load the OpenAPI specification from a file
-2. Apply all 6 transformation operations in sequence
+2. Apply all transformation operations in sequence
 3. Save the transformed specification back to a file
 """
 
 from pathlib import Path
+from typing import Callable
+
+from rich.console import Console
 
 from bootstrapper.core.loader import load_spec
 from bootstrapper.core.writer import write_spec
@@ -18,25 +21,25 @@ from bootstrapper.transformers.op5_format_fix import fix_byte_format
 from bootstrapper.transformers.op6_clean_required import clean_required_arrays
 from bootstrapper.transformers.op8_multipart_array_ref import fix_multipart_array_refs
 
+_PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
+    ("op1: remove null from anyOf/oneOf", remove_null_anyof),
+    ("op2: convert const to enum", convert_const_to_enum),
+    ("op3: convert float to number", convert_float_to_number),
+    ("op4: convert nullable to OpenAPI 3.1", convert_nullable_to_3_1),
+    ("op5: fix byte format", fix_byte_format),
+    ("op6: clean required arrays", clean_required_arrays),
+    ("op8: fix multipart $ref-to-array", fix_multipart_array_refs),
+]
 
-def transform_spec(input_path: Path, output_path: Path) -> None:
+
+def transform_spec(input_path: Path, output_path: Path, console: Console | None = None) -> None:
     """
     Load OpenAPI spec, apply all transformations, and save the result.
-
-    This function orchestrates the complete transformation pipeline:
-    1. Load the spec from input_path (preserves format: JSON/YAML)
-    2. Apply Op1: Remove null from anyOf arrays
-    3. Apply Op2: Convert const to enum
-    4. Apply Op3: Convert float to number
-    5. Apply Op4: Convert nullable (3.0) to 3.1
-    6. Apply Op5: Fix byte format
-    7. Apply Op6: Clean required arrays
-    8. Apply Op8: Fix multipart $ref-to-array properties
-    9. Save the spec to output_path in the same format as the input
 
     Args:
         input_path: Path to the input OpenAPI specification file (.json, .yaml, or .yml)
         output_path: Path where the transformed specification will be written
+        console: Optional Rich Console for progress output
 
     Raises:
         FileNotFoundError: If the input file doesn't exist
@@ -45,17 +48,11 @@ def transform_spec(input_path: Path, output_path: Path) -> None:
         yaml.YAMLError: If YAML parsing fails
         IOError: If writing to output_path fails
     """
-    # Step 1: Load the specification
     spec, file_format = load_spec(input_path)
 
-    # Step 2-7: Apply all transformations in sequence
-    spec = remove_null_anyof(spec)
-    spec = convert_const_to_enum(spec)
-    spec = convert_float_to_number(spec)
-    spec = convert_nullable_to_3_1(spec)
-    spec = fix_byte_format(spec)
-    spec = clean_required_arrays(spec)
-    spec = fix_multipart_array_refs(spec)
+    for label, transformer in _PIPELINE:
+        if console:
+            console.print(f"  [dim]→ {label}[/dim]")
+        spec = transformer(spec)
 
-    # Step 9: Save the transformed specification
     write_spec(spec, output_path, file_format)
