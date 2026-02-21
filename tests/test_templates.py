@@ -273,6 +273,7 @@ class TestGenerateConfigFiles:
             assert (target_dir / "openapi-generator-config-types.yaml").exists()
             assert (target_dir / "openapi-generator-config-client.yaml").exists()
             assert (target_dir / "openapi-overlay.yaml").exists()
+            assert not (target_dir / ".claude").exists()
 
     def test_generated_files_have_content(self):
         """Test that generated files contain content."""
@@ -360,7 +361,6 @@ class TestGenerateConfigFiles:
                 "AGENTS.md",
                 "CLAUDE.md",
                 "README.md",
-                ".claude/skills/openapi-overlay/SKILL.md",
             }
             assert set(results.keys()) == expected_keys
 

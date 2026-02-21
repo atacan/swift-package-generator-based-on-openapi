@@ -15,6 +15,8 @@ from typer.testing import CliRunner
 
 from bootstrapper.main import app, derive_project_name
 
+pytestmark = pytest.mark.slow
+
 # Sample broken OpenAPI specification for testing
 BROKEN_OPENAPI_SPEC = {
     "openapi": "3.0.0",
@@ -168,6 +170,10 @@ class TestFullPipelineYAML:
 
         # Check that overlay file was created
         assert (sample_openapi_yaml / "openapi-overlay.yaml").exists()
+
+        # Skills folder generation is deprecated in favor of manual interactive install
+        assert not (sample_openapi_yaml / ".claude").exists()
+        assert "npx skills add atacan/agentic-coding-files" in result.stdout
 
     def test_transformations_applied_correctly(self, sample_openapi_yaml):
         """Test that all transformations are applied correctly to the output file."""
@@ -673,9 +679,9 @@ class TestConfigFileWorkflow:
             preserved_config = yaml.safe_load(f)
 
         assert preserved_config == original_config, "Config file should be preserved exactly"
-        assert (
-            preserved_config["custom_field"] == "custom_value"
-        ), "Custom fields should be preserved"
+        assert preserved_config["custom_field"] == "custom_value", (
+            "Custom fields should be preserved"
+        )
 
         # Verify CLI output mentions preservation
         assert ".swift-bootstrapper.yaml already exists (preserved)" in result.stdout

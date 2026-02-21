@@ -103,7 +103,6 @@ def generate_config_files(
         "AGENTS.md": "AGENTS.md.j2",
         "CLAUDE.md": "CLAUDE.md.j2",
         "README.md": "README.md.j2",
-        ".claude/skills/openapi-overlay/SKILL.md": ".claude/skills/openapi-overlay/SKILL.md.j2",
     }
 
     results = {}

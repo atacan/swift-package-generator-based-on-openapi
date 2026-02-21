@@ -218,6 +218,15 @@ def bootstrap(
     else:
         console.print("[bold blue]✓[/bold blue] Config files already exist (preserved)")
 
+    console.print(
+        "[bold yellow]![/bold yellow] Skills setup is manual. "
+        "Run [bold]npx skills add atacan/agentic-coding-files[/bold] to install the latest skills."
+    )
+    console.print(
+        "[dim]The installer is interactive, so choose which skills to install "
+        "and where during the prompt.[/dim]"
+    )
+
     # Save the project config file (if it doesn't exist)
     config_created = save_config(target_path, config)
     if config_created:

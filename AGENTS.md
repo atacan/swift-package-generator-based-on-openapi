@@ -1,10 +1,11 @@
 ## Introduction
 
-Original plan to implement this project:
-
 This project is a Python CLI utility managed by `uv` designed to bootstrap, sanitize, and maintain Swift Packages derived from OpenAPI specifications. Its core logic acts as a middleware pipeline that ingests a raw `original_openapi` file (JSON or YAML), recursively traverses the schema to apply specific structural fixes—such as resolving `anyOf` nullability issues, converting `const` to `enum`, and normalizing OpenAPI 3.0/3.1 differences—and outputs a clean specification compatible with Apple's strict `swift-openapi-generator`.
 
 Beyond schema sanitization, the tool orchestrates the Swift Package Manager infrastructure. It scaffolds a modular directory structure (separating `Client` and `Types` targets), renders essential configuration files (`Package.swift`, `Makefile`, `openapi-generator-config.yaml`) using Jinja2 templates, and executes the necessary shell commands to generate the Swift code. The architecture is idempotent, allowing developers to re-run the tool to update API specifications without overwriting manual project configurations or overlay files.
+
+Skills are installed manually with:
+`npx skills add atacan/agentic-coding-files`
 
 ### Transformers
 
@@ -90,7 +91,10 @@ src/bootstrapper/
 │   ├── op4_nullable.py        # Convert nullable (3.0 → 3.1)
 │   ├── op5_format_fix.py      # Fix byte format issues
 │   ├── op6_clean_required.py  # Clean required arrays
-│   └── op7_overlay.py         # Apply OpenAPI overlay (always last)
+│   ├── op7_header_schema_wrap.py
+│   ├── op8_multipart_array_ref.py
+│   ├── op9_promote_schemas_from_headers.py
+│   └── op99_overlay.py        # Apply OpenAPI overlay (always last)
 └── resources/                 # Jinja2 templates (*.j2)
 ```
 
@@ -104,9 +108,10 @@ src/bootstrapper/
 3. Transform spec → openapi.yaml/json
 4. Create Swift package structure (Sources/, Tests/)
 5. Generate config files (Makefile, Package.swift, etc.)
-6. Apply overlay (if exists with actions)
-7. Generate AuthenticationMiddleware (if security schemes present)
-8. Run swift-openapi-generator
+6. Print manual skills-install command (`npx skills add atacan/agentic-coding-files`)
+7. Apply overlay (if exists with actions)
+8. Generate AuthenticationMiddleware (if security schemes present)
+9. Run swift-openapi-generator
 ```
 
 ### 2. Transformation Pipeline (`transformers/manager.py`)
@@ -119,7 +124,10 @@ spec = convert_float_to_number(spec) # Op3
 spec = convert_nullable_to_3_1(spec) # Op4
 spec = fix_byte_format(spec)         # Op5
 spec = clean_required_arrays(spec)   # Op6
-# Op7 (overlay) applied separately in main.py after config generation
+spec = fix_header_schemas(spec)       # Op7
+spec = fix_multipart_array_refs(spec) # Op8
+spec = promote_misplaced_schemas(spec)# Op9
+# Op99 (overlay) applied separately in main.py after config generation
 ```
 
 ### 3. Package Naming (`main.py:derive_project_name()`)
@@ -231,7 +239,7 @@ uv run mypy src/
 ```
 tests/
 ├── test_main.py                 # CLI and derive_project_name tests
-├── test_integration.py          # Full bootstrap flow tests
+├── test_integration.py          # Full bootstrap flow tests (slow)
 └── bootstrapper/transformers/   # Individual transformer tests
     ├── test_op1_null_anyof.py
     ├── test_op2_const_enum.py
@@ -243,4 +251,4 @@ tests/
 1. Create `src/bootstrapper/transformers/opN_name.py`
 2. Add test in `tests/bootstrapper/transformers/test_opN_name.py`
 3. Import and call in `transformers/manager.py`
-4. **Important:** Overlay (op7) must remain last in the pipeline
+4. **Important:** Overlay (op99) must remain last in the pipeline

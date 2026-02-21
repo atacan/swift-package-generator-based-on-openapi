@@ -47,6 +47,14 @@ swift-bootstrapper .
 
 That's it. The tool will sanitize the spec, generate all config files, create the Swift package structure, and run `swift-openapi-generator`.
 
+### 3. Install skills (interactive)
+
+```bash
+npx skills add atacan/agentic-coding-files
+```
+
+This command is interactive. Select the skills to install and choose the install location in the prompt.
+
 ### What gets created
 
 ```
