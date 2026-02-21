@@ -153,14 +153,25 @@ def generate_authentication_middleware(
         }
 
     # Extract primary security scheme
+    raw_schemes = extract_security_schemes(load_spec(openapi_path)[0])
     security_scheme = get_primary_security_scheme(openapi_path)
 
     if not security_scheme:
+        if raw_schemes:
+            # Schemes exist but none are supported — caller should warn
+            return {
+                "generated": False,
+                "reason": "No supported security schemes found",
+                "scheme_name": None,
+                "scheme_type": None,
+                "unsupported_schemes": list(raw_schemes.keys()),
+            }
         return {
             "generated": False,
-            "reason": "No supported security schemes found",
+            "reason": "No security schemes defined",
             "scheme_name": None,
             "scheme_type": None,
+            "unsupported_schemes": [],
         }
 
     # Prepare template context
@@ -188,6 +199,7 @@ def generate_authentication_middleware(
             "reason": f"Created with {scheme_type_readable} authentication",
             "scheme_name": security_scheme.name,
             "scheme_type": security_scheme.scheme_type.value,
+            "unsupported_schemes": [],
         }
     else:
         return {
@@ -195,4 +207,5 @@ def generate_authentication_middleware(
             "reason": "File already exists (preserved user edits)",
             "scheme_name": security_scheme.name,
             "scheme_type": security_scheme.scheme_type.value,
+            "unsupported_schemes": [],
         }

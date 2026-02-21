@@ -268,7 +268,14 @@ def bootstrap(
         console.print(
             "[bold blue]✓[/bold blue] AuthenticationMiddleware.swift already exists (preserved)"
         )
-    # Silent skip if no security schemes (normal/expected)
+    elif auth_results.get("unsupported_schemes"):
+        names = ", ".join(auth_results["unsupported_schemes"])
+        console.print(
+            f"[bold yellow]⚠[/bold yellow] AuthenticationMiddleware.swift not generated: "
+            f"security scheme(s) [{names}] are not supported "
+            f"(only HTTP Bearer and API Key in header are supported)"
+        )
+    # Silent skip if no security schemes defined (normal/expected)
 
     # Step 4: Run OpenAPI generator
     with console.status("[bold yellow]Running Swift OpenAPI Generator..."):

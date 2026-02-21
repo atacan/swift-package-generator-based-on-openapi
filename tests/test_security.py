@@ -539,7 +539,7 @@ paths: {}
 
             # Verify return status
             assert result["generated"] is False
-            assert "no supported" in result["reason"].lower()
+            assert "no security schemes" in result["reason"].lower()
             assert result["scheme_name"] is None
             assert result["scheme_type"] is None
 
