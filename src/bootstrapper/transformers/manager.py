@@ -16,6 +16,7 @@ from bootstrapper.transformers.op3_float_to_number import convert_float_to_numbe
 from bootstrapper.transformers.op4_nullable import convert_nullable_to_3_1
 from bootstrapper.transformers.op5_format_fix import fix_byte_format
 from bootstrapper.transformers.op6_clean_required import clean_required_arrays
+from bootstrapper.transformers.op8_multipart_array_ref import fix_multipart_array_refs
 
 
 def transform_spec(input_path: Path, output_path: Path) -> None:
@@ -30,7 +31,8 @@ def transform_spec(input_path: Path, output_path: Path) -> None:
     5. Apply Op4: Convert nullable (3.0) to 3.1
     6. Apply Op5: Fix byte format
     7. Apply Op6: Clean required arrays
-    8. Save the spec to output_path in the same format as the input
+    8. Apply Op8: Fix multipart $ref-to-array properties
+    9. Save the spec to output_path in the same format as the input
 
     Args:
         input_path: Path to the input OpenAPI specification file (.json, .yaml, or .yml)
@@ -53,6 +55,7 @@ def transform_spec(input_path: Path, output_path: Path) -> None:
     spec = convert_nullable_to_3_1(spec)
     spec = fix_byte_format(spec)
     spec = clean_required_arrays(spec)
+    spec = fix_multipart_array_refs(spec)
 
-    # Step 7: Save the transformed specification
+    # Step 9: Save the transformed specification
     write_spec(spec, output_path, file_format)

@@ -1,4 +1,4 @@
-"""Operation 6: Apply OpenAPI overlay using openapi-format CLI.
+"""Operation 99: Apply OpenAPI overlay using openapi-format CLI.
 
 This transformation applies overlay modifications to an OpenAPI specification
 using the openapi-format command-line tool.
