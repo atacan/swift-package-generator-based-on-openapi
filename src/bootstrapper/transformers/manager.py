@@ -19,6 +19,7 @@ from bootstrapper.transformers.op3_float_to_number import convert_float_to_numbe
 from bootstrapper.transformers.op4_nullable import convert_nullable_to_3_1
 from bootstrapper.transformers.op5_format_fix import fix_byte_format
 from bootstrapper.transformers.op6_clean_required import clean_required_arrays
+from bootstrapper.transformers.op7_header_schema_wrap import fix_header_schemas
 from bootstrapper.transformers.op8_multipart_array_ref import fix_multipart_array_refs
 
 _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
@@ -28,6 +29,7 @@ _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
     ("op4: convert nullable to OpenAPI 3.1", convert_nullable_to_3_1),
     ("op5: fix byte format", fix_byte_format),
     ("op6: clean required arrays", clean_required_arrays),
+    ("op7: fix header schema wrapping", fix_header_schemas),
     ("op8: fix multipart $ref-to-array", fix_multipart_array_refs),
 ]
 
