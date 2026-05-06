@@ -49,7 +49,6 @@ When you add a new transformer, make sure to first add a test for it in the "tes
 
 ### When to Verify
 
-- ✅ Before marking bd issues as complete
 - ✅ After implementing any new feature
 - ✅ After fixing bugs
 - ✅ Before creating pull requests
@@ -58,10 +57,9 @@ When you add a new transformer, make sure to first add a test for it in the "tes
 ### Handling Failures
 
 If verification fails:
-1. Keep the bd issue as `in_progress`
-2. Fix the errors
-3. Re-run verification
-4. Only mark complete when ALL checks pass
+1. Fix the errors
+2. Re-run verification
+3. Only mark complete when ALL checks pass
 
 ## Project Overview
 
