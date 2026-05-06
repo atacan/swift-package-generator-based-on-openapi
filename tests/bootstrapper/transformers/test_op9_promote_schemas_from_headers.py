@@ -1,11 +1,8 @@
 """Tests for op9_promote_schemas_from_headers: promote misplaced schemas."""
 
-import pytest
-
 from bootstrapper.transformers.op9_promote_schemas_from_headers import (
     promote_misplaced_schemas,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -92,12 +89,8 @@ def test_multiple_misplaced_headers_all_promoted():
     """All headers that are schema-referenced but absent from schemas are promoted."""
     spec = _spec(
         headers={
-            "ConfiguredRules": {
-                "schema": {"type": "object", "description": "Configured rules."}
-            },
-            "StyleRuleLanguage": {
-                "schema": {"type": "string", "enum": ["en", "de"]}
-            },
+            "ConfiguredRules": {"schema": {"type": "object", "description": "Configured rules."}},
+            "StyleRuleLanguage": {"schema": {"type": "string", "enum": ["en", "de"]}},
             "X-Trace-ID": {"schema": {"type": "string"}},  # real header, not referenced as schema
         },
         extra_refs=[
@@ -194,9 +187,7 @@ def test_ref_detected_deep_in_spec():
                         "200": {
                             "content": {
                                 "application/json": {
-                                    "schema": {
-                                        "$ref": "#/components/schemas/StyleId"
-                                    }
+                                    "schema": {"$ref": "#/components/schemas/StyleId"}
                                 }
                             }
                         }
@@ -205,11 +196,7 @@ def test_ref_detected_deep_in_spec():
             }
         },
         "components": {
-            "headers": {
-                "StyleId": {
-                    "schema": {"type": "string", "description": "Style ID"}
-                }
-            },
+            "headers": {"StyleId": {"schema": {"type": "string", "description": "Style ID"}}},
             "schemas": {},
         },
     }

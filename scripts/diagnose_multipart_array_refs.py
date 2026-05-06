@@ -122,9 +122,10 @@ def find_multipart_array_ref_problems(spec: dict) -> list[dict]:
                     # A $ref that resolves to an array — this is the crash case
                     if "$ref" in prop_schema and is_array_schema(prop_schema, spec):
                         resolved = resolve_ref(prop_schema["$ref"], spec)
+                        location = f"{method.upper()} {path_str}  (content-type: {content_type})"
                         problems.append(
                             {
-                                "location": f"{method.upper()} {path_str}  (content-type: {content_type})",
+                                "location": location,
                                 "property": prop_name,
                                 "ref": prop_schema["$ref"],
                                 "resolved_type": resolved.get("type") if resolved else "unknown",
@@ -151,9 +152,10 @@ def find_multipart_array_ref_problems(spec: dict) -> list[dict]:
                     continue
                 if "$ref" in prop_schema and is_array_schema(prop_schema, spec):
                     resolved = resolve_ref(prop_schema["$ref"], spec)
+                    location = f"components/requestBodies/{rb_name}  (content-type: {content_type})"
                     problems.append(
                         {
-                            "location": f"components/requestBodies/{rb_name}  (content-type: {content_type})",
+                            "location": location,
                             "property": prop_name,
                             "ref": prop_schema["$ref"],
                             "resolved_type": resolved.get("type") if resolved else "unknown",
@@ -190,7 +192,8 @@ def main() -> None:
         print()
 
     print(
-        "Fix: replace each $ref-to-array property with an inline 'type: array, items: $ref' schema,\n"
+        "Fix: replace each $ref-to-array property with an inline "
+        "'type: array, items: $ref' schema,\n"
         "or apply the op8_multipart_array_ref transformer.\n"
     )
 

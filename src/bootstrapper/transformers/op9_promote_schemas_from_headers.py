@@ -18,7 +18,6 @@ After op7 (fix_header_schemas), the extracted value is always at
 import json
 import re
 
-
 # Matches $ref values that point to components.schemas
 _SCHEMA_REF_RE = re.compile(r'#/components/schemas/([^"]+)')
 

@@ -1,7 +1,5 @@
 """Tests for op8_multipart_array_ref: fix $ref-to-array in multipart schemas."""
 
-import pytest
-
 from bootstrapper.transformers.op8_multipart_array_ref import fix_multipart_array_refs
 
 
@@ -49,11 +47,9 @@ def test_ref_to_array_is_inlined():
         },
     )
     result = fix_multipart_array_refs(spec)
-    prop = (
-        result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
-            "schema"
-        ]["properties"]["target_prop"]
-    )
+    prop = result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
+        "schema"
+    ]["properties"]["target_prop"]
     assert prop == {"type": "array", "items": {"type": "string", "format": "binary"}}
 
 
@@ -70,11 +66,9 @@ def test_ref_to_array_with_ref_items():
         },
     )
     result = fix_multipart_array_refs(spec)
-    prop = (
-        result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
-            "schema"
-        ]["properties"]["target_prop"]
-    )
+    prop = result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
+        "schema"
+    ]["properties"]["target_prop"]
     assert prop == {"type": "array", "items": {"$ref": "#/components/schemas/ExportOptions"}}
 
 
@@ -91,11 +85,9 @@ def test_description_preserved():
         },
     )
     result = fix_multipart_array_refs(spec)
-    prop = (
-        result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
-            "schema"
-        ]["properties"]["target_prop"]
-    )
+    prop = result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
+        "schema"
+    ]["properties"]["target_prop"]
     assert prop["description"] == "A list of tags"
     assert prop["type"] == "array"
 
@@ -109,16 +101,12 @@ def test_ref_to_object_not_changed():
     """$ref to an object schema should not be modified."""
     spec = _make_spec(
         {"$ref": "#/components/schemas/Config"},
-        component_schemas={
-            "Config": {"type": "object", "properties": {"key": {"type": "string"}}}
-        },
+        component_schemas={"Config": {"type": "object", "properties": {"key": {"type": "string"}}}},
     )
     result = fix_multipart_array_refs(spec)
-    prop = (
-        result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
-            "schema"
-        ]["properties"]["target_prop"]
-    )
+    prop = result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
+        "schema"
+    ]["properties"]["target_prop"]
     assert prop == {"$ref": "#/components/schemas/Config"}
 
 
@@ -126,11 +114,9 @@ def test_inline_array_not_changed():
     """A property that is already an inline array schema should be left alone."""
     spec = _make_spec({"type": "array", "items": {"type": "string"}})
     result = fix_multipart_array_refs(spec)
-    prop = (
-        result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
-            "schema"
-        ]["properties"]["target_prop"]
-    )
+    prop = result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
+        "schema"
+    ]["properties"]["target_prop"]
     assert prop == {"type": "array", "items": {"type": "string"}}
 
 
@@ -162,11 +148,9 @@ def test_non_multipart_content_not_touched():
         },
     }
     result = fix_multipart_array_refs(spec)
-    prop = (
-        result["paths"]["/data"]["post"]["requestBody"]["content"]["application/json"]["schema"][
-            "properties"
-        ]["items"]
-    )
+    prop = result["paths"]["/data"]["post"]["requestBody"]["content"]["application/json"]["schema"][
+        "properties"
+    ]["items"]
     # Should still be $ref — we don't touch non-multipart content
     assert prop == {"$ref": "#/components/schemas/ItemList"}
 
@@ -187,9 +171,7 @@ def test_components_request_bodies_fixed():
                         "multipart/form-data": {
                             "schema": {
                                 "type": "object",
-                                "properties": {
-                                    "files": {"$ref": "#/components/schemas/FileList"}
-                                },
+                                "properties": {"files": {"$ref": "#/components/schemas/FileList"}},
                             }
                         }
                     }
@@ -204,11 +186,9 @@ def test_components_request_bodies_fixed():
         },
     }
     result = fix_multipart_array_refs(spec)
-    prop = (
-        result["components"]["requestBodies"]["UploadBody"]["content"]["multipart/form-data"][
-            "schema"
-        ]["properties"]["files"]
-    )
+    prop = result["components"]["requestBodies"]["UploadBody"]["content"]["multipart/form-data"][
+        "schema"
+    ]["properties"]["files"]
     assert prop == {"type": "array", "items": {"type": "string", "format": "binary"}}
 
 
@@ -226,9 +206,7 @@ def test_other_properties_in_same_schema_untouched():
         },
     )
     result = fix_multipart_array_refs(spec)
-    name_prop = (
-        result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
-            "schema"
-        ]["properties"]["name"]
-    )
+    name_prop = result["paths"]["/upload"]["post"]["requestBody"]["content"]["multipart/form-data"][
+        "schema"
+    ]["properties"]["name"]
     assert name_prop == {"type": "string"}

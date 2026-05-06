@@ -1,9 +1,6 @@
 """Tests for op7_header_schema_wrap: fix Header Objects missing `schema` wrapper."""
 
-import pytest
-
 from bootstrapper.transformers.op7_header_schema_wrap import fix_header_schemas
-
 
 # ---------------------------------------------------------------------------
 # Helpers
