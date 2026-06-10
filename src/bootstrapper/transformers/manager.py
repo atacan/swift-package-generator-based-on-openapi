@@ -23,6 +23,7 @@ from bootstrapper.transformers.op7_header_schema_wrap import fix_header_schemas
 from bootstrapper.transformers.op8_multipart_array_ref import fix_multipart_array_refs
 from bootstrapper.transformers.op9_promote_schemas_from_headers import promote_misplaced_schemas
 from bootstrapper.transformers.op10_unique_operation_ids import ensure_unique_operation_ids
+from bootstrapper.transformers.op11_multipart_required import require_multipart_request_bodies
 
 _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
     ("op1: remove null from anyOf/oneOf", remove_null_anyof),
@@ -35,6 +36,7 @@ _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
     ("op8: fix multipart $ref-to-array", fix_multipart_array_refs),
     ("op9: promote misplaced schemas from headers", promote_misplaced_schemas),
     ("op10: ensure unique operationIds", ensure_unique_operation_ids),
+    ("op11: require multipart request bodies", require_multipart_request_bodies),
 ]
 
 
