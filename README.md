@@ -280,6 +280,9 @@ git clone https://github.com/atacan/swift-package-generator-based-on-openapi.git
 cd swift-package-generator-based-on-openapi
 uv sync
 
+# Install this checkout as the global swift-bootstrapper command
+make install-local
+
 # Run the CLI locally
 uv run swift-bootstrapper --help
 
