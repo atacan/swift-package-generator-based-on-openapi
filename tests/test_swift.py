@@ -403,6 +403,12 @@ class TestRunOpenAPIGenerator:
 class TestSetupSwiftPackage:
     """Tests for setup_swift_package function (main orchestration)."""
 
+    @pytest.fixture(autouse=True)
+    def mock_swift_build(self):
+        """Keep setup orchestration tests fast; real Swift builds are slow tests."""
+        with patch("bootstrapper.generators.swift.run_swift_build", return_value=True):
+            yield
+
     def test_returns_dict_with_expected_keys(self):
         """Test that the return value contains expected keys."""
         with tempfile.TemporaryDirectory() as tmpdir:

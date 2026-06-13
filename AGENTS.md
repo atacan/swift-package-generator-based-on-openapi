@@ -29,7 +29,15 @@ When you add a new transformer, make sure to first add a test for it in the "tes
    uv run pytest
    ```
 
-   To include slow tests (e.g., swift build verification):
+   The default test suite excludes tests marked `slow`. Slow tests include
+   full bootstrap integration coverage and real Swift package build verification.
+
+   To run only slow tests:
+   ```bash
+   uv run pytest -m slow
+   ```
+
+   To include both fast and slow tests:
    ```bash
    uv run pytest -m ""
    ```
@@ -222,7 +230,8 @@ uv run swift-bootstrapper --help
 
 # Run tests
 uv run pytest                    # Fast tests only
-uv run pytest -m ""              # All tests including slow
+uv run pytest -m slow            # Slow tests only, including real Swift builds
+uv run pytest -m ""              # All tests, fast + slow
 
 # Lint & format
 uv run ruff check .

@@ -2,6 +2,8 @@
 
 Generate Swift Packages from OpenAPI specifications. Takes a raw OpenAPI file (YAML or JSON), applies fixes for compatibility with Apple's [swift-openapi-generator](https://github.com/apple/swift-openapi-generator), and scaffolds a complete Swift Package Manager project.
 
+You can also use it as a transform-only OpenAPI fixer when you just want a sanitized spec written to an output path without creating a Swift package.
+
 ## Prerequisites
 
 - [uv](https://docs.astral.sh/uv/) -- handles Python automatically, no manual Python install needed
@@ -85,8 +87,23 @@ MyAPIWrapper/
 
 ## CLI Usage
 
+The CLI has two modes:
+
+- `bootstrap`: sanitize an OpenAPI spec and create/update a Swift package.
+- `transform`: sanitize an OpenAPI spec file only.
+
+For backwards compatibility, `swift-bootstrapper .` still runs `bootstrap`.
+
+### Bootstrap a Swift package
+
 ```
 swift-bootstrapper [TARGET_DIR] [--name NAME]
+```
+
+Equivalent explicit form:
+
+```bash
+swift-bootstrapper bootstrap [TARGET_DIR] [--name NAME]
 ```
 
 | Argument / Option | Default | Description |
@@ -107,6 +124,58 @@ swift-bootstrapper /path/to/my-api-project
 swift-bootstrapper . --name MyCustomAPI
 swift-bootstrapper /path/to/project -n AssemblyAI
 ```
+
+With `uvx`, run the same command without installing:
+
+```bash
+uvx --from git+https://github.com/atacan/swift-package-generator-based-on-openapi.git swift-bootstrapper bootstrap /path/to/my-api-project
+uvx --from git+https://github.com/atacan/swift-package-generator-based-on-openapi.git swift-bootstrapper bootstrap /path/to/project --name AssemblyAI
+```
+
+### Transform an OpenAPI file only
+
+Use `transform` when you only need the OpenAPI cleanup pipeline and do not want Swift package files, config files, generated sources, or Swift builds.
+
+```bash
+swift-bootstrapper transform INPUT_OPENAPI OUTPUT_OPENAPI
+```
+
+With an explicit overlay file:
+
+```bash
+swift-bootstrapper transform INPUT_OPENAPI OUTPUT_OPENAPI --overlay OVERLAY_FILE
+```
+
+| Argument / Option | Required | Description |
+|---|---:|---|
+| `INPUT_OPENAPI` | Yes | Source OpenAPI file (`.yaml`, `.yml`, or `.json`) |
+| `OUTPUT_OPENAPI` | Yes | Destination for the transformed spec |
+| `--overlay`, `-o` | No | Overlay file to apply after automated transformations |
+
+Examples:
+
+```bash
+# Apply automated transformations only
+swift-bootstrapper transform ./original_openapi.yaml ./openapi.yaml
+
+# Apply automated transformations, then an overlay
+swift-bootstrapper transform ./original_openapi.yaml ./openapi.yaml --overlay ./openapi-overlay.yaml
+
+# JSON input is supported; output serialization follows the input file format
+swift-bootstrapper transform ./original_openapi.json ./openapi.json
+```
+
+With `uvx`, run transform-only mode without installing:
+
+```bash
+# Apply automated transformations only
+uvx --from git+https://github.com/atacan/swift-package-generator-based-on-openapi.git swift-bootstrapper transform ./original_openapi.yaml ./openapi.yaml
+
+# Apply automated transformations, then an overlay
+uvx --from git+https://github.com/atacan/swift-package-generator-based-on-openapi.git swift-bootstrapper transform ./original_openapi.yaml ./openapi.yaml --overlay ./openapi-overlay.yaml
+```
+
+The transform command applies the same automated spec fixes as bootstrap. Overlay application is optional, and when provided it always runs after automated transformations.
 
 ## Package Naming
 
@@ -217,7 +286,10 @@ uv run swift-bootstrapper --help
 # Run tests
 uv run pytest
 
-# Run all tests including slow integration tests
+# Run slow tests only, including real Swift package builds
+uv run pytest -m slow
+
+# Run all tests including slow integration tests and real Swift package builds
 uv run pytest -m ""
 
 # Lint and format

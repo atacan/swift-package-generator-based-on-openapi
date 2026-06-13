@@ -4,6 +4,7 @@ from pathlib import Path
 
 import typer
 from rich.console import Console
+from typer.core import TyperGroup
 
 from bootstrapper.config import (
     CONFIG_FILENAME,
@@ -16,10 +17,23 @@ from bootstrapper.generators.security import generate_authentication_middleware
 from bootstrapper.generators.swift import ensure_package_structure, run_openapi_generator
 from bootstrapper.generators.templates import generate_config_files
 from bootstrapper.transformers.manager import transform_spec
-from bootstrapper.transformers.op99_overlay import apply_overlay
+from bootstrapper.transformers.op99_overlay import apply_overlay, apply_overlay_file
+
+ROOT_OPTIONS = {"--help", "-h", "--install-completion", "--show-completion"}
+
+
+class BootstrapDefaultGroup(TyperGroup):
+    """Route legacy root invocations to the bootstrap command."""
+
+    def parse_args(self, ctx, args):
+        if args and args[0] not in self.commands and args[0] not in ROOT_OPTIONS:
+            args.insert(0, "bootstrap")
+        return super().parse_args(ctx, args)
+
 
 app = typer.Typer(
     name="swift-bootstrapper",
+    cls=BootstrapDefaultGroup,
     help="Bootstrap and maintain Swift Packages based on OpenAPI specifications",
 )
 console = Console()
@@ -94,7 +108,7 @@ def resolve_project_name(
     return derived, "auto-derived from directory"
 
 
-@app.command()
+@app.command(name="bootstrap")
 def bootstrap(
     target_dir: str = typer.Argument(
         ".",
@@ -317,6 +331,64 @@ def bootstrap(
     console.print()
     console.print(f"[bold green]✓ Success![/bold green] {project_name} is ready.")
     console.print(f"[dim]Open {target_path}/Package.swift to begin.[/dim]")
+    console.print()
+
+
+@app.command(name="transform")
+def transform_openapi(
+    input_path: str = typer.Argument(
+        ...,
+        help="Path to the input OpenAPI specification file",
+    ),
+    output_path: str = typer.Argument(
+        ...,
+        help="Path where the transformed OpenAPI specification will be written",
+    ),
+    overlay_path: str | None = typer.Option(
+        None,
+        "--overlay",
+        "-o",
+        help="Optional OpenAPI overlay file to apply after automated transformations",
+    ),
+) -> None:
+    """Transform an OpenAPI specification without creating a Swift package."""
+    input_file = Path(input_path).resolve()
+    output_file = Path(output_path).resolve()
+    overlay_file = Path(overlay_path).resolve() if overlay_path else None
+
+    console.print()
+    console.print("[bold blue]OpenAPI Transformer[/bold blue]")
+    console.print(f"[dim]Input: {input_file}[/dim]")
+    console.print(f"[dim]Output: {output_file}[/dim]")
+    console.print()
+
+    console.print("[bold yellow]Applying transformations...[/bold yellow]")
+    try:
+        transform_spec(input_file, output_file, console=console)
+    except Exception as e:
+        console.print(f"[bold red]✗[/bold red] Failed to transform spec: {e}")
+        raise typer.Exit(1)
+
+    console.print(f"[bold green]✓[/bold green] Transformed specification written to: {output_file}")
+
+    if overlay_file:
+        with console.status("[bold yellow]Applying overlay..."):
+            overlay_results = apply_overlay_file(output_file, overlay_file)
+
+        if overlay_results["applied"]:
+            console.print(f"[bold green]✓[/bold green] {overlay_results['reason']}")
+        elif overlay_results["skipped"]:
+            console.print(f"[bold blue]✓[/bold blue] Overlay skipped: {overlay_results['reason']}")
+        else:
+            console.print(
+                f"[bold red]✗[/bold red] Failed to apply overlay: {overlay_results['reason']}"
+            )
+            raise typer.Exit(1)
+    else:
+        console.print("[dim]No overlay provided.[/dim]")
+
+    console.print()
+    console.print("[bold green]✓ Success![/bold green] OpenAPI specification transformed.")
     console.print()
 
 

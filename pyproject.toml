@@ -36,7 +36,7 @@ ignore = []
 testpaths = ["tests"]
 python_files = "test_*.py"
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "slow: marks slow integration tests, including real Swift package builds",
 ]
 addopts = "-m 'not slow'"
 

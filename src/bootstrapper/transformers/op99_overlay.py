@@ -63,6 +63,44 @@ def apply_overlay(
             "reason": "No overlay file found",
         }
 
+    return apply_overlay_file(openapi_path, overlay_path)
+
+
+def apply_overlay_file(openapi_path: Path, overlay_path: Path) -> dict[str, bool | str]:
+    """Apply a specific OpenAPI overlay file to a specific OpenAPI spec file.
+
+    Args:
+        openapi_path: Path to the OpenAPI spec file to update in place
+        overlay_path: Path to the overlay file to apply
+
+    Returns:
+        Dictionary with:
+        - "applied": True if overlay was applied successfully
+        - "skipped": True if skipped (empty actions)
+        - "reason": Description of what happened
+    """
+    file_suffix = openapi_path.suffix
+    if file_suffix not in [".yaml", ".yml", ".json"]:
+        return {
+            "applied": False,
+            "skipped": False,
+            "reason": f"Unsupported file extension: {file_suffix}",
+        }
+
+    if not openapi_path.exists():
+        return {
+            "applied": False,
+            "skipped": False,
+            "reason": f"OpenAPI file not found: {openapi_path}",
+        }
+
+    if not overlay_path.exists():
+        return {
+            "applied": False,
+            "skipped": False,
+            "reason": f"Overlay file not found: {overlay_path}",
+        }
+
     # Parse overlay file and check actions array
     try:
         overlay_data = _load_overlay_file(overlay_path)
@@ -74,7 +112,7 @@ def apply_overlay(
         }
 
     # Check if actions array exists and is non-empty
-    actions = overlay_data.get("actions", [])
+    actions = overlay_data.get("actions", []) if isinstance(overlay_data, dict) else []
     if not actions or (isinstance(actions, list) and len(actions) == 0):
         return {
             "applied": False,

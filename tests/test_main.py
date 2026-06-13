@@ -1,7 +1,10 @@
 """Tests for the main CLI module."""
 
+import subprocess
 from pathlib import Path
+from unittest.mock import patch
 
+import yaml
 from typer.testing import CliRunner
 
 from bootstrapper.config import ProjectConfig
@@ -196,15 +199,190 @@ class TestCLIBootstrapCommand:
 
         assert result.exit_code == 0
         assert "Bootstrap a Swift package" in result.stdout
+        assert "transform" in result.stdout
 
     def test_cli_bootstrap_help(self):
         """Test that bootstrap --help works."""
         runner = CliRunner()
 
-        result = runner.invoke(app, ["--help"])
+        result = runner.invoke(app, ["bootstrap", "--help"])
 
         assert result.exit_code == 0
         assert "Bootstrap a Swift package" in result.stdout
+
+    def test_legacy_bootstrap_invocation_still_works(self, tmp_path):
+        """Test that swift-bootstrapper TARGET_DIR still routes to bootstrap."""
+        runner = CliRunner()
+
+        result = runner.invoke(app, [str(tmp_path)])
+
+        assert result.exit_code == 1
+        assert "Could not find original_openapi" in result.stdout
+
+
+class TestCLITransformCommand:
+    """Test the transform-only CLI command."""
+
+    def test_cli_transform_help(self):
+        """Test that transform --help works."""
+        runner = CliRunner()
+
+        result = runner.invoke(app, ["transform", "--help"])
+
+        assert result.exit_code == 0
+        assert "Transform an OpenAPI specification" in result.stdout
+        assert "--overlay" in result.stdout
+
+    def test_transform_writes_output_without_package_scaffolding(self, tmp_path):
+        """Test transform-only mode writes a spec and does not create Swift package files."""
+        input_file = tmp_path / "input.yaml"
+        output_file = tmp_path / "fixed.yaml"
+        input_file.write_text(
+            """
+openapi: 3.1.0
+info:
+  title: Test
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Sample:
+      type: object
+      properties:
+        status:
+          const: active
+        score:
+          type: float
+""",
+            encoding="utf-8",
+        )
+
+        result = CliRunner().invoke(app, ["transform", str(input_file), str(output_file)])
+
+        assert result.exit_code == 0
+        assert output_file.exists()
+        output = yaml.safe_load(output_file.read_text(encoding="utf-8"))
+        sample_properties = output["components"]["schemas"]["Sample"]["properties"]
+        assert sample_properties["status"]["enum"] == ["active"]
+        assert "const" not in sample_properties["status"]
+        assert sample_properties["score"]["type"] == "number"
+        assert not (tmp_path / "Package.swift").exists()
+        assert not (tmp_path / "Sources").exists()
+        assert not (tmp_path / "Tests").exists()
+        assert not (tmp_path / ".swift-bootstrapper.yaml").exists()
+
+    @patch("bootstrapper.main.apply_overlay_file")
+    def test_transform_applies_overlay_after_transformations(self, mock_apply_overlay, tmp_path):
+        """Test transform-only mode applies the explicit overlay to the output file."""
+        input_file = tmp_path / "input.yaml"
+        output_file = tmp_path / "fixed.yaml"
+        overlay_file = tmp_path / "custom-overlay.yaml"
+        input_file.write_text(
+            "openapi: 3.1.0\ninfo:\n  title: Test\n  version: 1.0.0\npaths: {}\n",
+            encoding="utf-8",
+        )
+        overlay_file.write_text("overlay: 1.0.0\nactions: []\n", encoding="utf-8")
+        mock_apply_overlay.return_value = {
+            "applied": True,
+            "skipped": False,
+            "reason": "Overlay applied successfully",
+        }
+
+        result = CliRunner().invoke(
+            app,
+            ["transform", str(input_file), str(output_file), "--overlay", str(overlay_file)],
+        )
+
+        assert result.exit_code == 0
+        assert output_file.exists()
+        mock_apply_overlay.assert_called_once_with(output_file.resolve(), overlay_file.resolve())
+
+    def test_transform_missing_input_fails(self, tmp_path):
+        """Test missing input file returns a clear failure."""
+        output_file = tmp_path / "fixed.yaml"
+
+        result = CliRunner().invoke(
+            app,
+            ["transform", str(tmp_path / "missing.yaml"), str(output_file)],
+        )
+
+        assert result.exit_code == 1
+        assert "OpenAPI file not found" in result.stdout
+
+    def test_transform_unsupported_input_suffix_fails(self, tmp_path):
+        """Test unsupported input suffix returns a clear failure."""
+        input_file = tmp_path / "input.txt"
+        output_file = tmp_path / "fixed.yaml"
+        input_file.write_text("openapi: 3.1.0\n", encoding="utf-8")
+
+        result = CliRunner().invoke(app, ["transform", str(input_file), str(output_file)])
+
+        assert result.exit_code == 1
+        assert "Unsupported file format" in result.stdout
+
+    def test_transform_missing_explicit_overlay_fails(self, tmp_path):
+        """Test an explicitly provided missing overlay is an error."""
+        input_file = tmp_path / "input.yaml"
+        output_file = tmp_path / "fixed.yaml"
+        overlay_file = tmp_path / "missing-overlay.yaml"
+        input_file.write_text(
+            "openapi: 3.1.0\ninfo:\n  title: Test\n  version: 1.0.0\npaths: {}\n",
+            encoding="utf-8",
+        )
+
+        result = CliRunner().invoke(
+            app,
+            ["transform", str(input_file), str(output_file), "--overlay", str(overlay_file)],
+        )
+
+        assert result.exit_code == 1
+        assert "Overlay file not found" in result.stdout
+
+    def test_transform_malformed_overlay_fails(self, tmp_path):
+        """Test malformed explicit overlay returns a clear failure."""
+        input_file = tmp_path / "input.yaml"
+        output_file = tmp_path / "fixed.yaml"
+        overlay_file = tmp_path / "overlay.yaml"
+        input_file.write_text(
+            "openapi: 3.1.0\ninfo:\n  title: Test\n  version: 1.0.0\npaths: {}\n",
+            encoding="utf-8",
+        )
+        overlay_file.write_text("{ invalid yaml [", encoding="utf-8")
+
+        result = CliRunner().invoke(
+            app,
+            ["transform", str(input_file), str(output_file), "--overlay", str(overlay_file)],
+        )
+
+        assert result.exit_code == 1
+        assert "Failed to parse overlay file" in result.stdout
+
+    @patch("bootstrapper.transformers.op99_overlay.subprocess.run")
+    def test_transform_openapi_format_failure_fails(self, mock_run, tmp_path):
+        """Test openapi-format failures are surfaced by transform-only mode."""
+        input_file = tmp_path / "input.yaml"
+        output_file = tmp_path / "fixed.yaml"
+        overlay_file = tmp_path / "overlay.yaml"
+        input_file.write_text(
+            "openapi: 3.1.0\ninfo:\n  title: Test\n  version: 1.0.0\npaths: {}\n",
+            encoding="utf-8",
+        )
+        overlay_file.write_text(
+            "overlay: 1.0.0\nactions:\n"
+            "  - target: $.info\n    update:\n      description: Updated\n",
+            encoding="utf-8",
+        )
+        mock_run.side_effect = subprocess.CalledProcessError(
+            1, "openapi-format", stderr="Invalid overlay syntax"
+        )
+
+        result = CliRunner().invoke(
+            app,
+            ["transform", str(input_file), str(output_file), "--overlay", str(overlay_file)],
+        )
+
+        assert result.exit_code == 1
+        assert "openapi-format failed" in result.stdout
 
 
 class TestResolveProjectName:

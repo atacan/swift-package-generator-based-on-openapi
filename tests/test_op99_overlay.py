@@ -4,7 +4,7 @@ import json
 import subprocess
 from unittest.mock import MagicMock, patch
 
-from bootstrapper.transformers.op99_overlay import apply_overlay
+from bootstrapper.transformers.op99_overlay import apply_overlay, apply_overlay_file
 
 
 class TestOp6Overlay:
@@ -231,3 +231,36 @@ class TestOp6Overlay:
         result = apply_overlay(tmp_path, "openapi.yml")
 
         assert result["applied"] is True
+
+    @patch("subprocess.run")
+    def test_apply_overlay_file_uses_explicit_overlay_path(self, mock_run, tmp_path):
+        """Test path-based overlay application uses the exact overlay file provided."""
+        openapi_file = tmp_path / "fixed.yaml"
+        openapi_file.write_text("openapi: 3.1.0\ninfo:\n  title: Test\n  version: 1.0.0\n")
+
+        overlay_file = tmp_path / "custom-overlay.yaml"
+        overlay_file.write_text(
+            "overlay: 1.0.0\ninfo:\n  title: Overlay\nactions:\n"
+            "  - target: $.info\n    update:\n      description: Updated\n"
+        )
+
+        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+
+        result = apply_overlay_file(openapi_file, overlay_file)
+
+        assert result["applied"] is True
+        mock_run.assert_called_once()
+        call_args = mock_run.call_args[0][0]
+        assert str(openapi_file) in call_args
+        assert str(overlay_file) in call_args
+
+    def test_apply_overlay_file_missing_overlay_is_error(self, tmp_path):
+        """Test path-based overlay application fails for missing explicit overlays."""
+        openapi_file = tmp_path / "fixed.yaml"
+        openapi_file.write_text("openapi: 3.1.0\ninfo:\n  title: Test\n  version: 1.0.0\n")
+
+        result = apply_overlay_file(openapi_file, tmp_path / "missing-overlay.yaml")
+
+        assert result["applied"] is False
+        assert result["skipped"] is False
+        assert "Overlay file not found" in result["reason"]
