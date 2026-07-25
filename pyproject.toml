@@ -1,6 +1,6 @@
 [project]
 name = "swift-openapi-bootstrapper"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Python CLI utility to bootstrap and maintain Swift Packages based on OpenAPI specifications"
 readme = "README.md"
 authors = [
