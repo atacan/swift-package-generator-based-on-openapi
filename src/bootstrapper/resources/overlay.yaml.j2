@@ -4,6 +4,10 @@
 # on top of the cleaned openapi.yaml file.
 #
 # For overlay syntax, see: https://github.com/OAI/Overlay-Specification
+#
+# Update actions recursively merge objects and concatenate arrays. To replace
+# an entire schema, remove the schema in one action and add it to
+# $.components.schemas in the next action.
 
 overlay: 1.0.0
 info:

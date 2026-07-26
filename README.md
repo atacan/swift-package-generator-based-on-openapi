@@ -8,6 +8,12 @@ You can also use it as a transform-only OpenAPI fixer when you just want a sanit
 
 - [uv](https://docs.astral.sh/uv/) -- handles Python automatically, no manual Python install needed
 - Swift 5.9+ toolchain (Xcode 15+ on macOS)
+- [Speakeasy OpenAPI CLI](https://github.com/speakeasy-api/openapi) -- required when an
+  overlay contains actions:
+
+  ```bash
+  brew install openapi
+  ```
 
 ## Install
 
@@ -231,6 +237,23 @@ actions:
 ```
 
 Then re-run `swift-bootstrapper .` to apply.
+
+Overlay updates follow the OpenAPI Overlay Specification's recursive merge semantics.
+In particular, arrays are concatenated rather than replaced. To replace an entire
+schema, remove it first and then add the replacement in the next action:
+
+```yaml
+actions:
+  - target: "$.components.schemas.User"
+    remove: true
+  - target: "$.components.schemas"
+    update:
+      User:
+        type: object
+        properties:
+          user_id:
+            type: string
+```
 
 ## Automated Spec Fixes
 

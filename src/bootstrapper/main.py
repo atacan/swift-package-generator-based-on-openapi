@@ -348,7 +348,10 @@ def transform_openapi(
         None,
         "--overlay",
         "-o",
-        help="Optional OpenAPI overlay file to apply after automated transformations",
+        help=(
+            "Optional OpenAPI overlay file to apply after automated transformations "
+            "(requires Speakeasy OpenAPI CLI)"
+        ),
     ),
 ) -> None:
     """Transform an OpenAPI specification without creating a Swift package."""

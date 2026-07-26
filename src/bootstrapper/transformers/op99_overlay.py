@@ -1,7 +1,7 @@
-"""Operation 99: Apply OpenAPI overlay using openapi-format CLI.
+"""Operation 99: Apply an OpenAPI overlay using Speakeasy's OpenAPI CLI.
 
 This transformation applies overlay modifications to an OpenAPI specification
-using the openapi-format command-line tool.
+using the ``openapi overlay apply`` command.
 """
 
 import json
@@ -16,7 +16,7 @@ def apply_overlay(
     target_dir: Path,
     openapi_file: str = "openapi.yaml",
 ) -> dict[str, bool | str]:
-    """Apply OpenAPI overlay using openapi-format CLI.
+    """Apply an OpenAPI overlay using Speakeasy's OpenAPI CLI.
 
     Args:
         target_dir: Directory containing the OpenAPI files
@@ -120,16 +120,19 @@ def apply_overlay_file(openapi_path: Path, overlay_path: Path) -> dict[str, bool
             "reason": "Overlay has no actions defined",
         }
 
-    # Run openapi-format via subprocess
+    # Speakeasy reads the schema before opening the output, so applying in place
+    # preserves the current bootstrapper behavior for both YAML and JSON files.
     try:
         subprocess.run(
             [
-                "openapi-format",
-                "--no-sort",
-                str(openapi_path),
-                "--overlayFile",
+                "openapi",
+                "overlay",
+                "apply",
+                "--overlay",
                 str(overlay_path),
-                "-o",
+                "--schema",
+                str(openapi_path),
+                "--out",
                 str(openapi_path),
             ],
             capture_output=True,
@@ -148,20 +151,23 @@ def apply_overlay_file(openapi_path: Path, overlay_path: Path) -> dict[str, bool
         return {
             "applied": False,
             "skipped": False,
-            "reason": "openapi-format CLI not found. Install with: npm install -g openapi-format",
+            "reason": (
+                "Speakeasy OpenAPI CLI not found. Install with: brew install openapi "
+                "(or go install github.com/speakeasy-api/openapi/cmd/openapi@latest)"
+            ),
         }
     except subprocess.TimeoutExpired:
         return {
             "applied": False,
             "skipped": False,
-            "reason": "openapi-format command timed out after 30 seconds",
+            "reason": "Speakeasy OpenAPI command timed out after 30 seconds",
         }
     except subprocess.CalledProcessError as e:
         stderr = e.stderr.strip() if e.stderr else "No error details"
         return {
             "applied": False,
             "skipped": False,
-            "reason": f"openapi-format failed with exit code {e.returncode}: {stderr}",
+            "reason": f"Speakeasy OpenAPI failed with exit code {e.returncode}: {stderr}",
         }
 
 
