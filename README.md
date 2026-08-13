@@ -1,5 +1,7 @@
 # Swift OpenAPI Bootstrapper
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/atacan/swift-package-generator-based-on-openapi)
+
 Generate Swift Packages from OpenAPI specifications. Takes a raw OpenAPI file (YAML or JSON), applies fixes for compatibility with Apple's [swift-openapi-generator](https://github.com/apple/swift-openapi-generator), and scaffolds a complete Swift Package Manager project.
 
 You can also use it as a transform-only OpenAPI fixer when you just want a sanitized spec written to an output path without creating a Swift package.
