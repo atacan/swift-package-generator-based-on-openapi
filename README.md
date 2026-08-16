@@ -60,7 +60,7 @@ That's it. The tool will sanitize the spec, generate all config files, create th
 ### 3. Install skills (interactive)
 
 ```bash
-npx skills add atacan/agentic-coding-files
+npx skills add atacan/agentic-coding-files --skill openapi-overlay
 ```
 
 This command is interactive. Select the skills to install and choose the install location in the prompt.
