@@ -234,7 +234,7 @@ def bootstrap(
 
     console.print(
         "[bold yellow]![/bold yellow] Skills setup is manual. "
-        "Run [bold]npx skills add atacan/agentic-coding-files[/bold] to install the latest skills."
+        "Run [bold]npx skills add atacan/agentic-coding-files --skill openapi-overlay[/bold] to install the latest skills."
     )
     console.print(
         "[dim]The installer is interactive, so choose which skills to install "

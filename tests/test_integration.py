@@ -173,7 +173,7 @@ class TestFullPipelineYAML:
 
         # Skills folder generation is deprecated in favor of manual interactive install
         assert not (sample_openapi_yaml / ".claude").exists()
-        assert "npx skills add atacan/agentic-coding-files" in result.stdout
+        assert "npx skills add atacan/agentic-coding-files --skill openapi-overlay" in result.stdout
 
     def test_transformations_applied_correctly(self, sample_openapi_yaml):
         """Test that all transformations are applied correctly to the output file."""

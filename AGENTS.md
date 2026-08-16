@@ -5,7 +5,7 @@ This project is a Python CLI utility managed by `uv` designed to bootstrap, sani
 Beyond schema sanitization, the tool orchestrates the Swift Package Manager infrastructure. It scaffolds a modular directory structure (separating `Client` and `Types` targets), renders essential configuration files (`Package.swift`, `Makefile`, `openapi-generator-config.yaml`) using Jinja2 templates, and executes the necessary shell commands to generate the Swift code. The architecture is idempotent, allowing developers to re-run the tool to update API specifications without overwriting manual project configurations or overlay files.
 
 Skills are installed manually with:
-`npx skills add atacan/agentic-coding-files`
+`npx skills add atacan/agentic-coding-files --skill openapi-overlay`
 
 ### Transformers
 
@@ -114,7 +114,7 @@ src/bootstrapper/
 3. Transform spec → openapi.yaml/json
 4. Create Swift package structure (Sources/, Tests/)
 5. Generate config files (Makefile, Package.swift, etc.)
-6. Print manual skills-install command (`npx skills add atacan/agentic-coding-files`)
+6. Print manual skills-install command (`npx skills add atacan/agentic-coding-files --skill openapi-overlay`)
 7. Apply overlay (if exists with actions)
 8. Generate AuthenticationMiddleware (if security schemes present)
 9. Run swift-openapi-generator
