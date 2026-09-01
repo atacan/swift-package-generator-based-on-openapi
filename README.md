@@ -10,12 +10,8 @@ You can also use it as a transform-only OpenAPI fixer when you just want a sanit
 
 - [uv](https://docs.astral.sh/uv/) -- handles Python automatically, no manual Python install needed
 - Swift 5.9+ toolchain (Xcode 15+ on macOS)
-- [Speakeasy OpenAPI CLI](https://github.com/speakeasy-api/openapi) -- required when an
-  overlay contains actions:
-
-  ```bash
-  brew install openapi
-  ```
+- Node.js -- required when an overlay contains actions; the overlay is applied via
+  `npx openapi-format`, which downloads the package on first use
 
 ## Install
 

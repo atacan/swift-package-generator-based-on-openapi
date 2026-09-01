@@ -1,7 +1,7 @@
-"""Operation 99: Apply an OpenAPI overlay using Speakeasy's OpenAPI CLI.
+"""Operation 99: Apply an OpenAPI overlay using openapi-format.
 
 This transformation applies overlay modifications to an OpenAPI specification
-using the ``openapi overlay apply`` command.
+using ``npx openapi-format`` with its ``--overlayFile`` option.
 """
 
 import json
@@ -16,7 +16,7 @@ def apply_overlay(
     target_dir: Path,
     openapi_file: str = "openapi.yaml",
 ) -> dict[str, bool | str]:
-    """Apply an OpenAPI overlay using Speakeasy's OpenAPI CLI.
+    """Apply an OpenAPI overlay using openapi-format.
 
     Args:
         target_dir: Directory containing the OpenAPI files
@@ -120,24 +120,22 @@ def apply_overlay_file(openapi_path: Path, overlay_path: Path) -> dict[str, bool
             "reason": "Overlay has no actions defined",
         }
 
-    # Speakeasy reads the schema before opening the output, so applying in place
-    # preserves the current bootstrapper behavior for both YAML and JSON files.
     try:
         subprocess.run(
             [
-                "openapi",
-                "overlay",
-                "apply",
-                "--overlay",
+                "npx",
+                "--yes",
+                "openapi-format",
+                str(openapi_path),
+                "--overlayFile",
                 str(overlay_path),
-                "--schema",
+                "-o",
                 str(openapi_path),
-                "--out",
-                str(openapi_path),
+                "--no-sort",
             ],
             capture_output=True,
             text=True,
-            timeout=30,
+            timeout=60,
             check=True,
         )
 
@@ -152,22 +150,21 @@ def apply_overlay_file(openapi_path: Path, overlay_path: Path) -> dict[str, bool
             "applied": False,
             "skipped": False,
             "reason": (
-                "Speakeasy OpenAPI CLI not found. Install with: brew install openapi "
-                "(or go install github.com/speakeasy-api/openapi/cmd/openapi@latest)"
+                "npx not found. Install Node.js to use openapi-format for overlay application."
             ),
         }
     except subprocess.TimeoutExpired:
         return {
             "applied": False,
             "skipped": False,
-            "reason": "Speakeasy OpenAPI command timed out after 30 seconds",
+            "reason": "openapi-format command timed out after 60 seconds",
         }
     except subprocess.CalledProcessError as e:
         stderr = e.stderr.strip() if e.stderr else "No error details"
         return {
             "applied": False,
             "skipped": False,
-            "reason": f"Speakeasy OpenAPI failed with exit code {e.returncode}: {stderr}",
+            "reason": f"openapi-format failed with exit code {e.returncode}: {stderr}",
         }
 
 

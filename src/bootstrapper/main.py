@@ -350,7 +350,7 @@ def transform_openapi(
         "-o",
         help=(
             "Optional OpenAPI overlay file to apply after automated transformations "
-            "(requires Speakeasy OpenAPI CLI)"
+            "(requires Node.js/npx, uses openapi-format)"
         ),
     ),
 ) -> None:
