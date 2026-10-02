@@ -61,6 +61,26 @@ npx skills add atacan/agentic-coding-files --skill openapi-overlay
 
 This command is interactive. Select the skills to install and choose the install location in the prompt.
 
+### 4. Activate secret scanning
+
+Generated repositories include `.pre-commit-config.yaml` and
+`.github/workflows/secret-scan.yml` using Betterleaks and TruffleHog, following
+[this guide](https://actondon.com/blog/secret-scanning-for-git-repo). After
+initializing or cloning the target Git repository:
+
+```bash
+brew install pre-commit
+pre-commit install
+```
+
+pre-commit manages the pinned scanners; the bootstrapper does not install hooks
+or require scanners itself. Local checks cover staged changes and files. GitHub
+Actions scans incoming commits on pushes and pull requests across all branches,
+with an initial repository push covering its imported history. TruffleHog blocks
+only verified secrets and performs online verification; scanner execution errors
+also fail checks. See the generated README for targeted false-positive handling.
+Existing configuration and workflow files are preserved when regenerating.
+
 ### What gets created
 
 ```
@@ -76,6 +96,8 @@ MyAPIWrapper/
 ├── .swift-format                          # Swift formatting rules
 ├── .env.example                           # Environment variable template
 ├── .gitignore
+├── .pre-commit-config.yaml                # Local secret-scanning hooks
+├── .github/workflows/secret-scan.yml       # Incoming-commit secret scanning in CI
 ├── Sources/
 │   ├── MyAPIWrapperTypes/
 │   │   ├── MyAPIWrapperTypes.swift

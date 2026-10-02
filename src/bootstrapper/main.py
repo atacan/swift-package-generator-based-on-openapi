@@ -232,6 +232,13 @@ def bootstrap(
     else:
         console.print("[bold blue]✓[/bold blue] Config files already exist (preserved)")
 
+    if config_results.get(".pre-commit-config.yaml"):
+        console.print(
+            "[bold yellow]![/bold yellow] Secret scanning setup: install pre-commit "
+            "([bold]brew install pre-commit[/bold]), then run "
+            "[bold]pre-commit install[/bold] in the target repository."
+        )
+
     console.print(
         "[bold yellow]![/bold yellow] Skills setup is manual. "
         "Run [bold]npx skills add atacan/agentic-coding-files --skill openapi-overlay[/bold] "

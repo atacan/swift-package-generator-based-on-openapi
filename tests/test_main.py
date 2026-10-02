@@ -219,6 +219,30 @@ class TestCLIBootstrapCommand:
         assert result.exit_code == 1
         assert "Could not find original_openapi" in result.stdout
 
+    @patch("bootstrapper.generators.swift.run_swift_build", return_value=True)
+    @patch("bootstrapper.main.run_openapi_generator")
+    def test_secret_scanning_setup_hint_only_for_new_config(self, mock_generator, _, tmp_path):
+        """Existing projects get setup instructions without overwriting their README."""
+        (tmp_path / "original_openapi.yaml").write_text(
+            "openapi: 3.1.0\ninfo: {title: Test, version: '1.0.0'}\npaths: {}\n",
+            encoding="utf-8",
+        )
+        (tmp_path / "README.md").write_text("Custom README\n", encoding="utf-8")
+        mock_generator.return_value = {"types_generated": True, "client_generated": True}
+        runner = CliRunner()
+
+        first = runner.invoke(app, [str(tmp_path)])
+        assert first.exit_code == 0, first.stdout
+        assert "Secret scanning setup:" in first.stdout
+        assert "pre-commit install" in " ".join(first.stdout.split())
+        assert (tmp_path / "README.md").read_text() == "Custom README\n"
+        assert (tmp_path / ".pre-commit-config.yaml").exists()
+        assert (tmp_path / ".github/workflows/secret-scan.yml").exists()
+
+        second = runner.invoke(app, [str(tmp_path)])
+        assert second.exit_code == 0, second.stdout
+        assert "Secret scanning setup:" not in second.stdout
+
 
 class TestCLITransformCommand:
     """Test the transform-only CLI command."""

@@ -1,1 +1,50 @@
 # {{ project_name }}
+
+Swift package generated from an OpenAPI specification. Run `make help` for build
+and code-generation commands.
+
+## Secret scanning
+
+This repository includes Betterleaks and TruffleHog checks based on
+[this secret-scanning guide](https://actondon.com/blog/secret-scanning-for-git-repo).
+Activate the local hooks after initializing or cloning the Git repository:
+
+```bash
+brew install pre-commit
+pre-commit install
+```
+
+Alternatively, install pre-commit with `uv tool install pre-commit` or
+`pip install pre-commit`. Version 3.2 or newer is required. pre-commit downloads
+and builds the pinned scanners, bootstrapping Go if needed; its first run requires
+network access and can take a few minutes. The bootstrapper generates the
+configuration; each developer installs the hooks locally.
+
+On a commit, Betterleaks scans the staged diff and redacts its findings. TruffleHog
+scans the staged files supplied by pre-commit, which temporarily hides unstaged
+edits. Both work before the first commit. TruffleHog checks candidate credentials
+against provider APIs and blocks only verified, active secrets. Scanner execution
+errors also fail the checks. Run `pre-commit run` to check staged changes manually.
+
+The GitHub workflow runs on pushes and pull requests to every branch. It fetches
+full history to determine ranges, but scans incoming commits: push before-to-after
+and pull request merge-base-to-head. New branches are compared with the default
+branch when available; an initial repository push scans its imported history.
+Unchanged older history is outside subsequent CI scans. Both scanners run
+independently, so findings from either cause a failed workflow.
+
+OpenAPI specifications, overlays, examples, and generated Swift files are scanned.
+Keep real credentials in environment variables and leave only placeholders in
+examples. If a finding is a false positive, review the exact location before
+adding a targeted exception:
+
+- Betterleaks supports a `betterleaks:allow` comment on the relevant line or its reported
+  fingerprint in a root `.betterleaksignore` file.
+- TruffleHog supports a `trufflehog:ignore` comment on the relevant line.
+
+For formats that cannot contain comments, use a scanner-specific configuration or
+path exception limited to the affected fixture. Avoid excluding whole source or
+specification directories. Rotate and revoke any exposed real credential.
+
+Regenerating the package preserves existing hook configuration, workflow, and
+documentation files, including your edits.

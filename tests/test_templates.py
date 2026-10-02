@@ -44,6 +44,8 @@ class TestGetTemplateDir:
             "openapi-generator-config-types.yaml.j2",
             "openapi-generator-config-client.yaml.j2",
             "overlay.yaml.j2",
+            ".pre-commit-config.yaml.j2",
+            "secret-scan.yml.j2",
         ]
         for template in expected_templates:
             assert (template_dir / template).exists()
@@ -354,6 +356,8 @@ class TestGenerateConfigFiles:
                 "Makefile",
                 ".gitignore",
                 ".env.example",
+                ".pre-commit-config.yaml",
+                ".github/workflows/secret-scan.yml",
                 "openapi-generator-config-types.yaml",
                 "openapi-generator-config-client.yaml",
                 "openapi-overlay.yaml",

@@ -96,6 +96,8 @@ def generate_config_files(
         "Makefile": "Makefile.j2",
         ".gitignore": ".gitignore.j2",
         ".env.example": ".env.example.j2",
+        ".pre-commit-config.yaml": ".pre-commit-config.yaml.j2",
+        ".github/workflows/secret-scan.yml": "secret-scan.yml.j2",
         "openapi-generator-config-types.yaml": "openapi-generator-config-types.yaml.j2",
         "openapi-generator-config-client.yaml": "openapi-generator-config-client.yaml.j2",
         overlay_filename: overlay_template,

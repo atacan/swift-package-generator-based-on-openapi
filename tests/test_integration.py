@@ -163,6 +163,8 @@ class TestFullPipelineYAML:
         assert (sample_openapi_yaml / "Makefile").exists()
         assert (sample_openapi_yaml / ".gitignore").exists()
         assert (sample_openapi_yaml / ".env.example").exists()
+        assert (sample_openapi_yaml / ".pre-commit-config.yaml").exists()
+        assert (sample_openapi_yaml / ".github/workflows/secret-scan.yml").exists()
 
         # Check that generator config files were created
         assert (sample_openapi_yaml / "openapi-generator-config-types.yaml").exists()
@@ -173,7 +175,9 @@ class TestFullPipelineYAML:
 
         # Skills folder generation is deprecated in favor of manual interactive install
         assert not (sample_openapi_yaml / ".claude").exists()
-        assert "npx skills add atacan/agentic-coding-files --skill openapi-overlay" in result.stdout
+        assert "npx skills add atacan/agentic-coding-files --skill openapi-overlay" in " ".join(
+            result.stdout.split()
+        )
 
     def test_transformations_applied_correctly(self, sample_openapi_yaml):
         """Test that all transformations are applied correctly to the output file."""
@@ -369,6 +373,8 @@ class TestFullPipelineJSON:
         # Check that the transformed openapi.json was created (not .yaml)
         assert (sample_openapi_json / "openapi.json").exists()
         assert not (sample_openapi_json / "openapi.yaml").exists()
+        assert (sample_openapi_json / ".pre-commit-config.yaml").exists()
+        assert (sample_openapi_json / ".github/workflows/secret-scan.yml").exists()
 
     def test_transformations_applied_to_json(self, sample_openapi_json):
         """Test that transformations work correctly with JSON format."""
