@@ -291,7 +291,12 @@ These transformations are applied automatically to make specs compatible with `s
 | Float to number | Normalizes `float` type to `number` |
 | Format fixes | Converts `format: byte` to `contentEncoding: base64` |
 | Required cleanup | Removes invalid entries from `required` arrays |
+| Discriminated anyOf | Converts a tagged `anyOf` to `oneOf` only when every branch is an object with a required tag and disjoint string enum values; Swift can then generate a discriminated enum |
 | Overlay | Applies manual fixes from `openapi-overlay.yaml` (always last) |
+
+Bootstrap scaffolds a placeholder test file only for an empty test target. Existing
+Swift tests are preserved even when their filenames or subdirectories differ from
+the original placeholder.
 
 ## Makefile Shortcuts
 

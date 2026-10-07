@@ -540,6 +540,21 @@ class TestSetupSwiftPackage:
 class TestCreateInitialSwiftFiles:
     """Tests for create_initial_swift_files function and Swift file creation."""
 
+    @pytest.mark.parametrize(
+        "filename", ["ChatCompletionsTests.swift", "Responses/ResponsesTests.swift"]
+    )
+    def test_does_not_add_placeholder_when_tests_have_custom_names(self, tmp_path, filename):
+        tests_dir = tmp_path / "Tests" / "TestProjectTests"
+        custom_test = tests_dir / filename
+        custom_test.parent.mkdir(parents=True)
+        custom_test.write_text("import Testing\nstruct ExistingTests {}\n")
+
+        results = ensure_package_structure(tmp_path, "TestProject")
+
+        assert results["tests_file"] is False
+        assert not (tests_dir / "TestProjectTests.swift").exists()
+        assert custom_test.read_text() == "import Testing\nstruct ExistingTests {}\n"
+
     def test_initial_swift_files_created(self):
         """Verify Swift files are created with correct names in correct locations.
 

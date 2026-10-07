@@ -113,10 +113,17 @@ def create_initial_swift_files(target_dir: Path, project_name: str) -> dict[str,
         client_file_path, client_content, "Client Swift file"
     )
 
-    # Create Tests file
-    tests_file_path = target_dir / "Tests" / f"{project_name}Tests" / f"{project_name}Tests.swift"
-    tests_content = render_template("TestsFile.swift.j2", context)
-    results["tests_file"] = write_if_not_exists(tests_file_path, tests_content, "Tests Swift file")
+    # Only scaffold an empty test target. Existing suites may use custom names
+    # or subdirectories instead of the original placeholder filename.
+    tests_dir = target_dir / "Tests" / f"{project_name}Tests"
+    if any(path.is_file() for path in tests_dir.rglob("*.swift")):
+        results["tests_file"] = False
+    else:
+        tests_file_path = tests_dir / f"{project_name}Tests.swift"
+        tests_content = render_template("TestsFile.swift.j2", context)
+        results["tests_file"] = write_if_not_exists(
+            tests_file_path, tests_content, "Tests Swift file"
+        )
 
     return results
 

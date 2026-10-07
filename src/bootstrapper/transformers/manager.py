@@ -25,6 +25,7 @@ from bootstrapper.transformers.op9_promote_schemas_from_headers import promote_m
 from bootstrapper.transformers.op10_unique_operation_ids import ensure_unique_operation_ids
 from bootstrapper.transformers.op11_multipart_required import require_multipart_request_bodies
 from bootstrapper.transformers.op12_exclusive_minimum import normalize_exclusive_minimum
+from bootstrapper.transformers.op13_discriminated_anyof import normalize_discriminated_anyof
 
 _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
     # Detect nullable required properties before op1 discards their null branches.
@@ -40,6 +41,7 @@ _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
     ("op10: ensure unique operationIds", ensure_unique_operation_ids),
     ("op11: require multipart request bodies", require_multipart_request_bodies),
     ("op12: normalize exclusive minimum", normalize_exclusive_minimum),
+    ("op13: normalize disjoint discriminated anyOf", normalize_discriminated_anyof),
 ]
 
 
