@@ -256,8 +256,8 @@ class TestCLITransformCommand:
         assert result.exit_code == 0
         assert "Transform an OpenAPI specification" in result.stdout
         assert "--overlay" in result.stdout
-        assert "requires Node.js/npx" in result.stdout
-        assert "openapi-format" in result.stdout
+        assert "requires Speakeasy" in result.stdout
+        assert "openapi CLI" in result.stdout
 
     def test_transform_writes_output_without_package_scaffolding(self, tmp_path):
         """Test transform-only mode writes a spec and does not create Swift package files."""
@@ -385,7 +385,7 @@ components:
 
     @patch("bootstrapper.transformers.op99_overlay.subprocess.run")
     def test_transform_openapi_format_failure_fails(self, mock_run, tmp_path):
-        """Test openapi-format failures are surfaced by transform-only mode."""
+        """Test OpenAPI CLI failures are surfaced by transform-only mode."""
         input_file = tmp_path / "input.yaml"
         output_file = tmp_path / "fixed.yaml"
         overlay_file = tmp_path / "overlay.yaml"
@@ -408,7 +408,7 @@ components:
         )
 
         assert result.exit_code == 1
-        assert "openapi-format failed" in result.stdout
+        assert "openapi overlay apply failed" in result.stdout
 
 
 class TestResolveProjectName:

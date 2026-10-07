@@ -27,10 +27,11 @@ from bootstrapper.transformers.op11_multipart_required import require_multipart_
 from bootstrapper.transformers.op12_exclusive_minimum import normalize_exclusive_minimum
 
 _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
+    # Detect nullable required properties before op1 discards their null branches.
+    ("op4: normalize nullable properties for Swift", convert_nullable_to_3_1),
     ("op1: remove null from anyOf/oneOf", remove_null_anyof),
     ("op2: convert const to enum", convert_const_to_enum),
     ("op3: convert float to number", convert_float_to_number),
-    ("op4: convert nullable to OpenAPI 3.1", convert_nullable_to_3_1),
     ("op5: fix byte format", fix_byte_format),
     ("op6: clean required arrays", clean_required_arrays),
     ("op7: fix header schema wrapping", fix_header_schemas),

@@ -1,7 +1,8 @@
-"""Operation 99: Apply an OpenAPI overlay using openapi-format.
+"""Operation 99: Apply an OpenAPI overlay using Speakeasy's OpenAPI CLI.
 
 This transformation applies overlay modifications to an OpenAPI specification
-using ``npx openapi-format`` with its ``--overlayFile`` option.
+using ``openapi overlay apply``. Its YAML node model preserves large integers
+exactly, including the signed Int64 bounds used by OpenAI's seed parameter.
 """
 
 import json
@@ -16,7 +17,7 @@ def apply_overlay(
     target_dir: Path,
     openapi_file: str = "openapi.yaml",
 ) -> dict[str, bool | str]:
-    """Apply an OpenAPI overlay using openapi-format.
+    """Apply an OpenAPI overlay using Speakeasy's OpenAPI CLI.
 
     Args:
         target_dir: Directory containing the OpenAPI files
@@ -121,23 +122,37 @@ def apply_overlay_file(openapi_path: Path, overlay_path: Path) -> dict[str, bool
         }
 
     try:
-        subprocess.run(
+        result = subprocess.run(
             [
-                "npx",
-                "--yes",
-                "openapi-format",
-                str(openapi_path),
-                "--overlayFile",
+                "openapi",
+                "overlay",
+                "apply",
+                "--overlay",
                 str(overlay_path),
-                "-o",
+                "--schema",
                 str(openapi_path),
-                "--no-sort",
             ],
             capture_output=True,
             text=True,
             timeout=60,
             check=True,
         )
+
+        # The CLI emits YAML for both input formats. Validate before writing and
+        # retain JSON output when the input is JSON. Failed overlays leave input intact.
+        transformed = yaml.safe_load(result.stdout)
+        if not isinstance(transformed, dict):
+            return {
+                "applied": False,
+                "skipped": False,
+                "reason": "openapi overlay apply did not produce an object document",
+            }
+        output = (
+            json.dumps(transformed, indent=2, ensure_ascii=False) + "\n"
+            if file_suffix == ".json"
+            else result.stdout
+        )
+        openapi_path.write_text(output, encoding="utf-8")
 
         return {
             "applied": True,
@@ -150,21 +165,22 @@ def apply_overlay_file(openapi_path: Path, overlay_path: Path) -> dict[str, bool
             "applied": False,
             "skipped": False,
             "reason": (
-                "npx not found. Install Node.js to use openapi-format for overlay application."
+                "openapi CLI not found. Install Speakeasy's OpenAPI CLI to apply overlays "
+                "(brew install openapi)."
             ),
         }
     except subprocess.TimeoutExpired:
         return {
             "applied": False,
             "skipped": False,
-            "reason": "openapi-format command timed out after 60 seconds",
+            "reason": "openapi overlay apply timed out after 60 seconds",
         }
     except subprocess.CalledProcessError as e:
         stderr = e.stderr.strip() if e.stderr else "No error details"
         return {
             "applied": False,
             "skipped": False,
-            "reason": f"openapi-format failed with exit code {e.returncode}: {stderr}",
+            "reason": f"openapi overlay apply failed with exit code {e.returncode}: {stderr}",
         }
 
 

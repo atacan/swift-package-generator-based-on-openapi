@@ -1,4 +1,4 @@
-"""Tests for Operation 99: Apply OpenAPI overlays using openapi-format."""
+"""Tests for Operation 99: Apply OpenAPI overlays using openapi overlay apply."""
 
 import json
 import shutil
@@ -12,7 +12,52 @@ from bootstrapper.transformers.op99_overlay import apply_overlay, apply_overlay_
 
 
 class TestOp99Overlay:
-    """Tests for Operation 99: Apply overlays using openapi-format."""
+    """Tests for Operation 99: Apply overlays using openapi overlay apply."""
+
+    @pytest.mark.slow
+    @pytest.mark.skipif(shutil.which("openapi") is None, reason="OpenAPI CLI not installed")
+    @pytest.mark.parametrize("suffix", [".yaml", ".json"])
+    def test_overlay_preserves_exact_signed_int64_bounds(self, tmp_path, suffix):
+        """Applying an unrelated overlay must not corrupt the seed's numeric bounds."""
+        spec = {
+            "openapi": "3.1.0",
+            "info": {"title": "Test", "version": "1.0.0"},
+            "paths": {},
+            "components": {
+                "schemas": {
+                    "Seed": {
+                        "type": "integer",
+                        "format": "int64",
+                        "minimum": -(2**63),
+                        "maximum": 2**63 - 1,
+                    },
+                    "Example": {"example": '{"score": 0.8189693396524255}'},
+                },
+            },
+        }
+        original = tmp_path / ("openapi" + suffix)
+        original.write_text(json.dumps(spec) if suffix == ".json" else yaml.safe_dump(spec))
+        overlay = tmp_path / "overlay.yaml"
+        overlay.write_text(
+            yaml.safe_dump(
+                {
+                    "overlay": "1.0.0",
+                    "info": {"title": "Test", "version": "1.0.0"},
+                    "actions": [{"target": "$.info", "update": {"description": "Updated"}}],
+                }
+            )
+        )
+
+        result = apply_overlay_file(original, overlay)
+
+        assert result["applied"] is True
+        transformed = (
+            json.loads(original.read_text())
+            if suffix == ".json"
+            else yaml.safe_load(original.read_text())
+        )
+        assert transformed["components"] == spec["components"]
+        assert transformed["info"]["description"] == "Updated"
 
     def test_no_overlay_file_skips(self, tmp_path):
         """Test that missing overlay file is skipped gracefully."""
@@ -108,8 +153,8 @@ class TestOp99Overlay:
         assert "Failed to parse overlay file" in result["reason"]
 
     @patch("subprocess.run")
-    def test_npx_not_installed(self, mock_run, tmp_path):
-        """Test that a missing npx/Node.js is reported clearly."""
+    def test_openapi_cli_not_installed(self, mock_run, tmp_path):
+        """Test that a missing OpenAPI CLI is reported clearly."""
         # Create files
         openapi_file = tmp_path / "openapi.yaml"
         openapi_file.write_text("openapi: 3.1.0\ninfo:\n  title: Test\n  version: 1.0.0\n")
@@ -128,10 +173,10 @@ class TestOp99Overlay:
 
         assert result["applied"] is False
         assert result["skipped"] is False
-        assert "npx not found" in result["reason"]
+        assert "openapi CLI not found" in result["reason"]
 
     @patch("subprocess.run")
-    def test_openapi_format_timeout(self, mock_run, tmp_path):
+    def test_openapi_cli_timeout(self, mock_run, tmp_path):
         """Test that timeout is handled gracefully."""
         # Create files
         openapi_file = tmp_path / "openapi.yaml"
@@ -145,7 +190,7 @@ class TestOp99Overlay:
         overlay_file.write_text(overlay_content)
 
         # Mock subprocess to raise TimeoutExpired
-        mock_run.side_effect = subprocess.TimeoutExpired("npx", 60)
+        mock_run.side_effect = subprocess.TimeoutExpired("openapi", 60)
 
         result = apply_overlay(tmp_path, "openapi.yaml")
 
@@ -154,8 +199,8 @@ class TestOp99Overlay:
         assert "timed out" in result["reason"]
 
     @patch("subprocess.run")
-    def test_openapi_format_error(self, mock_run, tmp_path):
-        """Test that openapi-format errors are captured."""
+    def test_openapi_cli_error(self, mock_run, tmp_path):
+        """Test that openapi overlay apply errors are captured."""
         # Create files
         openapi_file = tmp_path / "openapi.yaml"
         openapi_file.write_text("openapi: 3.1.0\ninfo:\n  title: Test\n  version: 1.0.0\n")
@@ -169,14 +214,14 @@ class TestOp99Overlay:
 
         # Mock subprocess to return error
         mock_run.side_effect = subprocess.CalledProcessError(
-            1, "npx", stderr="Invalid overlay syntax"
+            1, "openapi", stderr="Invalid overlay syntax"
         )
 
         result = apply_overlay(tmp_path, "openapi.yaml")
 
         assert result["applied"] is False
         assert result["skipped"] is False
-        assert "openapi-format failed" in result["reason"]
+        assert "openapi overlay apply failed" in result["reason"]
         assert "exit code 1" in result["reason"]
 
     @patch("subprocess.run")
@@ -194,7 +239,9 @@ class TestOp99Overlay:
         overlay_file.write_text(overlay_content)
 
         # Mock successful subprocess call
-        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        mock_run.return_value = MagicMock(
+            returncode=0, stdout="openapi: 3.1.0\ninfo: {}\n", stderr=""
+        )
 
         result = apply_overlay(tmp_path, "openapi.yaml")
 
@@ -206,15 +253,13 @@ class TestOp99Overlay:
         mock_run.assert_called_once()
         call_args = mock_run.call_args[0][0]
         assert call_args == [
-            "npx",
-            "--yes",
-            "openapi-format",
-            str(openapi_file),
-            "--overlayFile",
+            "openapi",
+            "overlay",
+            "apply",
+            "--overlay",
             str(overlay_file),
-            "-o",
+            "--schema",
             str(openapi_file),
-            "--no-sort",
         ]
 
     @patch("subprocess.run")
@@ -232,7 +277,9 @@ class TestOp99Overlay:
         overlay_file.write_text(overlay_content)
 
         # Mock successful subprocess call
-        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        mock_run.return_value = MagicMock(
+            returncode=0, stdout="openapi: 3.1.0\ninfo: {}\n", stderr=""
+        )
 
         result = apply_overlay(tmp_path, "openapi.yml")
 
@@ -250,7 +297,9 @@ class TestOp99Overlay:
             "  - target: $.info\n    update:\n      description: Updated\n"
         )
 
-        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        mock_run.return_value = MagicMock(
+            returncode=0, stdout="openapi: 3.1.0\ninfo: {}\n", stderr=""
+        )
 
         result = apply_overlay_file(openapi_file, overlay_file)
 
@@ -272,8 +321,8 @@ class TestOp99Overlay:
         assert "Overlay file not found" in result["reason"]
 
     @pytest.mark.slow
-    @pytest.mark.skipif(shutil.which("npx") is None, reason="npx (Node.js) not installed")
-    def test_openapi_format_preserves_schema_after_quoted_large_number_example(self, tmp_path):
+    @pytest.mark.skipif(shutil.which("openapi") is None, reason="OpenAPI CLI not installed")
+    def test_openapi_cli_preserves_schema_after_quoted_large_number_example(self, tmp_path):
         """Regression test for schema loss after a quoted large-number example."""
         openapi_file = tmp_path / "openapi.yaml"
         openapi_file.write_text(

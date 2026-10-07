@@ -10,8 +10,12 @@ You can also use it as a transform-only OpenAPI fixer when you just want a sanit
 
 - [uv](https://docs.astral.sh/uv/) -- handles Python automatically, no manual Python install needed
 - Swift 5.9+ toolchain (Xcode 15+ on macOS)
-- Node.js -- required when an overlay contains actions; the overlay is applied via
-  `npx openapi-format`, which downloads the package on first use
+- [Speakeasy's OpenAPI CLI](https://github.com/speakeasy-api/openapi) -- required
+  when an overlay contains actions. Install with `brew install openapi`, or
+  `go install github.com/speakeasy-api/openapi/cmd/openapi@latest`.
+  The dedicated overlay engine preserves large integers exactly. The former
+  `openapi-format` integration could round Int64 bounds or turn negative bounds
+  into strings, preventing Swift code generation.
 
 ## Install
 
@@ -281,7 +285,7 @@ These transformations are applied automatically to make specs compatible with `s
 
 | Fix | What it does |
 |---|---|
-| Nullable handling | Converts OpenAPI 3.0 `nullable: true` to 3.1 style |
+| Nullable handling | Makes nullable properties optional for Swift before null branches are removed |
 | anyOf simplification | Removes redundant `type: null` from `anyOf` arrays |
 | const to enum | Converts `const` values to single-element `enum` arrays |
 | Float to number | Normalizes `float` type to `number` |
