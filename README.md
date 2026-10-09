@@ -292,7 +292,16 @@ These transformations are applied automatically to make specs compatible with `s
 | Format fixes | Converts `format: byte` to `contentEncoding: base64` |
 | Required cleanup | Removes invalid entries from `required` arrays |
 | Discriminated anyOf | Converts a tagged `anyOf` to `oneOf` only when every branch is an object with a required tag and disjoint string enum values; Swift can then generate a discriminated enum |
+| Discriminator mappings | Adds missing wire-value mappings for referenced object variants with required, disjoint string `const`/`enum` tags, including local references and `allOf` inheritance |
 | Overlay | Applies manual fixes from `openapi-overlay.yaml` (always last) |
+
+Mapping inference runs after discriminated `anyOf` normalization. It honors the
+discriminator's property name, maps every allowed tag value to its branch's original
+reference, and preserves existing explicit mappings. Constraints from `allOf` and
+`$ref` siblings are intersected. Optional tags, overlapping values, inline variants,
+unresolved or cyclic references, and conflicting explicit mappings leave the union
+unchanged. Manual changes to union branches or discriminator removal still belong
+in the overlay, which runs last.
 
 Bootstrap scaffolds a placeholder test file only for an empty test target. Existing
 Swift tests are preserved even when their filenames or subdirectories differ from
