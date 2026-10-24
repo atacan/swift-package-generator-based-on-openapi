@@ -217,3 +217,5 @@ __marimo__/
 
 .claude-trace
 .perles/config.yaml
+
+.build/

@@ -29,6 +29,13 @@ custom Swift code, tests, and resources. There is no automatic scaffold migratio
    depends on core, `OpenAPIRuntime`, and its own transport product. Register the
    new test directories as test targets if you want to run them.
 
+   Preserve custom products and targets such as realtime/WebSocket types, along
+   with their source directories, generator configurations, resources, and tests.
+   The four-product structure describes the HTTP client; a package with a separate
+   realtime product can expose five products. Keep custom generation commands such
+   as `make generate-realtime` and include them in the regeneration step before
+   the final build and tests.
+
    Move custom helpers such as `createClient(apiKey:)` that construct a specific
    transport into `Sources/{Name}AsyncHTTPClient/` or `Sources/{Name}URLSession/`.
    Preserve their server URL, timeout, runtime configuration, and middleware
@@ -56,6 +63,23 @@ custom Swift code, tests, and resources. There is no automatic scaffold migratio
    overlaid specification. Moving/removing the old public middleware is a source
    compatibility change for downstream callers; document it when publishing.
 
+   When the specification declares multiple bearer schemes, `.bearer(...)` cannot
+   choose between them. Use named credentials matching the exact scheme names in
+   the final overlaid specification. For example, a package with separate regular
+   and administration schemes can use:
+
+   ```swift
+   let authentication = Authentication.credentials([
+       "ApiKeyAuth": .init(apiKey),
+       "AdminApiKeyAuth": .init(adminApiKey),
+   ])
+   ```
+
+   Pass this value to either factory's `authentication:` parameter. Supply only
+   the credentials needed for the operations you call; shared authentication
+   selects credentials according to each operation's security requirements.
+   Verify regular and administration operations with offline authentication tests.
+
 4. **Preserve provider defaults and custom tests.** Factory helpers are editable
    and preserved on reruns. If your API returns fractional-second timestamps, set
    `configuration: Configuration = .init(dateTranscoder: .iso8601WithFractionalSeconds)`
@@ -65,7 +89,17 @@ custom Swift code, tests, and resources. There is no automatic scaffold migratio
    HTTP types, or a transport should declare those product dependencies directly.
 
 5. **Regenerate before the final build and tests.** After merging manifest changes,
-   resolve dependencies with `swift package resolve`, then rerun the bootstrapper.
+   resolve dependencies with `swift package resolve`.
+
+   Check `swift --version` against the resolved dependencies' `// swift-tools-version:`
+   headers in `.build/checkouts/*/Package.swift` and their documented compiler
+   requirements. Your root manifest's tools-version header does not guarantee that
+   newer dependencies support that Swift version. In the ElevenLabs trial, the
+   preserved older header coexisted with dependencies requiring Swift 6.2+.
+   Use a compatible toolchain or adjust dependency constraints to retain your
+   intended Swift support, and update the package README's minimum requirements.
+
+   Then rerun the bootstrapper and any custom generation steps.
    Updated dependency requirements can select a newer `swift-openapi-generator`
    and change generated source contents or file layout. In the AzureSpeech trial,
    the generator changed from 1.12.2 to 1.14.2 and split Types into additional files.
