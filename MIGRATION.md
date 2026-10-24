@@ -18,6 +18,14 @@ custom Swift code, tests, and resources. There is no automatic scaffold migratio
    are still required, even when code generation succeeds. Review generated model
    diffs too: updated schema transformations can change public property types.
 
+   If generation fails parsing an integer constraint, inspect the original spec
+   and overlay for scientific notation in integer-only fields. Some parsers reject
+   these spellings even when the value is a whole number. For example, normalize
+   `maxLength: 2.083e+3` to `maxLength: 2083`, `minLength: 1e+0` to `minLength: 1`,
+   and an integer schema's `default: 0e+0` to `default: 0`. Preserve the exact value;
+   only normalize mathematically integral values. Make the correction in the
+   original spec or overlay and rerun the bootstrapper so it survives regeneration.
+
 2. **Merge the four-product manifest changes.** Use
    [Package.swift.j2](src/bootstrapper/resources/Package.swift.j2) as a reference;
    keep your existing custom dependencies, platform settings, and resource rules.
@@ -98,6 +106,21 @@ custom Swift code, tests, and resources. There is no automatic scaffold migratio
    preserved older header coexisted with dependencies requiring Swift 6.2+.
    Use a compatible toolchain or adjust dependency constraints to retain your
    intended Swift support, and update the package README's minimum requirements.
+
+   Check the preserved Makefile before using `make regenerate`. If that target is
+   missing, merge an inline recipe such as this into the existing file:
+
+   ```make
+   .PHONY: regenerate
+   regenerate: ; uvx --from git+https://github.com/atacan/swift-package-generator-based-on-openapi.git swift-bootstrapper bootstrap .
+   ```
+
+   Preserve custom recipes and include additional generation steps, such as
+   `$(MAKE) generate-realtime`, when required by the package. Use literal tabs for
+   commands added on separate recipe lines. Existing recipes
+   using `swift-bootstrapper .` remain supported; changing them to the explicit
+   `bootstrap` form is optional. Makefiles are preserved on reruns, so template
+   updates do not add missing targets automatically.
 
    Then rerun the bootstrapper and any custom generation steps.
    Updated dependency requirements can select a newer `swift-openapi-generator`
