@@ -1,0 +1,2852 @@
+provenance:
+  source_repository: swift-openai-api
+  original_spec: original_openapi.yaml
+  original_spec_sha256: ca22e4f7ee15164d8e56aa8d28cd858b269d6081123697d0a3299dd55322b3f2
+  overlay: openapi-overlay.yaml
+  overlay_sha256: 23b5027bb79f9d2941d6a7f0ff8ccd7c528f05cc631de8c1bdb9d4f39d46d103
+  mapping_action_count: 12
+  mapping_entry_count: 174
+  scope: Exact standalone overlay mappings and source discriminator constraints. Payload properties and
+    annotations are omitted; required arrays, union branches, local refs, allOf, type/role const/enum
+    constraints, and discriminator objects are copied unchanged.
+expected:
+- path:
+  - components
+  - schemas
+  - RealtimeServerEvent
+  mapping:
+    conversation.created: '#/components/schemas/RealtimeServerEventConversationCreated'
+    conversation.item.created: '#/components/schemas/RealtimeServerEventConversationItemCreated'
+    conversation.item.deleted: '#/components/schemas/RealtimeServerEventConversationItemDeleted'
+    conversation.item.input_audio_transcription.completed: '#/components/schemas/RealtimeServerEventConversationItemInputAudioTranscriptionCompleted'
+    conversation.item.input_audio_transcription.delta: '#/components/schemas/RealtimeServerEventConversationItemInputAudioTranscriptionDelta'
+    conversation.item.input_audio_transcription.failed: '#/components/schemas/RealtimeServerEventConversationItemInputAudioTranscriptionFailed'
+    conversation.item.retrieved: '#/components/schemas/RealtimeServerEventConversationItemRetrieved'
+    conversation.item.truncated: '#/components/schemas/RealtimeServerEventConversationItemTruncated'
+    error: '#/components/schemas/RealtimeServerEventError'
+    input_audio_buffer.cleared: '#/components/schemas/RealtimeServerEventInputAudioBufferCleared'
+    input_audio_buffer.committed: '#/components/schemas/RealtimeServerEventInputAudioBufferCommitted'
+    input_audio_buffer.dtmf_event_received: '#/components/schemas/RealtimeServerEventInputAudioBufferDtmfEventReceived'
+    input_audio_buffer.speech_started: '#/components/schemas/RealtimeServerEventInputAudioBufferSpeechStarted'
+    input_audio_buffer.speech_stopped: '#/components/schemas/RealtimeServerEventInputAudioBufferSpeechStopped'
+    rate_limits.updated: '#/components/schemas/RealtimeServerEventRateLimitsUpdated'
+    response.output_audio.delta: '#/components/schemas/RealtimeServerEventResponseAudioDelta'
+    response.output_audio.done: '#/components/schemas/RealtimeServerEventResponseAudioDone'
+    response.output_audio_transcript.delta: '#/components/schemas/RealtimeServerEventResponseAudioTranscriptDelta'
+    response.output_audio_transcript.done: '#/components/schemas/RealtimeServerEventResponseAudioTranscriptDone'
+    response.content_part.added: '#/components/schemas/RealtimeServerEventResponseContentPartAdded'
+    response.content_part.done: '#/components/schemas/RealtimeServerEventResponseContentPartDone'
+    response.created: '#/components/schemas/RealtimeServerEventResponseCreated'
+    response.done: '#/components/schemas/RealtimeServerEventResponseDone'
+    response.function_call_arguments.delta: '#/components/schemas/RealtimeServerEventResponseFunctionCallArgumentsDelta'
+    response.function_call_arguments.done: '#/components/schemas/RealtimeServerEventResponseFunctionCallArgumentsDone'
+    response.output_item.added: '#/components/schemas/RealtimeServerEventResponseOutputItemAdded'
+    response.output_item.done: '#/components/schemas/RealtimeServerEventResponseOutputItemDone'
+    response.output_text.delta: '#/components/schemas/RealtimeServerEventResponseTextDelta'
+    response.output_text.done: '#/components/schemas/RealtimeServerEventResponseTextDone'
+    session.created: '#/components/schemas/RealtimeServerEventSessionCreated'
+    session.updated: '#/components/schemas/RealtimeServerEventSessionUpdated'
+    output_audio_buffer.started: '#/components/schemas/RealtimeServerEventOutputAudioBufferStarted'
+    output_audio_buffer.stopped: '#/components/schemas/RealtimeServerEventOutputAudioBufferStopped'
+    output_audio_buffer.cleared: '#/components/schemas/RealtimeServerEventOutputAudioBufferCleared'
+    conversation.item.added: '#/components/schemas/RealtimeServerEventConversationItemAdded'
+    conversation.item.done: '#/components/schemas/RealtimeServerEventConversationItemDone'
+    input_audio_buffer.timeout_triggered: '#/components/schemas/RealtimeServerEventInputAudioBufferTimeoutTriggered'
+    conversation.item.input_audio_transcription.segment: '#/components/schemas/RealtimeServerEventConversationItemInputAudioTranscriptionSegment'
+    mcp_list_tools.in_progress: '#/components/schemas/RealtimeServerEventMCPListToolsInProgress'
+    mcp_list_tools.completed: '#/components/schemas/RealtimeServerEventMCPListToolsCompleted'
+    mcp_list_tools.failed: '#/components/schemas/RealtimeServerEventMCPListToolsFailed'
+    response.mcp_call_arguments.delta: '#/components/schemas/RealtimeServerEventResponseMCPCallArgumentsDelta'
+    response.mcp_call_arguments.done: '#/components/schemas/RealtimeServerEventResponseMCPCallArgumentsDone'
+    response.mcp_call.in_progress: '#/components/schemas/RealtimeServerEventResponseMCPCallInProgress'
+    response.mcp_call.completed: '#/components/schemas/RealtimeServerEventResponseMCPCallCompleted'
+    response.mcp_call.failed: '#/components/schemas/RealtimeServerEventResponseMCPCallFailed'
+- path:
+  - components
+  - schemas
+  - ChatCompletionMessageToolCalls
+  - items
+  mapping:
+    function: '#/components/schemas/ChatCompletionMessageToolCall'
+    custom: '#/components/schemas/ChatCompletionMessageCustomToolCall'
+- path:
+  - components
+  - schemas
+  - ChatCompletionRequestMessage
+  mapping:
+    developer: '#/components/schemas/ChatCompletionRequestDeveloperMessage'
+    system: '#/components/schemas/ChatCompletionRequestSystemMessage'
+    user: '#/components/schemas/ChatCompletionRequestUserMessage'
+    assistant: '#/components/schemas/ChatCompletionRequestAssistantMessage'
+    tool: '#/components/schemas/ChatCompletionRequestToolMessage'
+    function: '#/components/schemas/ChatCompletionRequestFunctionMessage'
+- path:
+  - components
+  - schemas
+  - OutputItem
+  mapping:
+    message: '#/components/schemas/OutputMessage'
+    file_search_call: '#/components/schemas/FileSearchToolCall'
+    function_call: '#/components/schemas/FunctionToolCall'
+    function_call_output: '#/components/schemas/FunctionToolCallOutputResource'
+    web_search_call: '#/components/schemas/WebSearchToolCall'
+    computer_call: '#/components/schemas/ComputerToolCall'
+    computer_call_output: '#/components/schemas/ComputerToolCallOutputResource'
+    reasoning: '#/components/schemas/ReasoningItem'
+    program: '#/components/schemas/Program'
+    program_output: '#/components/schemas/ProgramOutput'
+    tool_search_call: '#/components/schemas/ToolSearchCall'
+    tool_search_output: '#/components/schemas/ToolSearchOutput'
+    additional_tools: '#/components/schemas/AdditionalTools'
+    compaction: '#/components/schemas/CompactionBody'
+    image_generation_call: '#/components/schemas/ImageGenToolCall'
+    code_interpreter_call: '#/components/schemas/CodeInterpreterToolCall'
+    local_shell_call: '#/components/schemas/LocalShellToolCall'
+    local_shell_call_output: '#/components/schemas/LocalShellToolCallOutput'
+    shell_call: '#/components/schemas/FunctionShellCall'
+    shell_call_output: '#/components/schemas/FunctionShellCallOutput'
+    apply_patch_call: '#/components/schemas/ApplyPatchToolCall'
+    apply_patch_call_output: '#/components/schemas/ApplyPatchToolCallOutput'
+    mcp_call: '#/components/schemas/MCPToolCall'
+    mcp_list_tools: '#/components/schemas/MCPListTools'
+    mcp_approval_request: '#/components/schemas/MCPApprovalRequest'
+    mcp_approval_response: '#/components/schemas/MCPApprovalResponseResource'
+    custom_tool_call: '#/components/schemas/CustomToolCall'
+    custom_tool_call_output: '#/components/schemas/CustomToolCallOutputResource'
+- path:
+  - components
+  - schemas
+  - OutputMessageContent
+  mapping:
+    output_text: '#/components/schemas/OutputTextContent'
+    refusal: '#/components/schemas/RefusalContent'
+- path:
+  - components
+  - schemas
+  - OutputContent
+  mapping:
+    output_text: '#/components/schemas/OutputTextContent'
+    refusal: '#/components/schemas/RefusalContent'
+    reasoning_text: '#/components/schemas/ReasoningTextContent'
+- path:
+  - components
+  - schemas
+  - InputContent
+  mapping:
+    input_text: '#/components/schemas/InputTextContent'
+    input_image: '#/components/schemas/InputImageContent'
+    input_file: '#/components/schemas/InputFileContent'
+- path:
+  - components
+  - schemas
+  - Tool
+  mapping:
+    function: '#/components/schemas/FunctionTool'
+    file_search: '#/components/schemas/FileSearchTool'
+    computer: '#/components/schemas/ComputerTool'
+    computer_use_preview: '#/components/schemas/ComputerUsePreviewTool'
+    web_search: '#/components/schemas/WebSearchTool'
+    web_search_2025_08_26: '#/components/schemas/WebSearchTool'
+    mcp: '#/components/schemas/MCPTool'
+    code_interpreter: '#/components/schemas/CodeInterpreterTool'
+    programmatic_tool_calling: '#/components/schemas/ProgrammaticToolCallingParam'
+    image_generation: '#/components/schemas/ImageGenTool'
+    local_shell: '#/components/schemas/LocalShellToolParam'
+    shell: '#/components/schemas/FunctionShellToolParam'
+    custom: '#/components/schemas/CustomToolParam'
+    namespace: '#/components/schemas/NamespaceToolParam'
+    tool_search: '#/components/schemas/ToolSearchToolParam'
+    web_search_preview: '#/components/schemas/WebSearchPreviewTool'
+    web_search_preview_2025_03_11: '#/components/schemas/WebSearchPreviewTool'
+    apply_patch: '#/components/schemas/ApplyPatchToolParam'
+- path:
+  - components
+  - schemas
+  - ResponseStreamEvent
+  mapping:
+    response.audio.delta: '#/components/schemas/ResponseAudioDeltaEvent'
+    response.audio.done: '#/components/schemas/ResponseAudioDoneEvent'
+    response.audio.transcript.delta: '#/components/schemas/ResponseAudioTranscriptDeltaEvent'
+    response.audio.transcript.done: '#/components/schemas/ResponseAudioTranscriptDoneEvent'
+    response.code_interpreter_call_code.delta: '#/components/schemas/ResponseCodeInterpreterCallCodeDeltaEvent'
+    response.code_interpreter_call_code.done: '#/components/schemas/ResponseCodeInterpreterCallCodeDoneEvent'
+    response.code_interpreter_call.completed: '#/components/schemas/ResponseCodeInterpreterCallCompletedEvent'
+    response.code_interpreter_call.in_progress: '#/components/schemas/ResponseCodeInterpreterCallInProgressEvent'
+    response.code_interpreter_call.interpreting: '#/components/schemas/ResponseCodeInterpreterCallInterpretingEvent'
+    response.compaction.compacting: '#/components/schemas/ResponseCompactionCompactingStreamingEvent'
+    response.completed: '#/components/schemas/ResponseCompletedEvent'
+    response.content_part.added: '#/components/schemas/ResponseContentPartAddedEvent'
+    response.content_part.done: '#/components/schemas/ResponseContentPartDoneEvent'
+    response.created: '#/components/schemas/ResponseCreatedEvent'
+    error: '#/components/schemas/ResponseErrorEvent'
+    response.file_search_call.completed: '#/components/schemas/ResponseFileSearchCallCompletedEvent'
+    response.file_search_call.in_progress: '#/components/schemas/ResponseFileSearchCallInProgressEvent'
+    response.file_search_call.searching: '#/components/schemas/ResponseFileSearchCallSearchingEvent'
+    response.function_call_arguments.delta: '#/components/schemas/ResponseFunctionCallArgumentsDeltaEvent'
+    response.function_call_arguments.done: '#/components/schemas/ResponseFunctionCallArgumentsDoneEvent'
+    response.shell_call_command.added: '#/components/schemas/ResponseShellCallCommandAddedStreamingEvent'
+    response.shell_call_command.delta: '#/components/schemas/ResponseShellCallCommandDeltaStreamingEvent'
+    response.shell_call_command.done: '#/components/schemas/ResponseShellCallCommandDoneStreamingEvent'
+    response.shell_call_output_content.delta: '#/components/schemas/ResponseShellCallOutputContentDeltaStreamingEvent'
+    response.shell_call_output_content.done: '#/components/schemas/ResponseShellCallOutputContentDoneStreamingEvent'
+    response.in_progress: '#/components/schemas/ResponseInProgressEvent'
+    response.failed: '#/components/schemas/ResponseFailedEvent'
+    response.incomplete: '#/components/schemas/ResponseIncompleteEvent'
+    response.output_item.added: '#/components/schemas/ResponseOutputItemAddedEvent'
+    response.output_item.done: '#/components/schemas/ResponseOutputItemDoneEvent'
+    response.reasoning_summary_part.added: '#/components/schemas/ResponseReasoningSummaryPartAddedEvent'
+    response.reasoning_summary_part.done: '#/components/schemas/ResponseReasoningSummaryPartDoneEvent'
+    response.reasoning_summary_text.delta: '#/components/schemas/ResponseReasoningSummaryTextDeltaEvent'
+    response.reasoning_summary_text.done: '#/components/schemas/ResponseReasoningSummaryTextDoneEvent'
+    response.reasoning_text.delta: '#/components/schemas/ResponseReasoningTextDeltaEvent'
+    response.reasoning_text.done: '#/components/schemas/ResponseReasoningTextDoneEvent'
+    response.refusal.delta: '#/components/schemas/ResponseRefusalDeltaEvent'
+    response.refusal.done: '#/components/schemas/ResponseRefusalDoneEvent'
+    response.output_text.delta: '#/components/schemas/ResponseTextDeltaEvent'
+    response.output_text.done: '#/components/schemas/ResponseTextDoneEvent'
+    response.web_search_call.completed: '#/components/schemas/ResponseWebSearchCallCompletedEvent'
+    response.web_search_call.in_progress: '#/components/schemas/ResponseWebSearchCallInProgressEvent'
+    response.web_search_call.searching: '#/components/schemas/ResponseWebSearchCallSearchingEvent'
+    response.image_generation_call.completed: '#/components/schemas/ResponseImageGenCallCompletedEvent'
+    response.image_generation_call.generating: '#/components/schemas/ResponseImageGenCallGeneratingEvent'
+    response.image_generation_call.in_progress: '#/components/schemas/ResponseImageGenCallInProgressEvent'
+    response.image_generation_call.partial_image: '#/components/schemas/ResponseImageGenCallPartialImageEvent'
+    response.mcp_call_arguments.delta: '#/components/schemas/ResponseMCPCallArgumentsDeltaEvent'
+    response.mcp_call_arguments.done: '#/components/schemas/ResponseMCPCallArgumentsDoneEvent'
+    response.mcp_call.completed: '#/components/schemas/ResponseMCPCallCompletedEvent'
+    response.mcp_call.failed: '#/components/schemas/ResponseMCPCallFailedEvent'
+    response.mcp_call.in_progress: '#/components/schemas/ResponseMCPCallInProgressEvent'
+    response.mcp_list_tools.completed: '#/components/schemas/ResponseMCPListToolsCompletedEvent'
+    response.mcp_list_tools.failed: '#/components/schemas/ResponseMCPListToolsFailedEvent'
+    response.mcp_list_tools.in_progress: '#/components/schemas/ResponseMCPListToolsInProgressEvent'
+    response.output_text.annotation.added: '#/components/schemas/ResponseOutputTextAnnotationAddedEvent'
+    response.queued: '#/components/schemas/ResponseQueuedEvent'
+    response.custom_tool_call_input.delta: '#/components/schemas/ResponseCustomToolCallInputDeltaEvent'
+    response.custom_tool_call_input.done: '#/components/schemas/ResponseCustomToolCallInputDoneEvent'
+- path:
+  - components
+  - schemas
+  - CreateSpeechResponseStreamEvent
+  mapping:
+    speech.audio.delta: '#/components/schemas/SpeechAudioDeltaEvent'
+    speech.audio.done: '#/components/schemas/SpeechAudioDoneEvent'
+- path:
+  - components
+  - schemas
+  - CreateTranscriptionResponseStreamEvent
+  mapping:
+    transcript.text.segment: '#/components/schemas/TranscriptTextSegmentEvent'
+    transcript.text.delta: '#/components/schemas/TranscriptTextDeltaEvent'
+    transcript.text.done: '#/components/schemas/TranscriptTextDoneEvent'
+- path:
+  - components
+  - schemas
+  - CreateTranscriptionResponseDiarizedJson
+  - properties
+  - usage
+  mapping:
+    tokens: '#/components/schemas/TranscriptTextUsageTokens'
+    duration: '#/components/schemas/TranscriptTextUsageDuration'
+unsafe_roots:
+- Item
+- InputItem
+- RealtimeTurnDetection
+spec:
+  openapi: 3.1.0
+  components:
+    schemas:
+      AdditionalTools:
+        properties:
+          type:
+            type: string
+            enum:
+            - additional_tools
+          role:
+            $ref: '#/components/schemas/MessageRole'
+        type: object
+        required:
+        - type
+        - id
+        - role
+        - tools
+      AdditionalToolsItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - additional_tools
+          role:
+            type: string
+            enum:
+            - developer
+        type: object
+        required:
+        - type
+        - role
+        - tools
+      ApplyPatchToolCall:
+        properties:
+          type:
+            type: string
+            enum:
+            - apply_patch_call
+        type: object
+        required:
+        - type
+        - id
+        - call_id
+        - status
+        - operation
+      ApplyPatchToolCallItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - apply_patch_call
+        type: object
+        required:
+        - type
+        - call_id
+        - status
+        - operation
+      ApplyPatchToolCallOutput:
+        properties:
+          type:
+            type: string
+            enum:
+            - apply_patch_call_output
+        type: object
+        required:
+        - type
+        - id
+        - call_id
+        - status
+      ApplyPatchToolCallOutputItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - apply_patch_call_output
+        type: object
+        required:
+        - type
+        - call_id
+        - status
+      ApplyPatchToolParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - apply_patch
+        type: object
+        required:
+        - type
+      ChatCompletionMessageCustomToolCall:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - custom
+        required:
+        - id
+        - type
+        - custom
+      ChatCompletionMessageToolCall:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - function
+        required:
+        - id
+        - type
+        - function
+      ChatCompletionMessageToolCalls:
+        type: array
+        items:
+          oneOf:
+          - $ref: '#/components/schemas/ChatCompletionMessageToolCall'
+          - $ref: '#/components/schemas/ChatCompletionMessageCustomToolCall'
+          discriminator:
+            propertyName: type
+      ChatCompletionRequestAssistantMessage:
+        type: object
+        properties:
+          role:
+            type: string
+            enum:
+            - assistant
+        required:
+        - role
+      ChatCompletionRequestDeveloperMessage:
+        type: object
+        properties:
+          role:
+            type: string
+            enum:
+            - developer
+        required:
+        - content
+        - role
+      ChatCompletionRequestFunctionMessage:
+        type: object
+        properties:
+          role:
+            type: string
+            enum:
+            - function
+        required:
+        - role
+        - content
+        - name
+      ChatCompletionRequestMessage:
+        oneOf:
+        - $ref: '#/components/schemas/ChatCompletionRequestDeveloperMessage'
+        - $ref: '#/components/schemas/ChatCompletionRequestSystemMessage'
+        - $ref: '#/components/schemas/ChatCompletionRequestUserMessage'
+        - $ref: '#/components/schemas/ChatCompletionRequestAssistantMessage'
+        - $ref: '#/components/schemas/ChatCompletionRequestToolMessage'
+        - $ref: '#/components/schemas/ChatCompletionRequestFunctionMessage'
+        discriminator:
+          propertyName: role
+      ChatCompletionRequestSystemMessage:
+        type: object
+        properties:
+          role:
+            type: string
+            enum:
+            - system
+        required:
+        - content
+        - role
+      ChatCompletionRequestToolMessage:
+        type: object
+        properties:
+          role:
+            type: string
+            enum:
+            - tool
+        required:
+        - role
+        - content
+        - tool_call_id
+      ChatCompletionRequestUserMessage:
+        type: object
+        properties:
+          role:
+            type: string
+            enum:
+            - user
+        required:
+        - content
+        - role
+      CodeInterpreterTool:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - code_interpreter
+        required:
+        - type
+        - container
+      CodeInterpreterToolCall:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - code_interpreter_call
+        required:
+        - type
+        - id
+        - status
+        - container_id
+        - code
+        - outputs
+      CompactionBody:
+        properties:
+          type:
+            type: string
+            enum:
+            - compaction
+        type: object
+        required:
+        - type
+        - id
+        - encrypted_content
+      CompactionSummaryItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - compaction
+        type: object
+        required:
+        - type
+        - encrypted_content
+      CompactionTriggerItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - compaction_trigger
+        type: object
+        required:
+        - type
+      ComputerCallOutputItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - computer_call_output
+        type: object
+        required:
+        - call_id
+        - type
+        - output
+      ComputerTool:
+        properties:
+          type:
+            type: string
+            enum:
+            - computer
+        type: object
+        required:
+        - type
+      ComputerToolCall:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - computer_call
+        required:
+        - type
+        - id
+        - call_id
+        - pending_safety_checks
+        - status
+      ComputerToolCallOutput:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - computer_call_output
+        required:
+        - type
+        - call_id
+        - output
+      ComputerToolCallOutputResource:
+        allOf:
+        - $ref: '#/components/schemas/ComputerToolCallOutput'
+        - type: object
+          properties: {}
+          required:
+          - id
+          - status
+      ComputerUsePreviewTool:
+        properties:
+          type:
+            type: string
+            enum:
+            - computer_use_preview
+        type: object
+        required:
+        - type
+        - environment
+        - display_width
+        - display_height
+      CreateSpeechResponseStreamEvent:
+        anyOf:
+        - $ref: '#/components/schemas/SpeechAudioDeltaEvent'
+        - $ref: '#/components/schemas/SpeechAudioDoneEvent'
+        discriminator:
+          propertyName: type
+      CreateTranscriptionResponseDiarizedJson:
+        type: object
+        properties:
+          usage:
+            type: object
+            oneOf:
+            - $ref: '#/components/schemas/TranscriptTextUsageTokens'
+            - $ref: '#/components/schemas/TranscriptTextUsageDuration'
+            discriminator:
+              propertyName: type
+        required:
+        - task
+        - duration
+        - text
+        - segments
+      CreateTranscriptionResponseStreamEvent:
+        anyOf:
+        - $ref: '#/components/schemas/TranscriptTextSegmentEvent'
+        - $ref: '#/components/schemas/TranscriptTextDeltaEvent'
+        - $ref: '#/components/schemas/TranscriptTextDoneEvent'
+        discriminator:
+          propertyName: type
+      CustomToolCall:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - custom_tool_call
+        required:
+        - type
+        - call_id
+        - name
+        - input
+      CustomToolCallOutput:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - custom_tool_call_output
+        required:
+        - type
+        - call_id
+        - output
+      CustomToolCallOutputResource:
+        allOf:
+        - $ref: '#/components/schemas/CustomToolCallOutput'
+        - type: object
+          properties: {}
+          required:
+          - id
+          - status
+      CustomToolParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - custom
+        type: object
+        required:
+        - type
+        - name
+      EasyInputMessage:
+        type: object
+        properties:
+          role:
+            type: string
+            enum:
+            - user
+            - assistant
+            - system
+            - developer
+          type:
+            type: string
+            enum:
+            - message
+        required:
+        - role
+        - content
+      FileSearchTool:
+        properties:
+          type:
+            type: string
+            enum:
+            - file_search
+        type: object
+        required:
+        - type
+        - vector_store_ids
+      FileSearchToolCall:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - file_search_call
+        required:
+        - id
+        - type
+        - status
+        - queries
+      FunctionCallOutputItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - function_call_output
+        type: object
+        required:
+        - type
+        - output
+      FunctionShellCall:
+        properties:
+          type:
+            type: string
+            enum:
+            - shell_call
+        type: object
+        required:
+        - type
+        - id
+        - call_id
+        - action
+        - status
+        - environment
+      FunctionShellCallItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - shell_call
+        type: object
+        required:
+        - call_id
+        - type
+        - action
+      FunctionShellCallOutput:
+        properties:
+          type:
+            type: string
+            enum:
+            - shell_call_output
+        type: object
+        required:
+        - type
+        - id
+        - call_id
+        - status
+        - output
+        - max_output_length
+      FunctionShellCallOutputItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - shell_call_output
+        type: object
+        required:
+        - call_id
+        - type
+        - output
+      FunctionShellToolParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - shell
+        type: object
+        required:
+        - type
+      FunctionTool:
+        properties:
+          type:
+            type: string
+            enum:
+            - function
+        type: object
+        required:
+        - type
+        - name
+        - strict
+        - parameters
+      FunctionToolCall:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - function_call
+        required:
+        - type
+        - call_id
+        - name
+        - arguments
+      FunctionToolCallOutput:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - function_call_output
+        required:
+        - type
+        - output
+      FunctionToolCallOutputResource:
+        allOf:
+        - $ref: '#/components/schemas/FunctionToolCallOutput'
+        - type: object
+          properties: {}
+          required:
+          - id
+          - status
+      ImageGenTool:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - image_generation
+        required:
+        - type
+      ImageGenToolCall:
+        properties:
+          type:
+            type: string
+            enum:
+            - image_generation_call
+        type: object
+        required:
+        - type
+        - id
+        - status
+        - result
+      InputContent:
+        oneOf:
+        - $ref: '#/components/schemas/InputTextContent'
+        - $ref: '#/components/schemas/InputImageContent'
+        - $ref: '#/components/schemas/InputFileContent'
+        discriminator:
+          propertyName: type
+      InputFileContent:
+        properties:
+          type:
+            type: string
+            enum:
+            - input_file
+        type: object
+        required:
+        - type
+      InputImageContent:
+        properties:
+          type:
+            type: string
+            enum:
+            - input_image
+        type: object
+        required:
+        - type
+        - detail
+      InputItem:
+        oneOf:
+        - $ref: '#/components/schemas/EasyInputMessage'
+        - type: object
+          $ref: '#/components/schemas/Item'
+        - $ref: '#/components/schemas/CompactionTriggerItemParam'
+        - $ref: '#/components/schemas/ItemReferenceParam'
+        - $ref: '#/components/schemas/ProgramItemParam'
+        - $ref: '#/components/schemas/ProgramOutputItemParam'
+        discriminator:
+          propertyName: type
+      InputMessage:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - message
+          role:
+            type: string
+            enum:
+            - user
+            - system
+            - developer
+        required:
+        - role
+        - content
+      InputTextContent:
+        properties:
+          type:
+            type: string
+            enum:
+            - input_text
+        type: object
+        required:
+        - type
+        - text
+      Item:
+        type: object
+        oneOf:
+        - $ref: '#/components/schemas/InputMessage'
+        - $ref: '#/components/schemas/OutputMessage'
+        - $ref: '#/components/schemas/FileSearchToolCall'
+        - $ref: '#/components/schemas/ComputerToolCall'
+        - $ref: '#/components/schemas/ComputerCallOutputItemParam'
+        - $ref: '#/components/schemas/WebSearchToolCall'
+        - $ref: '#/components/schemas/FunctionToolCall'
+        - $ref: '#/components/schemas/FunctionCallOutputItemParam'
+        - $ref: '#/components/schemas/ToolSearchCallItemParam'
+        - $ref: '#/components/schemas/ToolSearchOutputItemParam'
+        - $ref: '#/components/schemas/AdditionalToolsItemParam'
+        - $ref: '#/components/schemas/ResponseConfigurationUpdateItemParam'
+        - $ref: '#/components/schemas/ReasoningItem'
+        - $ref: '#/components/schemas/CompactionSummaryItemParam'
+        - $ref: '#/components/schemas/ImageGenToolCall'
+        - $ref: '#/components/schemas/CodeInterpreterToolCall'
+        - $ref: '#/components/schemas/LocalShellToolCall'
+        - $ref: '#/components/schemas/LocalShellToolCallOutput'
+        - $ref: '#/components/schemas/FunctionShellCallItemParam'
+        - $ref: '#/components/schemas/FunctionShellCallOutputItemParam'
+        - $ref: '#/components/schemas/ApplyPatchToolCallItemParam'
+        - $ref: '#/components/schemas/ApplyPatchToolCallOutputItemParam'
+        - $ref: '#/components/schemas/MCPListTools'
+        - $ref: '#/components/schemas/MCPApprovalRequest'
+        - $ref: '#/components/schemas/MCPApprovalResponse'
+        - $ref: '#/components/schemas/MCPToolCall'
+        - $ref: '#/components/schemas/CustomToolCallOutput'
+        - $ref: '#/components/schemas/CustomToolCall'
+        discriminator:
+          propertyName: type
+      ItemReferenceParam:
+        properties:
+          type:
+            anyOf:
+            - type: string
+              enum:
+              - item_reference
+            - type: 'null'
+        type: object
+        required:
+        - id
+      LocalShellToolCall:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - local_shell_call
+        required:
+        - type
+        - id
+        - call_id
+        - action
+        - status
+      LocalShellToolCallOutput:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - local_shell_call_output
+        required:
+        - id
+        - type
+        - call_id
+        - output
+      LocalShellToolParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - local_shell
+        type: object
+        required:
+        - type
+      MCPApprovalRequest:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - mcp_approval_request
+        required:
+        - type
+        - id
+        - server_label
+        - name
+        - arguments
+      MCPApprovalResponse:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - mcp_approval_response
+        required:
+        - type
+        - request_id
+        - approve
+        - approval_request_id
+      MCPApprovalResponseResource:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - mcp_approval_response
+        required:
+        - type
+        - id
+        - request_id
+        - approve
+        - approval_request_id
+      MCPListTools:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - mcp_list_tools
+        required:
+        - type
+        - id
+        - server_label
+        - tools
+      MCPTool:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - mcp
+        required:
+        - type
+        - server_label
+      MCPToolCall:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - mcp_call
+        required:
+        - type
+        - id
+        - server_label
+        - name
+        - arguments
+      MessageRole:
+        type: string
+        enum:
+        - unknown
+        - user
+        - assistant
+        - system
+        - critic
+        - discriminator
+        - developer
+        - tool
+      NamespaceToolParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - namespace
+        type: object
+        required:
+        - type
+        - name
+        - description
+        - tools
+      OutputContent:
+        oneOf:
+        - $ref: '#/components/schemas/OutputTextContent'
+        - $ref: '#/components/schemas/RefusalContent'
+        - $ref: '#/components/schemas/ReasoningTextContent'
+        discriminator:
+          propertyName: type
+      OutputItem:
+        oneOf:
+        - $ref: '#/components/schemas/OutputMessage'
+        - $ref: '#/components/schemas/FileSearchToolCall'
+        - $ref: '#/components/schemas/FunctionToolCall'
+        - $ref: '#/components/schemas/FunctionToolCallOutputResource'
+        - $ref: '#/components/schemas/WebSearchToolCall'
+        - $ref: '#/components/schemas/ComputerToolCall'
+        - $ref: '#/components/schemas/ComputerToolCallOutputResource'
+        - $ref: '#/components/schemas/ReasoningItem'
+        - $ref: '#/components/schemas/Program'
+        - $ref: '#/components/schemas/ProgramOutput'
+        - $ref: '#/components/schemas/ToolSearchCall'
+        - $ref: '#/components/schemas/ToolSearchOutput'
+        - $ref: '#/components/schemas/AdditionalTools'
+        - $ref: '#/components/schemas/CompactionBody'
+        - $ref: '#/components/schemas/ImageGenToolCall'
+        - $ref: '#/components/schemas/CodeInterpreterToolCall'
+        - $ref: '#/components/schemas/LocalShellToolCall'
+        - $ref: '#/components/schemas/LocalShellToolCallOutput'
+        - $ref: '#/components/schemas/FunctionShellCall'
+        - $ref: '#/components/schemas/FunctionShellCallOutput'
+        - $ref: '#/components/schemas/ApplyPatchToolCall'
+        - $ref: '#/components/schemas/ApplyPatchToolCallOutput'
+        - $ref: '#/components/schemas/MCPToolCall'
+        - $ref: '#/components/schemas/MCPListTools'
+        - $ref: '#/components/schemas/MCPApprovalRequest'
+        - $ref: '#/components/schemas/MCPApprovalResponseResource'
+        - $ref: '#/components/schemas/CustomToolCall'
+        - $ref: '#/components/schemas/CustomToolCallOutputResource'
+        discriminator:
+          propertyName: type
+      OutputMessage:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - message
+          role:
+            type: string
+            enum:
+            - assistant
+        required:
+        - id
+        - type
+        - role
+        - content
+        - status
+      OutputMessageContent:
+        oneOf:
+        - $ref: '#/components/schemas/OutputTextContent'
+        - $ref: '#/components/schemas/RefusalContent'
+        discriminator:
+          propertyName: type
+      OutputTextContent:
+        properties:
+          type:
+            type: string
+            enum:
+            - output_text
+        type: object
+        required:
+        - type
+        - text
+        - annotations
+        - logprobs
+      Program:
+        properties:
+          type:
+            type: string
+            enum:
+            - program
+        type: object
+        required:
+        - type
+        - id
+        - call_id
+        - code
+        - fingerprint
+      ProgramItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - program
+        type: object
+        required:
+        - id
+        - type
+        - call_id
+        - code
+        - fingerprint
+      ProgramOutput:
+        properties:
+          type:
+            type: string
+            enum:
+            - program_output
+        type: object
+        required:
+        - type
+        - id
+        - call_id
+        - result
+        - status
+      ProgramOutputItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - program_output
+        type: object
+        required:
+        - id
+        - type
+        - call_id
+        - result
+        - status
+      ProgrammaticToolCallingParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - programmatic_tool_calling
+        type: object
+        required:
+        - type
+      RealtimeServerEvent:
+        discriminator:
+          propertyName: type
+        anyOf:
+        - $ref: '#/components/schemas/RealtimeServerEventConversationCreated'
+        - $ref: '#/components/schemas/RealtimeServerEventConversationItemCreated'
+        - $ref: '#/components/schemas/RealtimeServerEventConversationItemDeleted'
+        - $ref: '#/components/schemas/RealtimeServerEventConversationItemInputAudioTranscriptionCompleted'
+        - $ref: '#/components/schemas/RealtimeServerEventConversationItemInputAudioTranscriptionDelta'
+        - $ref: '#/components/schemas/RealtimeServerEventConversationItemInputAudioTranscriptionFailed'
+        - $ref: '#/components/schemas/RealtimeServerEventConversationItemRetrieved'
+        - $ref: '#/components/schemas/RealtimeServerEventConversationItemTruncated'
+        - $ref: '#/components/schemas/RealtimeServerEventError'
+        - $ref: '#/components/schemas/RealtimeServerEventInputAudioBufferCleared'
+        - $ref: '#/components/schemas/RealtimeServerEventInputAudioBufferCommitted'
+        - $ref: '#/components/schemas/RealtimeServerEventInputAudioBufferDtmfEventReceived'
+        - $ref: '#/components/schemas/RealtimeServerEventInputAudioBufferSpeechStarted'
+        - $ref: '#/components/schemas/RealtimeServerEventInputAudioBufferSpeechStopped'
+        - $ref: '#/components/schemas/RealtimeServerEventRateLimitsUpdated'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseAudioDelta'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseAudioDone'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseAudioTranscriptDelta'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseAudioTranscriptDone'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseContentPartAdded'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseContentPartDone'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseCreated'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseDone'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseFunctionCallArgumentsDelta'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseFunctionCallArgumentsDone'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseOutputItemAdded'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseOutputItemDone'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseTextDelta'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseTextDone'
+        - $ref: '#/components/schemas/RealtimeServerEventSessionCreated'
+        - $ref: '#/components/schemas/RealtimeServerEventSessionUpdated'
+        - $ref: '#/components/schemas/RealtimeServerEventOutputAudioBufferStarted'
+        - $ref: '#/components/schemas/RealtimeServerEventOutputAudioBufferStopped'
+        - $ref: '#/components/schemas/RealtimeServerEventOutputAudioBufferCleared'
+        - $ref: '#/components/schemas/RealtimeServerEventConversationItemAdded'
+        - $ref: '#/components/schemas/RealtimeServerEventConversationItemDone'
+        - $ref: '#/components/schemas/RealtimeServerEventInputAudioBufferTimeoutTriggered'
+        - $ref: '#/components/schemas/RealtimeServerEventConversationItemInputAudioTranscriptionSegment'
+        - $ref: '#/components/schemas/RealtimeServerEventMCPListToolsInProgress'
+        - $ref: '#/components/schemas/RealtimeServerEventMCPListToolsCompleted'
+        - $ref: '#/components/schemas/RealtimeServerEventMCPListToolsFailed'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseMCPCallArgumentsDelta'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseMCPCallArgumentsDone'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseMCPCallInProgress'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseMCPCallCompleted'
+        - $ref: '#/components/schemas/RealtimeServerEventResponseMCPCallFailed'
+      RealtimeServerEventConversationCreated:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.created
+        required:
+        - event_id
+        - type
+        - conversation
+      RealtimeServerEventConversationItemAdded:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.item.added
+        required:
+        - event_id
+        - type
+        - item
+      RealtimeServerEventConversationItemCreated:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.item.created
+        required:
+        - event_id
+        - type
+        - item
+      RealtimeServerEventConversationItemDeleted:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.item.deleted
+        required:
+        - event_id
+        - type
+        - item_id
+      RealtimeServerEventConversationItemDone:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.item.done
+        required:
+        - event_id
+        - type
+        - item
+      RealtimeServerEventConversationItemInputAudioTranscriptionCompleted:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.item.input_audio_transcription.completed
+        required:
+        - event_id
+        - type
+        - item_id
+        - content_index
+        - transcript
+        - usage
+      RealtimeServerEventConversationItemInputAudioTranscriptionDelta:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.item.input_audio_transcription.delta
+        required:
+        - event_id
+        - type
+        - item_id
+      RealtimeServerEventConversationItemInputAudioTranscriptionFailed:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.item.input_audio_transcription.failed
+        required:
+        - event_id
+        - type
+        - item_id
+        - content_index
+        - error
+      RealtimeServerEventConversationItemInputAudioTranscriptionSegment:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.item.input_audio_transcription.segment
+        required:
+        - event_id
+        - type
+        - item_id
+        - content_index
+        - text
+        - id
+        - speaker
+        - start
+        - end
+      RealtimeServerEventConversationItemRetrieved:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.item.retrieved
+        required:
+        - event_id
+        - type
+        - item
+      RealtimeServerEventConversationItemTruncated:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - conversation.item.truncated
+        required:
+        - event_id
+        - type
+        - item_id
+        - content_index
+        - audio_end_ms
+      RealtimeServerEventError:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - error
+        required:
+        - event_id
+        - type
+        - error
+      RealtimeServerEventInputAudioBufferCleared:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - input_audio_buffer.cleared
+        required:
+        - event_id
+        - type
+      RealtimeServerEventInputAudioBufferCommitted:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - input_audio_buffer.committed
+        required:
+        - event_id
+        - type
+        - item_id
+      RealtimeServerEventInputAudioBufferDtmfEventReceived:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - input_audio_buffer.dtmf_event_received
+        required:
+        - type
+        - event
+        - received_at
+      RealtimeServerEventInputAudioBufferSpeechStarted:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - input_audio_buffer.speech_started
+        required:
+        - event_id
+        - type
+        - audio_start_ms
+        - item_id
+      RealtimeServerEventInputAudioBufferSpeechStopped:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - input_audio_buffer.speech_stopped
+        required:
+        - event_id
+        - type
+        - audio_end_ms
+        - item_id
+      RealtimeServerEventInputAudioBufferTimeoutTriggered:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - input_audio_buffer.timeout_triggered
+        required:
+        - event_id
+        - type
+        - audio_start_ms
+        - audio_end_ms
+        - item_id
+      RealtimeServerEventMCPListToolsCompleted:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - mcp_list_tools.completed
+        required:
+        - event_id
+        - type
+        - item_id
+      RealtimeServerEventMCPListToolsFailed:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - mcp_list_tools.failed
+        required:
+        - event_id
+        - type
+        - item_id
+      RealtimeServerEventMCPListToolsInProgress:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - mcp_list_tools.in_progress
+        required:
+        - event_id
+        - type
+        - item_id
+      RealtimeServerEventOutputAudioBufferCleared:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - output_audio_buffer.cleared
+        required:
+        - event_id
+        - type
+        - response_id
+      RealtimeServerEventOutputAudioBufferStarted:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - output_audio_buffer.started
+        required:
+        - event_id
+        - type
+        - response_id
+      RealtimeServerEventOutputAudioBufferStopped:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - output_audio_buffer.stopped
+        required:
+        - event_id
+        - type
+        - response_id
+      RealtimeServerEventRateLimitsUpdated:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - rate_limits.updated
+        required:
+        - event_id
+        - type
+        - rate_limits
+      RealtimeServerEventResponseAudioDelta:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_audio.delta
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - content_index
+        - delta
+      RealtimeServerEventResponseAudioDone:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_audio.done
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - content_index
+      RealtimeServerEventResponseAudioTranscriptDelta:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_audio_transcript.delta
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - content_index
+        - delta
+      RealtimeServerEventResponseAudioTranscriptDone:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_audio_transcript.done
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - content_index
+        - transcript
+      RealtimeServerEventResponseContentPartAdded:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.content_part.added
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - content_index
+        - part
+      RealtimeServerEventResponseContentPartDone:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.content_part.done
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - content_index
+        - part
+      RealtimeServerEventResponseCreated:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.created
+        required:
+        - event_id
+        - type
+        - response
+      RealtimeServerEventResponseDone:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.done
+        required:
+        - event_id
+        - type
+        - response
+      RealtimeServerEventResponseFunctionCallArgumentsDelta:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.function_call_arguments.delta
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - call_id
+        - delta
+      RealtimeServerEventResponseFunctionCallArgumentsDone:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.function_call_arguments.done
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - call_id
+        - name
+        - arguments
+      RealtimeServerEventResponseMCPCallArgumentsDelta:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_call_arguments.delta
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - delta
+      RealtimeServerEventResponseMCPCallArgumentsDone:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_call_arguments.done
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - arguments
+      RealtimeServerEventResponseMCPCallCompleted:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_call.completed
+        required:
+        - event_id
+        - type
+        - output_index
+        - item_id
+      RealtimeServerEventResponseMCPCallFailed:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_call.failed
+        required:
+        - event_id
+        - type
+        - output_index
+        - item_id
+      RealtimeServerEventResponseMCPCallInProgress:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_call.in_progress
+        required:
+        - event_id
+        - type
+        - output_index
+        - item_id
+      RealtimeServerEventResponseOutputItemAdded:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_item.added
+        required:
+        - event_id
+        - type
+        - response_id
+        - output_index
+        - item
+      RealtimeServerEventResponseOutputItemDone:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_item.done
+        required:
+        - event_id
+        - type
+        - response_id
+        - output_index
+        - item
+      RealtimeServerEventResponseTextDelta:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_text.delta
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - content_index
+        - delta
+      RealtimeServerEventResponseTextDone:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_text.done
+        required:
+        - event_id
+        - type
+        - response_id
+        - item_id
+        - output_index
+        - content_index
+        - text
+      RealtimeServerEventSessionCreated:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - session.created
+        required:
+        - event_id
+        - type
+        - session
+      RealtimeServerEventSessionUpdated:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - session.updated
+        required:
+        - event_id
+        - type
+        - session
+      RealtimeTurnDetection:
+        anyOf:
+        - oneOf:
+          - type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: server_vad
+          - type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                const: semantic_vad
+          discriminator:
+            propertyName: type
+        - type: 'null'
+      ReasoningItem:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - reasoning
+        required:
+        - id
+        - summary
+        - type
+      ReasoningTextContent:
+        properties:
+          type:
+            type: string
+            enum:
+            - reasoning_text
+        type: object
+        required:
+        - type
+        - text
+      RefusalContent:
+        properties:
+          type:
+            type: string
+            enum:
+            - refusal
+        type: object
+        required:
+        - type
+        - refusal
+      ResponseAudioDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.audio.delta
+        required:
+        - type
+        - delta
+        - sequence_number
+      ResponseAudioDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.audio.done
+        required:
+        - type
+        - sequence_number
+        - response_id
+      ResponseAudioTranscriptDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.audio.transcript.delta
+        required:
+        - type
+        - response_id
+        - delta
+        - sequence_number
+      ResponseAudioTranscriptDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.audio.transcript.done
+        required:
+        - type
+        - response_id
+        - sequence_number
+      ResponseCodeInterpreterCallCodeDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.code_interpreter_call_code.delta
+        required:
+        - type
+        - output_index
+        - item_id
+        - delta
+        - sequence_number
+      ResponseCodeInterpreterCallCodeDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.code_interpreter_call_code.done
+        required:
+        - type
+        - output_index
+        - item_id
+        - code
+        - sequence_number
+      ResponseCodeInterpreterCallCompletedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.code_interpreter_call.completed
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseCodeInterpreterCallInProgressEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.code_interpreter_call.in_progress
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseCodeInterpreterCallInterpretingEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.code_interpreter_call.interpreting
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseCompactionCompactingStreamingEvent:
+        properties:
+          type:
+            type: string
+            enum:
+            - response.compaction.compacting
+        type: object
+        required:
+        - type
+        - sequence_number
+        - output_index
+        - item_id
+      ResponseCompletedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.completed
+        required:
+        - type
+        - response
+        - sequence_number
+      ResponseConfigurationUpdateItemParam:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - configuration_update
+        required:
+        - type
+      ResponseContentPartAddedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.content_part.added
+        required:
+        - type
+        - item_id
+        - output_index
+        - content_index
+        - part
+        - sequence_number
+      ResponseContentPartDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.content_part.done
+        required:
+        - type
+        - item_id
+        - output_index
+        - content_index
+        - part
+        - sequence_number
+      ResponseCreatedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.created
+        required:
+        - type
+        - response
+        - sequence_number
+      ResponseCustomToolCallInputDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.custom_tool_call_input.delta
+        required:
+        - type
+        - output_index
+        - item_id
+        - delta
+        - sequence_number
+      ResponseCustomToolCallInputDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.custom_tool_call_input.done
+        required:
+        - type
+        - output_index
+        - item_id
+        - input
+        - sequence_number
+      ResponseErrorEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - error
+        required:
+        - type
+        - code
+        - message
+        - param
+        - sequence_number
+      ResponseFailedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.failed
+        required:
+        - type
+        - response
+        - sequence_number
+      ResponseFileSearchCallCompletedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.file_search_call.completed
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseFileSearchCallInProgressEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.file_search_call.in_progress
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseFileSearchCallSearchingEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.file_search_call.searching
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseFunctionCallArgumentsDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.function_call_arguments.delta
+        required:
+        - type
+        - item_id
+        - output_index
+        - delta
+        - sequence_number
+      ResponseFunctionCallArgumentsDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.function_call_arguments.done
+        required:
+        - type
+        - item_id
+        - output_index
+        - arguments
+        - sequence_number
+      ResponseImageGenCallCompletedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.image_generation_call.completed
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseImageGenCallGeneratingEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.image_generation_call.generating
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseImageGenCallInProgressEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.image_generation_call.in_progress
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseImageGenCallPartialImageEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.image_generation_call.partial_image
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+        - partial_image_index
+        - partial_image_b64
+      ResponseInProgressEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.in_progress
+        required:
+        - type
+        - response
+        - sequence_number
+      ResponseIncompleteEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.incomplete
+        required:
+        - type
+        - response
+        - sequence_number
+      ResponseMCPCallArgumentsDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_call_arguments.delta
+        required:
+        - type
+        - output_index
+        - item_id
+        - delta
+        - sequence_number
+      ResponseMCPCallArgumentsDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_call_arguments.done
+        required:
+        - type
+        - output_index
+        - item_id
+        - arguments
+        - sequence_number
+      ResponseMCPCallCompletedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_call.completed
+        required:
+        - type
+        - item_id
+        - output_index
+        - sequence_number
+      ResponseMCPCallFailedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_call.failed
+        required:
+        - type
+        - item_id
+        - output_index
+        - sequence_number
+      ResponseMCPCallInProgressEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_call.in_progress
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseMCPListToolsCompletedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_list_tools.completed
+        required:
+        - type
+        - item_id
+        - output_index
+        - sequence_number
+      ResponseMCPListToolsFailedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_list_tools.failed
+        required:
+        - type
+        - item_id
+        - output_index
+        - sequence_number
+      ResponseMCPListToolsInProgressEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.mcp_list_tools.in_progress
+        required:
+        - type
+        - item_id
+        - output_index
+        - sequence_number
+      ResponseOutputItemAddedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_item.added
+        required:
+        - type
+        - output_index
+        - item
+        - sequence_number
+      ResponseOutputItemDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_item.done
+        required:
+        - type
+        - output_index
+        - item
+        - sequence_number
+      ResponseOutputTextAnnotationAddedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_text.annotation.added
+        required:
+        - type
+        - item_id
+        - output_index
+        - content_index
+        - annotation_index
+        - annotation
+        - sequence_number
+      ResponseQueuedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.queued
+        required:
+        - type
+        - response
+        - sequence_number
+      ResponseReasoningSummaryPartAddedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.reasoning_summary_part.added
+        required:
+        - type
+        - item_id
+        - output_index
+        - summary_index
+        - part
+        - sequence_number
+      ResponseReasoningSummaryPartDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.reasoning_summary_part.done
+        required:
+        - type
+        - item_id
+        - output_index
+        - summary_index
+        - part
+        - sequence_number
+      ResponseReasoningSummaryTextDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.reasoning_summary_text.delta
+        required:
+        - type
+        - item_id
+        - output_index
+        - summary_index
+        - delta
+        - sequence_number
+      ResponseReasoningSummaryTextDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.reasoning_summary_text.done
+        required:
+        - type
+        - item_id
+        - output_index
+        - summary_index
+        - text
+        - sequence_number
+      ResponseReasoningTextDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.reasoning_text.delta
+        required:
+        - type
+        - item_id
+        - output_index
+        - content_index
+        - delta
+        - sequence_number
+      ResponseReasoningTextDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.reasoning_text.done
+        required:
+        - type
+        - item_id
+        - output_index
+        - content_index
+        - text
+        - sequence_number
+      ResponseRefusalDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.refusal.delta
+        required:
+        - type
+        - item_id
+        - output_index
+        - content_index
+        - delta
+        - sequence_number
+      ResponseRefusalDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.refusal.done
+        required:
+        - type
+        - item_id
+        - output_index
+        - content_index
+        - refusal
+        - sequence_number
+      ResponseShellCallCommandAddedStreamingEvent:
+        properties:
+          type:
+            type: string
+            enum:
+            - response.shell_call_command.added
+        type: object
+        required:
+        - type
+        - sequence_number
+        - output_index
+        - command_index
+        - command
+      ResponseShellCallCommandDeltaStreamingEvent:
+        properties:
+          type:
+            type: string
+            enum:
+            - response.shell_call_command.delta
+        type: object
+        required:
+        - type
+        - sequence_number
+        - output_index
+        - command_index
+        - delta
+      ResponseShellCallCommandDoneStreamingEvent:
+        properties:
+          type:
+            type: string
+            enum:
+            - response.shell_call_command.done
+        type: object
+        required:
+        - type
+        - sequence_number
+        - output_index
+        - command_index
+        - command
+      ResponseShellCallOutputContentDeltaStreamingEvent:
+        properties:
+          type:
+            type: string
+            enum:
+            - response.shell_call_output_content.delta
+        type: object
+        required:
+        - type
+        - sequence_number
+        - item_id
+        - output_index
+        - command_index
+        - delta
+      ResponseShellCallOutputContentDoneStreamingEvent:
+        properties:
+          type:
+            type: string
+            enum:
+            - response.shell_call_output_content.done
+        type: object
+        required:
+        - type
+        - sequence_number
+        - item_id
+        - output_index
+        - command_index
+        - output
+      ResponseStreamEvent:
+        anyOf:
+        - $ref: '#/components/schemas/ResponseAudioDeltaEvent'
+        - $ref: '#/components/schemas/ResponseAudioDoneEvent'
+        - $ref: '#/components/schemas/ResponseAudioTranscriptDeltaEvent'
+        - $ref: '#/components/schemas/ResponseAudioTranscriptDoneEvent'
+        - $ref: '#/components/schemas/ResponseCodeInterpreterCallCodeDeltaEvent'
+        - $ref: '#/components/schemas/ResponseCodeInterpreterCallCodeDoneEvent'
+        - $ref: '#/components/schemas/ResponseCodeInterpreterCallCompletedEvent'
+        - $ref: '#/components/schemas/ResponseCodeInterpreterCallInProgressEvent'
+        - $ref: '#/components/schemas/ResponseCodeInterpreterCallInterpretingEvent'
+        - $ref: '#/components/schemas/ResponseCompactionCompactingStreamingEvent'
+        - $ref: '#/components/schemas/ResponseCompletedEvent'
+        - $ref: '#/components/schemas/ResponseContentPartAddedEvent'
+        - $ref: '#/components/schemas/ResponseContentPartDoneEvent'
+        - $ref: '#/components/schemas/ResponseCreatedEvent'
+        - $ref: '#/components/schemas/ResponseErrorEvent'
+        - $ref: '#/components/schemas/ResponseFileSearchCallCompletedEvent'
+        - $ref: '#/components/schemas/ResponseFileSearchCallInProgressEvent'
+        - $ref: '#/components/schemas/ResponseFileSearchCallSearchingEvent'
+        - $ref: '#/components/schemas/ResponseFunctionCallArgumentsDeltaEvent'
+        - $ref: '#/components/schemas/ResponseFunctionCallArgumentsDoneEvent'
+        - $ref: '#/components/schemas/ResponseShellCallCommandAddedStreamingEvent'
+        - $ref: '#/components/schemas/ResponseShellCallCommandDeltaStreamingEvent'
+        - $ref: '#/components/schemas/ResponseShellCallCommandDoneStreamingEvent'
+        - $ref: '#/components/schemas/ResponseShellCallOutputContentDeltaStreamingEvent'
+        - $ref: '#/components/schemas/ResponseShellCallOutputContentDoneStreamingEvent'
+        - $ref: '#/components/schemas/ResponseInProgressEvent'
+        - $ref: '#/components/schemas/ResponseFailedEvent'
+        - $ref: '#/components/schemas/ResponseIncompleteEvent'
+        - $ref: '#/components/schemas/ResponseOutputItemAddedEvent'
+        - $ref: '#/components/schemas/ResponseOutputItemDoneEvent'
+        - $ref: '#/components/schemas/ResponseReasoningSummaryPartAddedEvent'
+        - $ref: '#/components/schemas/ResponseReasoningSummaryPartDoneEvent'
+        - $ref: '#/components/schemas/ResponseReasoningSummaryTextDeltaEvent'
+        - $ref: '#/components/schemas/ResponseReasoningSummaryTextDoneEvent'
+        - $ref: '#/components/schemas/ResponseReasoningTextDeltaEvent'
+        - $ref: '#/components/schemas/ResponseReasoningTextDoneEvent'
+        - $ref: '#/components/schemas/ResponseRefusalDeltaEvent'
+        - $ref: '#/components/schemas/ResponseRefusalDoneEvent'
+        - $ref: '#/components/schemas/ResponseTextDeltaEvent'
+        - $ref: '#/components/schemas/ResponseTextDoneEvent'
+        - $ref: '#/components/schemas/ResponseWebSearchCallCompletedEvent'
+        - $ref: '#/components/schemas/ResponseWebSearchCallInProgressEvent'
+        - $ref: '#/components/schemas/ResponseWebSearchCallSearchingEvent'
+        - $ref: '#/components/schemas/ResponseImageGenCallCompletedEvent'
+        - $ref: '#/components/schemas/ResponseImageGenCallGeneratingEvent'
+        - $ref: '#/components/schemas/ResponseImageGenCallInProgressEvent'
+        - $ref: '#/components/schemas/ResponseImageGenCallPartialImageEvent'
+        - $ref: '#/components/schemas/ResponseMCPCallArgumentsDeltaEvent'
+        - $ref: '#/components/schemas/ResponseMCPCallArgumentsDoneEvent'
+        - $ref: '#/components/schemas/ResponseMCPCallCompletedEvent'
+        - $ref: '#/components/schemas/ResponseMCPCallFailedEvent'
+        - $ref: '#/components/schemas/ResponseMCPCallInProgressEvent'
+        - $ref: '#/components/schemas/ResponseMCPListToolsCompletedEvent'
+        - $ref: '#/components/schemas/ResponseMCPListToolsFailedEvent'
+        - $ref: '#/components/schemas/ResponseMCPListToolsInProgressEvent'
+        - $ref: '#/components/schemas/ResponseOutputTextAnnotationAddedEvent'
+        - $ref: '#/components/schemas/ResponseQueuedEvent'
+        - $ref: '#/components/schemas/ResponseCustomToolCallInputDeltaEvent'
+        - $ref: '#/components/schemas/ResponseCustomToolCallInputDoneEvent'
+        discriminator:
+          propertyName: type
+      ResponseTextDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_text.delta
+        required:
+        - type
+        - item_id
+        - output_index
+        - content_index
+        - delta
+        - sequence_number
+        - logprobs
+      ResponseTextDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.output_text.done
+        required:
+        - type
+        - item_id
+        - output_index
+        - content_index
+        - text
+        - sequence_number
+        - logprobs
+      ResponseWebSearchCallCompletedEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.web_search_call.completed
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseWebSearchCallInProgressEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.web_search_call.in_progress
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      ResponseWebSearchCallSearchingEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - response.web_search_call.searching
+        required:
+        - type
+        - output_index
+        - item_id
+        - sequence_number
+      SpeechAudioDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - speech.audio.delta
+        required:
+        - type
+        - audio
+      SpeechAudioDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - speech.audio.done
+        required:
+        - type
+        - usage
+      Tool:
+        discriminator:
+          propertyName: type
+        oneOf:
+        - $ref: '#/components/schemas/FunctionTool'
+        - $ref: '#/components/schemas/FileSearchTool'
+        - $ref: '#/components/schemas/ComputerTool'
+        - $ref: '#/components/schemas/ComputerUsePreviewTool'
+        - $ref: '#/components/schemas/WebSearchTool'
+        - $ref: '#/components/schemas/MCPTool'
+        - $ref: '#/components/schemas/CodeInterpreterTool'
+        - $ref: '#/components/schemas/ProgrammaticToolCallingParam'
+        - $ref: '#/components/schemas/ImageGenTool'
+        - $ref: '#/components/schemas/LocalShellToolParam'
+        - $ref: '#/components/schemas/FunctionShellToolParam'
+        - $ref: '#/components/schemas/CustomToolParam'
+        - $ref: '#/components/schemas/NamespaceToolParam'
+        - $ref: '#/components/schemas/ToolSearchToolParam'
+        - $ref: '#/components/schemas/WebSearchPreviewTool'
+        - $ref: '#/components/schemas/ApplyPatchToolParam'
+      ToolSearchCall:
+        properties:
+          type:
+            type: string
+            enum:
+            - tool_search_call
+        type: object
+        required:
+        - type
+        - id
+        - call_id
+        - execution
+        - arguments
+        - status
+      ToolSearchCallItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - tool_search_call
+        type: object
+        required:
+        - type
+        - arguments
+      ToolSearchOutput:
+        properties:
+          type:
+            type: string
+            enum:
+            - tool_search_output
+        type: object
+        required:
+        - type
+        - id
+        - call_id
+        - execution
+        - tools
+        - status
+      ToolSearchOutputItemParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - tool_search_output
+        type: object
+        required:
+        - type
+        - tools
+      ToolSearchToolParam:
+        properties:
+          type:
+            type: string
+            enum:
+            - tool_search
+        type: object
+        required:
+        - type
+      TranscriptTextDeltaEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - transcript.text.delta
+        required:
+        - type
+        - delta
+      TranscriptTextDoneEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - transcript.text.done
+        required:
+        - type
+        - text
+      TranscriptTextSegmentEvent:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - transcript.text.segment
+        required:
+        - type
+        - id
+        - start
+        - end
+        - text
+        - speaker
+      TranscriptTextUsageDuration:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - duration
+        required:
+        - type
+        - seconds
+      TranscriptTextUsageTokens:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - tokens
+        required:
+        - type
+        - input_tokens
+        - output_tokens
+        - total_tokens
+      WebSearchPreviewTool:
+        properties:
+          type:
+            type: string
+            enum:
+            - web_search_preview
+            - web_search_preview_2025_03_11
+        type: object
+        required:
+        - type
+      WebSearchTool:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - web_search
+            - web_search_2025_08_26
+        required:
+        - type
+      WebSearchToolCall:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - web_search_call
+        required:
+        - id
+        - type
+        - status

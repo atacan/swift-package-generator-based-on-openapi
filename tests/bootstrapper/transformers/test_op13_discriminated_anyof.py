@@ -43,7 +43,13 @@ def test_pipeline_normalizes_disjoint_tagged_anyof(tmp_path):
     event = json.loads(output.read_text())["components"]["schemas"]["Event"]
     assert "anyOf" not in event
     assert event["oneOf"] == alternatives
-    assert event["discriminator"] == discriminator
+    assert event["discriminator"] == {
+        "propertyName": "type",
+        "mapping": {
+            **discriminator["mapping"],
+            "response.completed": "#/components/schemas/Completed",
+        },
+    }
 
 
 @pytest.fixture

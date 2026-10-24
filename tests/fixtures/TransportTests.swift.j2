@@ -1,0 +1,47 @@
+import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+import HTTPTypes
+import OpenAPIRuntime
+import Testing
+import TestProject
+import TestProject{{ suffix }}
+import {{ module }}
+
+private struct MarkerMiddleware: ClientMiddleware {
+    func intercept(
+        _ request: HTTPRequest,
+        body: HTTPBody?,
+        baseURL: URL,
+        operationID: String,
+        next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+    ) async throws -> (HTTPResponse, HTTPBody?) {
+        var request = request
+        request.headerFields[HTTPField.Name("x-marker")!] = "custom"
+        return try await next(request, body, baseURL)
+    }
+}
+
+struct {{ suffix }}BehaviorTests {
+    @Test func factoryUsesSharedAuthenticationAndInjectedConfiguration() async throws {
+        let client: Client = .{{ method }}(
+            serverURL: URL(string: "{{ server_url }}")!,
+            authentication: .bearer("token"),
+            transportConfiguration: {{ configuration }},
+            middlewares: [MarkerMiddleware()]
+        )
+        let secure = try await client.bearer().ok.body.json
+        #expect(secure.authorization == "Bearer token")
+        #expect(secure.marker == "custom")
+        let anonymous = try await client.publicEndpoint().ok.body.json
+        #expect(anonymous.authorization == "<none>")
+        #expect(anonymous.marker == "custom")
+        let keyClient: Client = .{{ method }}(
+            serverURL: URL(string: "{{ server_url }}")!,
+            authentication: .apiKey { "dynamic-key" }
+        )
+        let keyed = try await keyClient.key().ok.body.json
+        #expect(keyed.apiKey == "dynamic-key")
+    }
+}

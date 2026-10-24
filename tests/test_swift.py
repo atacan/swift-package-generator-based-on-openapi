@@ -141,6 +141,9 @@ class TestEnsurePackageStructure:
                 "client_file",
                 "tests_file",
             }
+            expected_keys.update(
+                {"urlsession_dir", "asynchttpclient_dir", "urlsession_file", "asynchttpclient_file"}
+            )
             assert set(results.keys()) == expected_keys
 
     def test_idempotent_on_second_call(self):
@@ -326,7 +329,7 @@ class TestRunOpenAPIGenerator:
         """Test handling when types generation fails."""
         # First call fails (types), second succeeds (client)
         mock_run.side_effect = [
-            MagicMock(returncode=1),
+            MagicMock(returncode=1, stdout="", stderr=""),
             MagicMock(returncode=0),
         ]
 
@@ -587,8 +590,8 @@ class TestCreateInitialSwiftFiles:
 
         Tests that:
         - TypesFile contains 'import OpenAPIRuntime' and project_name in header
-        - ClientFile contains 'import OpenAPIRuntime', 'import OpenAPIAsyncHTTPClient'
-        - TestsFile contains 'import Testing', 'import {ProjectName}', 'import UsefulThings'
+        - ClientFile imports only the transport-independent runtime
+        - TestsFile imports Testing and package modules without transport dependencies
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             target_dir = Path(tmpdir)
@@ -609,7 +612,7 @@ class TestCreateInitialSwiftFiles:
             client_file = client_dir / f"{project_name}.swift"
             client_content = client_file.read_text(encoding="utf-8")
             assert "import OpenAPIRuntime" in client_content
-            assert "import OpenAPIAsyncHTTPClient" in client_content
+            assert "import OpenAPIAsyncHTTPClient" not in client_content
             assert project_name in client_content
 
             # Read tests file and verify content
@@ -618,7 +621,7 @@ class TestCreateInitialSwiftFiles:
             tests_content = tests_file.read_text(encoding="utf-8")
             assert "import Testing" in tests_content
             assert f"import {project_name}" in tests_content
-            assert "import UsefulThings" in tests_content
+            assert "import UsefulThings" not in tests_content
 
     def test_swift_files_preserved(self):
         """Verify preservation behavior - user edits are not overwritten.

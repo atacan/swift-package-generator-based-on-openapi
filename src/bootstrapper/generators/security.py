@@ -6,6 +6,7 @@ and generate appropriate Swift authentication middleware based on the detected s
 
 from enum import Enum
 from pathlib import Path
+from urllib.parse import unquote
 
 from bootstrapper.core.loader import load_spec
 from bootstrapper.generators.templates import render_template, write_if_not_exists
@@ -71,7 +72,7 @@ def classify_security_scheme(scheme_name: str, scheme_def: dict) -> SecuritySche
     scheme_type = scheme_def.get("type")
 
     # HTTP Bearer authentication
-    if scheme_type == "http" and scheme_def.get("scheme") == "bearer":
+    if scheme_type == "http" and scheme_def.get("scheme", "").lower() == "bearer":
         return SecurityScheme(scheme_name, SecuritySchemeType.HTTP_BEARER)
 
     # API Key in header
@@ -120,92 +121,140 @@ def get_primary_security_scheme(openapi_path: Path) -> SecurityScheme | None:
     return None
 
 
+def swift_string(value: str) -> str:
+    """Encode spec-provided text as a Swift literal, including interpolation escapes."""
+    escaped = []
+    for char in value:
+        if char in ("\\", '"'):
+            escaped.append("\\" + char)
+        elif ord(char) < 32 or ord(char) == 127:
+            escaped.append(f"\\u{{{ord(char):x}}}")
+        else:
+            escaped.append(char)
+    return '"' + "".join(escaped) + '"'
+
+
+def resolve_local_object(spec: dict, value: dict) -> dict:
+    """Resolve local references without silently treating unresolved security as public."""
+    seen = set()
+    while "$ref" in value:
+        reference = value["$ref"]
+        if reference in seen or not reference.startswith("#/"):
+            raise ValueError(f"Unsupported or cyclic security/path reference: {reference}")
+        seen.add(reference)
+        resolved = spec
+        for token in unquote(reference[2:]).split("/"):
+            resolved = resolved[token.replace("~1", "/").replace("~0", "~")]
+        value = {**resolved, **{key: item for key, item in value.items() if key != "$ref"}}
+    return value
+
+
+def security_template_context(spec: dict) -> dict[str, str]:
+    """Build transport-independent security metadata from the overlaid specification."""
+    schemes = []
+    for name, definition in sorted(extract_security_schemes(spec).items()):
+        definition = resolve_local_object(spec, definition)
+        scheme = classify_security_scheme(name, definition)
+        expression = ".unsupported"
+        if scheme:
+            if scheme.scheme_type == SecuritySchemeType.HTTP_BEARER:
+                expression = ".bearer"
+            else:
+                expression = f".apiKey(header: {swift_string(scheme.header_name.lower())})"
+        schemes.append(f"{swift_string(name)}: {expression}")
+
+    def requirements_literal(requirements: list[dict]) -> str:
+        return (
+            "["
+            + ", ".join(
+                "[" + ", ".join(swift_string(name) for name in sorted(requirement)) + "]"
+                for requirement in requirements
+            )
+            + "]"
+        )
+
+    operations = []
+    methods = {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
+    for path, path_item in spec.get("paths", {}).items():
+        path_item = resolve_local_object(spec, path_item)
+        for method, operation in path_item.items():
+            if method not in methods or not isinstance(operation, dict):
+                continue
+            # Match swift-openapi-generator's operation identifier fallback.
+            operation_id = operation.get("operationId", f"{method}{path}")
+            requirements = operation.get("security", spec.get("security", []))
+            operations.append(f"{swift_string(operation_id)}: {requirements_literal(requirements)}")
+    return {
+        "schemes_literal": "[" + ", ".join(schemes) + "]" if schemes else "[:]",
+        "default_requirements_literal": requirements_literal(spec.get("security", [])),
+        "operations_literal": "[" + ", ".join(operations) + "]" if operations else "[:]",
+    }
+
+
+def create_authentication_support(target_dir: Path, project_name: str) -> dict[str, bool]:
+    """Create shared, editable authentication support and initial empty metadata."""
+    client_dir = target_dir / "Sources" / project_name
+    results = {}
+    for filename in ("Authentication.swift", "AuthenticationMiddleware.swift"):
+        results[filename] = write_if_not_exists(
+            client_dir / "Authentication" / filename,
+            render_template(f"{filename}.j2", {}),
+        )
+    metadata = client_dir / "Authentication" / "GeneratedSecurity" / "OperationSecurity.swift"
+    write_if_not_exists(
+        metadata, render_template("OperationSecurity.swift.j2", security_template_context({}))
+    )
+    return results
+
+
 def generate_authentication_middleware(
     target_dir: Path,
     project_name: str,
     openapi_file: str = "openapi.yaml",
-) -> dict[str, any]:
-    """Generate AuthenticationMiddleware.swift based on OpenAPI security schemes.
-
-    Args:
-        target_dir: The target project directory
-        project_name: Name of the Swift package
-        openapi_file: Name of the OpenAPI spec file (default: "openapi.yaml")
-
-    Returns:
-        Dictionary with generation status:
-        {
-            "generated": bool,  # True if file was created, False otherwise
-            "reason": str,      # Human-readable explanation
-            "scheme_name": str | None,  # Name of the security scheme used
-            "scheme_type": str | None,  # Type of authentication
-        }
-    """
+) -> dict:
+    """Preserve shared authentication code and refresh security metadata after overlays."""
     openapi_path = target_dir / openapi_file
-
-    # Check if OpenAPI file exists
     if not openapi_path.exists():
         return {
             "generated": False,
             "reason": f"OpenAPI file not found: {openapi_file}",
             "scheme_name": None,
             "scheme_type": None,
-        }
-
-    # Extract primary security scheme
-    raw_schemes = extract_security_schemes(load_spec(openapi_path)[0])
-    security_scheme = get_primary_security_scheme(openapi_path)
-
-    if not security_scheme:
-        if raw_schemes:
-            # Schemes exist but none are supported — caller should warn
-            return {
-                "generated": False,
-                "reason": "No supported security schemes found",
-                "scheme_name": None,
-                "scheme_type": None,
-                "unsupported_schemes": list(raw_schemes.keys()),
-            }
-        return {
-            "generated": False,
-            "reason": "No security schemes defined",
-            "scheme_name": None,
-            "scheme_type": None,
             "unsupported_schemes": [],
         }
 
-    # Prepare template context
-    context = {
-        "project_name": project_name,
-        "scheme_name": security_scheme.name,
-        "scheme_type": security_scheme.scheme_type.value,
-        "header_name": security_scheme.header_name,
-    }
+    spec, _ = load_spec(openapi_path)
+    context = security_template_context(spec)
+    support = create_authentication_support(target_dir, project_name)
+    metadata = (
+        target_dir
+        / "Sources"
+        / project_name
+        / "Authentication"
+        / "GeneratedSecurity"
+        / "OperationSecurity.swift"
+    )
+    content = render_template("OperationSecurity.swift.j2", context)
+    metadata_updated = metadata.read_text(encoding="utf-8") != content
+    if metadata_updated:
+        metadata.write_text(content, encoding="utf-8")
 
-    # Render template
-    content = render_template("AuthenticationMiddleware.swift.j2", context)
-
-    # Write to Types directory
-    types_dir = target_dir / "Sources" / f"{project_name}Types"
-    auth_file = types_dir / "AuthenticationMiddleware.swift"
-
-    # Use write_if_not_exists to preserve user edits
-    was_created = write_if_not_exists(auth_file, content, "AuthenticationMiddleware.swift")
-
-    if was_created:
-        scheme_type_readable = security_scheme.scheme_type.value.replace("_", " ")
-        return {
-            "generated": True,
-            "reason": f"Created with {scheme_type_readable} authentication",
-            "scheme_name": security_scheme.name,
-            "scheme_type": security_scheme.scheme_type.value,
-            "unsupported_schemes": [],
-        }
+    schemes = extract_security_schemes(spec)
+    unsupported = [
+        name
+        for name, definition in schemes.items()
+        if classify_security_scheme(name, resolve_local_object(spec, definition)) is None
+    ]
+    primary = get_primary_security_scheme(openapi_path)
+    if support["AuthenticationMiddleware.swift"]:
+        reason = "Created shared authentication support"
     else:
-        return {
-            "generated": False,
-            "reason": "File already exists (preserved user edits)",
-            "scheme_name": security_scheme.name,
-            "scheme_type": security_scheme.scheme_type.value,
-            "unsupported_schemes": [],
-        }
+        reason = "Authentication support already exists (preserved user edits)"
+    return {
+        "generated": support["AuthenticationMiddleware.swift"],
+        "metadata_updated": metadata_updated,
+        "reason": reason,
+        "scheme_name": primary.name if primary else None,
+        "scheme_type": primary.scheme_type.value if primary else None,
+        "unsupported_schemes": unsupported,
+    }

@@ -3,6 +3,86 @@
 Swift package generated from an OpenAPI specification. Run `make help` for build
 and code-generation commands.
 
+## Client products
+
+| Product | Contents |
+| --- | --- |
+| `{{ project_name }}Types` | Generated models, operation inputs/outputs, and API protocol |
+| `{{ project_name }}` | Generated client and shared authentication; accepts any `ClientTransport` |
+| `{{ project_name }}URLSession` | `Client.urlSession(...)` convenience factory |
+| `{{ project_name }}AsyncHTTPClient` | `Client.asyncHTTPClient(...)` convenience factory |
+
+Add the core product and your chosen convenience product to your application's
+target dependencies. Add the Types product as well if you import it directly.
+Both factories return the same `{{ project_name }}.Client` and expose the same API.
+Factories are scaffolded by the bootstrapper after successful generation of both
+Types and Client. If generation fails during the initial bootstrap, fix the
+toolchain/specification and run `make regenerate` to complete setup.
+
+```swift
+import Foundation
+import {{ project_name }}
+import {{ project_name }}URLSession
+
+let client = Client.urlSession(
+    serverURL: URL(string: "https://api.example.com")!,
+    authentication: .bearer("YOUR_TOKEN")
+)
+```
+
+For AsyncHTTPClient, import `{{ project_name }}AsyncHTTPClient` and use
+`Client.asyncHTTPClient(serverURL:authentication:)` with the same arguments.
+Use `.apiKey("YOUR_KEY")` for a header API key. These shorthand forms require
+exactly one scheme of the corresponding kind in the specification. For multiple
+or combined schemes, use their OpenAPI security scheme names:
+
+```swift
+let authentication = Authentication.credentials([
+    "BearerAuth": .init("YOUR_TOKEN"),
+    "ApiKeyAuth": .init("YOUR_KEY"),
+])
+```
+
+Dynamic credentials use an async, `@Sendable` provider, such as
+`Authentication.bearer { try await tokenStore.accessToken() }` or
+`Authentication.apiKey { try await keyStore.currentKey() }`. Named credentials
+support `.init(provider: { ... })` too. Providers run per authenticated request;
+the application handles token acquisition and refresh. Provider errors propagate.
+
+Authentication follows each operation's effective OpenAPI `security` requirements.
+Public operations (`security: []`) do not receive generated credentials. Schemes
+inside one requirement are combined; separate requirements are alternatives,
+selected in specification order when all credentials for one are available.
+An empty requirement (`{}`) permits anonymous access. Missing credentials or an
+unsupported required scheme cause an error before the request is sent. Factories
+default to `.none`, which works for public operations and reports missing
+credentials on protected operations. Built-in authentication supports bearer
+tokens and header API keys; use the original generated `Client` initializer with
+`transport:` and `middlewares:` for custom authentication.
+
+Both factories accept `configuration:` (OpenAPI runtime settings),
+`transportConfiguration:` (the upstream transport's configuration), and
+`middlewares:` (additional middleware). Additional middleware runs before shared
+authentication on outgoing requests. The default transports use their shared
+session/client. To inject your own, pass `URLSessionTransport.Configuration(session:)`
+or `AsyncHTTPClientTransport.Configuration(client:timeout:)`; import the upstream
+transport module and declare its product directly when using those types.
+The application owns any injected session/client and must manage its lifecycle;
+the package never invalidates or shuts it down. Do not shut down the shared client.
+
+For a custom transport, the core product provides
+`Client(serverURL:configuration:transport:authentication:middlewares:)`.
+
+Run `make regenerate` after changing the original specification or overlay.
+Authentication support and factory edits are preserved. Only
+`Sources/{{ project_name }}/Authentication/GeneratedSecurity/OperationSecurity.swift`
+is rewritten to reflect the final overlaid specification. External or cyclic
+references in security schemes/path items are rejected; local references are supported.
+
+The core target has no dependency on either transport. Both transport packages
+are declared at package level, so target isolation does not guarantee that every
+SwiftPM/Xcode workflow avoids resolving or fetching an unused transport.
+
 ## Secret scanning
 
 This repository includes Betterleaks and TruffleHog checks based on

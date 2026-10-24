@@ -105,15 +105,71 @@ MyAPIWrapper/
 ├── Sources/
 │   ├── MyAPIWrapperTypes/
 │   │   ├── MyAPIWrapperTypes.swift
-│   │   ├── AuthenticationMiddleware.swift  # Only if spec has security schemes
 │   │   └── GeneratedSources/              # swift-openapi-generator output
-│   └── MyAPIWrapper/
-│       ├── MyAPIWrapper.swift
-│       └── GeneratedSources/
+│   ├── MyAPIWrapper/
+│   │   ├── MyAPIWrapper.swift
+│   │   ├── Client+Authentication.swift
+│   │   ├── Authentication/
+│   │   │   ├── Authentication.swift
+│   │   │   ├── AuthenticationMiddleware.swift
+│   │   │   └── GeneratedSecurity/OperationSecurity.swift
+│   │   └── GeneratedSources/
+│   ├── MyAPIWrapperURLSession/
+│   │   └── Client+URLSession.swift
+│   └── MyAPIWrapperAsyncHTTPClient/
+│       └── Client+AsyncHTTPClient.swift
 └── Tests/
-    └── MyAPIWrapperTests/
-        └── MyAPIWrapperTests.swift
+    ├── MyAPIWrapperTypesTests/
+    ├── MyAPIWrapperTests/
+    ├── MyAPIWrapperURLSessionTests/
+    └── MyAPIWrapperAsyncHTTPClientTests/
 ```
+
+## Generated package products
+
+New packages expose four products: `{Name}Types`, `{Name}`, `{Name}URLSession`,
+and `{Name}AsyncHTTPClient`. The core client accepts any OpenAPI `ClientTransport`
+and has no dependency on either HTTP transport. Both convenience modules add
+factories returning that same generated `Client`:
+
+```swift
+import Foundation
+import MyAPIWrapper
+import MyAPIWrapperURLSession
+
+let client = Client.urlSession(
+    serverURL: URL(string: "https://api.example.com")!,
+    authentication: .bearer("YOUR_TOKEN")
+)
+```
+
+Use `MyAPIWrapperAsyncHTTPClient` and `Client.asyncHTTPClient(...)` for the other
+transport. Add the core and selected convenience products to your application's
+target dependencies. Factories also accept runtime `configuration:`, upstream
+`transportConfiguration:`, and additional `middlewares:`. Caller-provided sessions
+and HTTP clients remain owned by the caller, including their shutdown lifecycle.
+
+Shared authentication supports static or async bearer/header API key credentials,
+named credentials for multiple schemes, and operation-specific security rules.
+For example, `.bearer { try await tokenStore.accessToken() }` obtains a current
+token per authenticated request. Public operations receive no generated credentials;
+missing required credentials fail before sending. The generated README documents
+combined requirements, alternatives, custom transports, and configuration examples.
+Unsupported security schemes are reported and require custom middleware through
+the original generated Client initializer.
+
+Authentication requirements are regenerated from the final overlaid specification;
+editable support files and factories are preserved. Factory extensions are created
+after both OpenAPI generation steps succeed, keeping initial scaffolding buildable.
+Both transport packages remain declared at package level; an unused transport may
+still be resolved or fetched by some SwiftPM/Xcode workflows.
+
+If Types or Client generation fails, the CLI prints the generator's captured
+stdout/stderr and exits with status 1. Missing Swift, missing input files, and
+timeouts are reported explicitly, including any output captured before a timeout.
+The success message is printed only when both generation steps succeed.
+
+For packages generated with an older layout, see the [migration guide](MIGRATION.md).
 
 ## CLI Usage
 
@@ -292,7 +348,16 @@ These transformations are applied automatically to make specs compatible with `s
 | Format fixes | Converts `format: byte` to `contentEncoding: base64` |
 | Required cleanup | Removes invalid entries from `required` arrays |
 | Discriminated anyOf | Converts a tagged `anyOf` to `oneOf` only when every branch is an object with a required tag and disjoint string enum values; Swift can then generate a discriminated enum |
+| Discriminator mappings | Adds missing wire-value mappings for referenced object variants with required, disjoint string `const`/`enum` tags, including local references and `allOf` inheritance |
 | Overlay | Applies manual fixes from `openapi-overlay.yaml` (always last) |
+
+Mapping inference runs after discriminated `anyOf` normalization. It honors the
+discriminator's property name, maps every allowed tag value to its branch's original
+reference, and preserves existing explicit mappings. Constraints from `allOf` and
+`$ref` siblings are intersected. Optional tags, overlapping values, inline variants,
+unresolved or cyclic references, and conflicting explicit mappings leave the union
+unchanged. Manual changes to union branches or discriminator removal still belong
+in the overlay, which runs last.
 
 Bootstrap scaffolds a placeholder test file only for an empty test target. Existing
 Swift tests are preserved even when their filenames or subdirectories differ from

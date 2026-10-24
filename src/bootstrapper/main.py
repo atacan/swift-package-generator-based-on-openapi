@@ -203,6 +203,16 @@ def bootstrap(
         console.print("[bold green]✓[/bold green] Created Package.swift")
     else:
         console.print("[bold blue]✓[/bold blue] Package.swift already exists (preserved)")
+        manifest = (target_path / "Package.swift").read_text(encoding="utf-8")
+        if any(
+            f'"{project_name}{suffix}"' not in manifest
+            for suffix in ("URLSession", "AsyncHTTPClient")
+        ):
+            console.print(
+                "[bold yellow]![/bold yellow] Existing manifest needs a manual update "
+                "to expose the URLSession and AsyncHTTPClient products. "
+                "See MIGRATION.md in the bootstrapper repository for instructions."
+            )
 
     # Report Swift file creation
     if any(
@@ -299,14 +309,16 @@ def bootstrap(
         console.print(
             "[bold blue]✓[/bold blue] AuthenticationMiddleware.swift already exists (preserved)"
         )
-    elif auth_results.get("unsupported_schemes"):
+    if auth_results.get("metadata_updated"):
+        console.print("[bold green]✓[/bold green] Updated operation authentication requirements")
+    if auth_results.get("unsupported_schemes"):
         names = ", ".join(auth_results["unsupported_schemes"])
         console.print(
-            f"[bold yellow]⚠[/bold yellow] AuthenticationMiddleware.swift not generated: "
-            f"security scheme(s) [{names}] are not supported "
-            f"(only HTTP Bearer and API Key in header are supported)"
+            f"[bold yellow]⚠[/bold yellow] Unsupported security scheme(s): [{names}]. "
+            "Only HTTP Bearer and API Key in header are supported by shared authentication. "
+            "Use the generated Client's transport/middlewares initializer "
+            "for custom authentication."
         )
-    # Silent skip if no security schemes defined (normal/expected)
 
     # Step 4: Run OpenAPI generator
     with console.status("[bold yellow]Running Swift OpenAPI Generator..."):
@@ -318,22 +330,27 @@ def bootstrap(
             console.print(f"[bold red]✗[/bold red] Failed to run generator: {e}")
             raise typer.Exit(1)
 
-    # Report generation results
-    if generator_results["types_generated"]:
-        console.print("[bold green]✓[/bold green] Generated Types")
-    else:
-        console.print(
-            "[bold yellow]![/bold yellow] Types generation failed "
-            "(config file may be missing or swift toolchain not available)"
-        )
+    # Print diagnostics as plain text so Swift messages containing brackets are preserved.
+    for name, status_key, error_key in (
+        ("Types", "types_generated", "types_error"),
+        ("Client", "client_generated", "client_error"),
+    ):
+        if generator_results[status_key]:
+            console.print(f"[bold green]✓[/bold green] Generated {name}")
+        else:
+            console.print(f"[bold red]✗[/bold red] {name} generation failed")
+            console.print(
+                generator_results.get(error_key, "No generator diagnostics were provided."),
+                markup=False,
+                highlight=False,
+                soft_wrap=True,
+            )
 
-    if generator_results["client_generated"]:
-        console.print("[bold green]✓[/bold green] Generated Client")
-    else:
+    if not (generator_results["types_generated"] and generator_results["client_generated"]):
         console.print(
-            "[bold yellow]![/bold yellow] Client generation failed "
-            "(config file may be missing or swift toolchain not available)"
+            "[bold red]✗ Bootstrap failed: Swift code generation did not complete.[/bold red]"
         )
+        raise typer.Exit(1)
 
     # Final success message
     console.print()
