@@ -194,4 +194,5 @@ def test_existing_manifest_gets_migration_notice_without_overwriting(tmp_path, m
     result = CliRunner().invoke(app, [str(tmp_path), "--name", "TestProject"])
     assert result.exit_code == 0, result.stdout
     assert "manual update" in result.stdout
+    assert "MIGRATION.md" in result.stdout
     assert (tmp_path / "Package.swift").read_text() == manifest

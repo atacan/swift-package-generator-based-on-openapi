@@ -169,18 +169,7 @@ stdout/stderr and exits with status 1. Missing Swift, missing input files, and
 timeouts are reported explicitly, including any output captured before a timeout.
 The success message is printed only when both generation steps succeed.
 
-### Updating existing generated packages
-
-Existing `Package.swift`, helper files, and tests are preserved. Regeneration does
-not automatically migrate an older manifest to four products. Add the two transport
-products/targets and their dependencies using the current `Package.swift.j2` as a
-reference, add `HTTPTypes` directly to targets importing it, and remove the transport
-dependency/import from the core target. Add the corresponding test targets if desired.
-New shared authentication files are created under the core client target. Any old
-`Types/AuthenticationMiddleware.swift` is preserved; migrate custom behavior into
-the new shared middleware and remove the legacy file when its users have migrated.
-Existing test suites using `UsefulThings` should keep that dependency in their manifest;
-newly generated test placeholders do not require it.
+For packages generated with an older layout, see the [migration guide](MIGRATION.md).
 
 ## CLI Usage
 

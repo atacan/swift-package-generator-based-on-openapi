@@ -211,7 +211,7 @@ def bootstrap(
             console.print(
                 "[bold yellow]![/bold yellow] Existing manifest needs a manual update "
                 "to expose the URLSession and AsyncHTTPClient products. "
-                "See the bootstrapper README's existing-package migration instructions."
+                "See MIGRATION.md in the bootstrapper repository for instructions."
             )
 
     # Report Swift file creation
