@@ -29,6 +29,22 @@ custom Swift code, tests, and resources. There is no automatic scaffold migratio
    depends on core, `OpenAPIRuntime`, and its own transport product. Register the
    new test directories as test targets if you want to run them.
 
+   Move custom helpers such as `createClient(apiKey:)` that construct a specific
+   transport into `Sources/{Name}AsyncHTTPClient/` or `Sources/{Name}URLSession/`.
+   Preserve their server URL, timeout, runtime configuration, and middleware
+   behavior. Update callers and tests to depend on and import the helper's new
+   transport product; document this module change for downstream users.
+
+   Carry over the helper's imports and declare their package/product dependencies
+   directly in the receiving target. For example, a public AsyncHTTPClient factory
+   default using `.init(timeout: .minutes(10))` needs `import NIOCore` in its Swift
+   file, a direct `swift-nio` package dependency in `Package.swift`, and
+   `.product(name: "NIOCore", package: "swift-nio")` in the AsyncHTTPClient target's
+   dependencies. Retain `import OpenAPIAsyncHTTPClient` and its product dependency
+   there too. Missing imports for public default arguments can produce a warning
+   that becomes an error in Swift 6 language mode; do not rely on transitive imports.
+   Keep explicit caller overrides working when carrying defaults into factories.
+
 3. **Adopt shared authentication.** The new files live in
    `Sources/{Name}/Authentication/`. Update old
    `AuthenticationMiddleware(apiKey:)` call sites to the factories' `authentication:`
@@ -48,12 +64,18 @@ custom Swift code, tests, and resources. There is no automatic scaffold migratio
    `.process("Resources")` when existing suites use them. Tests importing runtime,
    HTTP types, or a transport should declare those product dependencies directly.
 
-5. **Verify and update your package documentation.** Run `swift build` and the
-   offline test suites, then rerun the generator and check the diff to confirm
-   your manual edits survive. Select offline suites explicitly if existing tests
-   automatically use credentials from `.env`. Update the preserved README and
-   AGENTS.md with the two factory examples and relevant troubleshooting guidance
-   from the current templates. Run live tests separately when intended.
+5. **Regenerate before the final build and tests.** After merging manifest changes,
+   resolve dependencies with `swift package resolve`, then rerun the bootstrapper.
+   Updated dependency requirements can select a newer `swift-openapi-generator`
+   and change generated source contents or file layout. In the AzureSpeech trial,
+   the generator changed from 1.12.2 to 1.14.2 and split Types into additional files.
+   Review the diff and confirm your manual edits survived, then run `swift build`
+   and the offline test suites against the regenerated output. If you regenerate
+   again and the output changes, repeat the final build and tests. Select offline
+   suites explicitly if existing tests automatically use credentials from `.env`.
+   Update the preserved README and AGENTS.md with the two factory examples and
+   relevant troubleshooting guidance from the current templates. Run live tests
+   separately when intended.
 
 In the SonioxAPI trial, regeneration, `swift build`, and the seven existing
 `ResponseDecodingTests` passed before migration. The preserved manifest still
@@ -68,6 +90,9 @@ the fractional-second default in both provider factories fixed that failure.
 The migrated package's offline verification command is:
 
 ```bash
+# From the bootstrapper repository, after editing the target manifest:
+swift package --package-path /path/to/SonioxAPI resolve
+uv run swift-bootstrapper bootstrap /path/to/SonioxAPI
 cd /path/to/SonioxAPI
 swift build
 swift test --filter 'ResponseDecodingTests|FactoryDefaultsTests|AuthenticationTests'
