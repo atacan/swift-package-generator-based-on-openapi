@@ -23,19 +23,23 @@ let package = Package(
             name: "{{ project_name }}",
             targets: ["{{ project_name }}"]
         ),
+        .library(name: "{{ project_name }}URLSession", targets: ["{{ project_name }}URLSession"]),
+        .library(name: "{{ project_name }}AsyncHTTPClient", targets: ["{{ project_name }}AsyncHTTPClient"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-openapi-generator.git", from: "1.13.0"),
         .package(url: "https://github.com/apple/swift-openapi-runtime.git", from: "1.12.0"),
         .package(url: "https://github.com/swift-server/swift-openapi-async-http-client", from: "1.5.0"),
-        .package(url: "https://github.com/atacan/UsefulThings", branch: "main"),
+        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-http-types", from: "1.0.0"),
     ],
     targets: [
         // Types target: Contains generated types from OpenAPI spec
         .target(
             name: "{{ project_name }}Types",
             dependencies: [
-                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime")
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+                .product(name: "HTTPTypes", package: "swift-http-types"),
             ]
         ),
         // Client target: Contains generated client and custom code
@@ -43,16 +47,59 @@ let package = Package(
             name: "{{ project_name }}",
             dependencies: [
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-                .product(name: "OpenAPIAsyncHTTPClient", package: "swift-openapi-async-http-client"),
+                .product(name: "HTTPTypes", package: "swift-http-types"),
                 .target(name: "{{ project_name }}Types"),
             ]
         ),
-        // Tests
+        // Transport conveniences both construct the shared generated Client.
+        .target(
+            name: "{{ project_name }}URLSession",
+            dependencies: [
+                .target(name: "{{ project_name }}"),
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+            ]
+        ),
+        .target(
+            name: "{{ project_name }}AsyncHTTPClient",
+            dependencies: [
+                .target(name: "{{ project_name }}"),
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+                .product(name: "OpenAPIAsyncHTTPClient", package: "swift-openapi-async-http-client"),
+            ]
+        ),
+        .testTarget(
+            name: "{{ project_name }}TypesTests",
+            dependencies: [.target(name: "{{ project_name }}Types")]
+        ),
+        .testTarget(
+            name: "{{ project_name }}URLSessionTests",
+            dependencies: [
+                .target(name: "{{ project_name }}"),
+                .target(name: "{{ project_name }}URLSession"),
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+                .product(name: "HTTPTypes", package: "swift-http-types"),
+            ]
+        ),
+        .testTarget(
+            name: "{{ project_name }}AsyncHTTPClientTests",
+            dependencies: [
+                .target(name: "{{ project_name }}"),
+                .target(name: "{{ project_name }}AsyncHTTPClient"),
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+                .product(name: "OpenAPIAsyncHTTPClient", package: "swift-openapi-async-http-client"),
+                .product(name: "HTTPTypes", package: "swift-http-types"),
+            ]
+        ),
+        // Shared client and authentication tests
         .testTarget(
             name: "{{ project_name }}Tests",
             dependencies: [
                 .target(name: "{{ project_name }}"),
-                .product(name: "UsefulThings", package: "UsefulThings"),
+                .target(name: "{{ project_name }}Types"),
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+                .product(name: "HTTPTypes", package: "swift-http-types"),
             ]
         ),
     ]

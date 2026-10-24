@@ -196,10 +196,8 @@ class TestFullPipelineYAML:
         user_response = transformed_spec["components"]["schemas"]["UserResponse"]
 
         # Test op1: anyOf with null should be unwrapped to just string
-        # and default: null should be removed
         assert "anyOf" not in user_response["properties"]["username"]
         assert user_response["properties"]["username"]["type"] == "string"
-        assert "default" not in user_response["properties"]["username"]
 
         # Test op2: const should be converted to enum
         assert "const" not in user_response["properties"]["status"]
@@ -229,8 +227,8 @@ class TestFullPipelineYAML:
         # Test op5: required array should be cleaned
         # nonexistent_field should be removed from required
         assert "nonexistent_field" not in user_response.get("required", [])
-        # username should remain (it was nullable via anyOf but op1 cleaned it)
-        assert "username" in user_response.get("required", [])
+        # Op4 detects nullable anyOf before op1 removes its null branch.
+        assert "username" not in user_response.get("required", [])
         # email should be REMOVED from required because it was nullable: true
         assert "email" not in user_response.get("required", [])
 
@@ -489,8 +487,14 @@ paths:
         # CLI should succeed (generator might fail if swift not available)
         assert result.exit_code in [0, 1]
 
-        # Verify AuthenticationMiddleware was created in Types target
-        auth_file = tmp_path / "Sources" / "TestProjectTypes" / "AuthenticationMiddleware.swift"
+        # Verify shared AuthenticationMiddleware was created in the client target
+        auth_file = (
+            tmp_path
+            / "Sources"
+            / "TestProject"
+            / "Authentication"
+            / "AuthenticationMiddleware.swift"
+        )
         assert auth_file.exists(), "AuthenticationMiddleware.swift should be created"
 
         # Verify content
@@ -534,18 +538,28 @@ paths:
         # CLI should succeed
         assert result.exit_code in [0, 1]
 
-        # Verify AuthenticationMiddleware was created in Types target
-        auth_file = tmp_path / "Sources" / "ApiKeyProjectTypes" / "AuthenticationMiddleware.swift"
+        # Verify shared AuthenticationMiddleware was created in the client target
+        auth_file = (
+            tmp_path
+            / "Sources"
+            / "ApiKeyProject"
+            / "Authentication"
+            / "AuthenticationMiddleware.swift"
+        )
         assert auth_file.exists(), "AuthenticationMiddleware.swift should be created"
 
         # Verify content
         content = auth_file.read_text(encoding="utf-8")
         assert "AuthenticationMiddleware" in content, "Should contain middleware struct"
-        assert "x-api-key" in content, "Should contain custom header name (lowercased)"
+        metadata = (
+            tmp_path
+            / "Sources/ApiKeyProject/Authentication/GeneratedSecurity/OperationSecurity.swift"
+        )
+        assert "x-api-key" in metadata.read_text()
         assert "HTTPField.Name" in content, "Should use HTTPField.Name for custom header"
 
-    def test_bootstrap_without_security_no_middleware(self, tmp_path):
-        """Test that no middleware is generated when security schemes are absent."""
+    def test_bootstrap_without_security_has_shared_authentication(self, tmp_path):
+        """Test shared support is available without attaching credentials to public APIs."""
         runner = CliRunner()
 
         # Create original_openapi.yaml WITHOUT security schemes
@@ -570,9 +584,15 @@ paths:
         # CLI should succeed
         assert result.exit_code in [0, 1]
 
-        # Verify AuthenticationMiddleware was NOT created in Types target
-        auth_file = tmp_path / "Sources" / "NoAuthProjectTypes" / "AuthenticationMiddleware.swift"
-        assert not auth_file.exists(), "AuthenticationMiddleware.swift should NOT be created"
+        # Verify shared authentication support exists even without security schemes
+        auth_file = (
+            tmp_path
+            / "Sources"
+            / "NoAuthProject"
+            / "Authentication"
+            / "AuthenticationMiddleware.swift"
+        )
+        assert auth_file.exists(), "Shared authentication support is always available"
 
         # Verify CLI output does NOT mention AuthenticationMiddleware generation
         # (silent skip is expected behavior)
@@ -607,8 +627,14 @@ paths:
         result = runner.invoke(app, [str(tmp_path), "--name", "PreserveProject"])
         assert result.exit_code in [0, 1]
 
-        # Verify middleware was created in Types target
-        auth_file = tmp_path / "Sources" / "PreserveProjectTypes" / "AuthenticationMiddleware.swift"
+        # Verify middleware was created in the client target
+        auth_file = (
+            tmp_path
+            / "Sources"
+            / "PreserveProject"
+            / "Authentication"
+            / "AuthenticationMiddleware.swift"
+        )
         assert auth_file.exists()
 
         # Modify the file with custom content

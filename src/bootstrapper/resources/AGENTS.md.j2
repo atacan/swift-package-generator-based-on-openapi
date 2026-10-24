@@ -5,3 +5,10 @@ make regenerate
 ```
 
 As this is a Swift package, you can find the code of the Swift package dependencies in the ".build/checkouts/" directory. Look at that folder when you need to understand how to use the code from the Swift package dependencies.
+
+The package exposes {{ project_name }}Types, {{ project_name }},
+{{ project_name }}URLSession, and {{ project_name }}AsyncHTTPClient products.
+Authentication belongs to the shared client target and is used by both transport
+factories. Keep transport imports and dependencies out of the Types and shared
+Client targets. Regenerate operation security metadata with `make regenerate`;
+do not edit Authentication/GeneratedSecurity/OperationSecurity.swift directly.

@@ -105,15 +105,82 @@ MyAPIWrapper/
 ├── Sources/
 │   ├── MyAPIWrapperTypes/
 │   │   ├── MyAPIWrapperTypes.swift
-│   │   ├── AuthenticationMiddleware.swift  # Only if spec has security schemes
 │   │   └── GeneratedSources/              # swift-openapi-generator output
-│   └── MyAPIWrapper/
-│       ├── MyAPIWrapper.swift
-│       └── GeneratedSources/
+│   ├── MyAPIWrapper/
+│   │   ├── MyAPIWrapper.swift
+│   │   ├── Client+Authentication.swift
+│   │   ├── Authentication/
+│   │   │   ├── Authentication.swift
+│   │   │   ├── AuthenticationMiddleware.swift
+│   │   │   └── GeneratedSecurity/OperationSecurity.swift
+│   │   └── GeneratedSources/
+│   ├── MyAPIWrapperURLSession/
+│   │   └── Client+URLSession.swift
+│   └── MyAPIWrapperAsyncHTTPClient/
+│       └── Client+AsyncHTTPClient.swift
 └── Tests/
-    └── MyAPIWrapperTests/
-        └── MyAPIWrapperTests.swift
+    ├── MyAPIWrapperTypesTests/
+    ├── MyAPIWrapperTests/
+    ├── MyAPIWrapperURLSessionTests/
+    └── MyAPIWrapperAsyncHTTPClientTests/
 ```
+
+## Generated package products
+
+New packages expose four products: `{Name}Types`, `{Name}`, `{Name}URLSession`,
+and `{Name}AsyncHTTPClient`. The core client accepts any OpenAPI `ClientTransport`
+and has no dependency on either HTTP transport. Both convenience modules add
+factories returning that same generated `Client`:
+
+```swift
+import Foundation
+import MyAPIWrapper
+import MyAPIWrapperURLSession
+
+let client = Client.urlSession(
+    serverURL: URL(string: "https://api.example.com")!,
+    authentication: .bearer("YOUR_TOKEN")
+)
+```
+
+Use `MyAPIWrapperAsyncHTTPClient` and `Client.asyncHTTPClient(...)` for the other
+transport. Add the core and selected convenience products to your application's
+target dependencies. Factories also accept runtime `configuration:`, upstream
+`transportConfiguration:`, and additional `middlewares:`. Caller-provided sessions
+and HTTP clients remain owned by the caller, including their shutdown lifecycle.
+
+Shared authentication supports static or async bearer/header API key credentials,
+named credentials for multiple schemes, and operation-specific security rules.
+For example, `.bearer { try await tokenStore.accessToken() }` obtains a current
+token per authenticated request. Public operations receive no generated credentials;
+missing required credentials fail before sending. The generated README documents
+combined requirements, alternatives, custom transports, and configuration examples.
+Unsupported security schemes are reported and require custom middleware through
+the original generated Client initializer.
+
+Authentication requirements are regenerated from the final overlaid specification;
+editable support files and factories are preserved. Factory extensions are created
+after both OpenAPI generation steps succeed, keeping initial scaffolding buildable.
+Both transport packages remain declared at package level; an unused transport may
+still be resolved or fetched by some SwiftPM/Xcode workflows.
+
+If Types or Client generation fails, the CLI prints the generator's captured
+stdout/stderr and exits with status 1. Missing Swift, missing input files, and
+timeouts are reported explicitly, including any output captured before a timeout.
+The success message is printed only when both generation steps succeed.
+
+### Updating existing generated packages
+
+Existing `Package.swift`, helper files, and tests are preserved. Regeneration does
+not automatically migrate an older manifest to four products. Add the two transport
+products/targets and their dependencies using the current `Package.swift.j2` as a
+reference, add `HTTPTypes` directly to targets importing it, and remove the transport
+dependency/import from the core target. Add the corresponding test targets if desired.
+New shared authentication files are created under the core client target. Any old
+`Types/AuthenticationMiddleware.swift` is preserved; migrate custom behavior into
+the new shared middleware and remove the legacy file when its users have migrated.
+Existing test suites using `UsefulThings` should keep that dependency in their manifest;
+newly generated test placeholders do not require it.
 
 ## CLI Usage
 
