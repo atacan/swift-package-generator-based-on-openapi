@@ -232,3 +232,17 @@ def test_escaped_and_percent_encoded_references_keep_deprecated_models_live(tmp_
         "Old/Kind",
         "Old Kind",
     }
+
+
+def test_discriminator_mapping_by_schema_name_keeps_deprecated_model_live(tmp_path):
+    spec = document(
+        {
+            "Base": {
+                "type": "object",
+                "properties": {"kind": {"type": "string"}},
+                "discriminator": {"propertyName": "kind", "mapping": {"old": "Old"}},
+            },
+            "Old": {"type": "object", "deprecated": True},
+        }
+    )
+    assert set(transform(tmp_path, spec)["components"]["schemas"]) == {"Base", "Old"}

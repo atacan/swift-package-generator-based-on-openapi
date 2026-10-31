@@ -5,7 +5,7 @@ defaults, extension values, and API properties named ``deprecated`` are data.
 Deprecated models still referenced by the remaining API are retained.
 """
 
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from typing import Any
 from urllib.parse import unquote
 
@@ -121,14 +121,17 @@ def _document_schemas(spec: dict, include_models: bool = True) -> Iterator[Any]:
         yield from path_item(value)
 
 
-def _model_references(schema: Any) -> set[str]:
+def _model_references(schema: Any, model_names: Collection[str]) -> set[str]:
     names = set()
     prefix = "#/components/schemas/"
     for node in _schema_nodes(schema):
         refs = [node.get(key) for key in ("$ref", "$dynamicRef", "$recursiveRef")]
         discriminator = node.get("discriminator", {})
         if isinstance(discriminator, dict):
-            refs.extend(_values(discriminator.get("mapping")))
+            for value in _values(discriminator.get("mapping")):
+                if isinstance(value, str) and value in model_names:
+                    names.add(value)
+                refs.append(value)
         for ref in refs:
             if isinstance(ref, str):
                 ref = unquote(ref)
@@ -168,13 +171,13 @@ def remove_deprecated_fields(spec: dict) -> dict:
     # used by inline operation/component schemas, following transitive references.
     pending = list(models.keys() - deprecated)
     for root in _document_schemas(spec, include_models=False):
-        pending.extend(_model_references(root))
+        pending.extend(_model_references(root, models))
     live = set()
     while pending:
         name = pending.pop()
         if name not in live and name in models:
             live.add(name)
-            pending.extend(_model_references(models[name]))
+            pending.extend(_model_references(models[name], models))
     for name in deprecated - live:
         del models[name]
     return spec
