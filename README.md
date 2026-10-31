@@ -376,6 +376,13 @@ make test-on-linux  # Run tests in a Docker container (swift:latest)
 make merge-main     # Merge current branch into main and push
 ```
 
+Generated recipes enable Bash error handling, unset-variable checks, and pipefail
+through `SHELL`, including on macOS's bundled GNU Make 3.81, which ignores
+`.SHELLFLAGS`. Existing Makefiles are preserved: to adopt this fix, set
+`SHELL := /bin/bash -eu -o pipefail` and `.SHELLFLAGS := -c` in the package's
+Makefile. This prevents a failing command or pipeline from being hidden by a
+later successful command in the same recipe.
+
 ## File Reference
 
 | File | Edit? | Purpose |

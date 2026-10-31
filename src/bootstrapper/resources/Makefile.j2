@@ -5,9 +5,9 @@
 # Configuration
 # ------------------------------------------------------------------------------
 
-# Shell settings: fail on error, pipefail
-SHELL := /bin/bash
-.SHELLFLAGS := -eu -o pipefail -c
+# Keep flags in SHELL: macOS GNU Make 3.81 ignores .SHELLFLAGS.
+SHELL := /bin/bash -eu -o pipefail
+.SHELLFLAGS := -c
 
 # Swift Format Settings
 SWIFT_FORMAT_OPTIONS := -i -p --ignore-unparsable-files --configuration .swift-format
