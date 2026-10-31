@@ -7,6 +7,43 @@ import pytest
 from bootstrapper.transformers.manager import transform_spec
 
 
+@pytest.mark.parametrize("tag", ["type", "event_type", "kind"])
+def test_const_only_tags_remain_typed_through_union_normalization(tmp_path, tag):
+    schemas = {
+        name: {
+            "type": "object",
+            "required": [tag],
+            "properties": {tag: {"const": value}},
+        }
+        for name, value in (("ModelOutput", "model_output"), ("Thought", "thought"))
+    }
+    branches = [{"$ref": f"#/components/schemas/{name}"} for name in schemas]
+    schemas["Step"] = {"anyOf": branches, "discriminator": {"propertyName": tag}}
+    spec = {
+        "openapi": "3.0.3",
+        "info": {"title": "Const-only tags", "version": "1.0.0"},
+        "paths": {},
+        "components": {"schemas": schemas},
+    }
+    original = tmp_path / "original.json"
+    transformed = tmp_path / "transformed.json"
+    original.write_text(json.dumps(spec))
+
+    transform_spec(original, transformed)
+
+    result = json.loads(transformed.read_text())
+    schemas = result["components"]["schemas"]
+    for name, value in (("ModelOutput", "model_output"), ("Thought", "thought")):
+        assert schemas[name]["properties"][tag] == {"type": "string", "enum": [value]}
+    assert schemas["Step"]["oneOf"] == branches
+    assert schemas["Step"]["discriminator"]["mapping"] == {
+        "model_output": "#/components/schemas/ModelOutput",
+        "thought": "#/components/schemas/Thought",
+    }
+    transform_spec(transformed, transformed)
+    assert json.loads(transformed.read_text()) == result
+
+
 @pytest.mark.parametrize("union", ["anyOf", "oneOf"])
 def test_nullable_required_fields_are_detected_before_null_branches_are_removed(tmp_path, union):
     """Nested completions and error payloads must keep their nullable fields optional."""

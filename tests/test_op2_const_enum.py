@@ -1,6 +1,58 @@
 """Tests for Operation 2: Convert const to enum."""
 
+from copy import deepcopy
+
+import pytest
+
 from bootstrapper.transformers.op2_const_enum import convert_const_to_enum
+
+
+@pytest.mark.parametrize(
+    ("value", "expected_type"),
+    [
+        ("model_output", "string"),
+        ("", "string"),
+        (True, "boolean"),
+        (False, "boolean"),
+        (0, "integer"),
+        (-42, "integer"),
+        (2**63, "integer"),
+        (1.0, "number"),
+        (-1.5, "number"),
+    ],
+)
+def test_infers_missing_scalar_type_from_const(value, expected_type):
+    result = convert_const_to_enum({"const": value, "description": "Literal value"})
+    assert result == {"type": expected_type, "enum": [value], "description": "Literal value"}
+    assert type(result["enum"][0]) is type(value)
+
+
+@pytest.mark.parametrize("declared_type", ["string", "number", ["string", "null"], None])
+def test_preserves_explicit_type_even_when_it_conflicts_with_const(declared_type):
+    result = convert_const_to_enum({"type": declared_type, "const": "model_output"})
+    assert result == {"type": declared_type, "enum": ["model_output"]}
+
+
+@pytest.mark.parametrize("value", [None, [], ["text"], {}, {"text": "hello"}])
+def test_null_and_composite_constants_keep_existing_conversion_without_inference(value):
+    assert convert_const_to_enum({"const": value}) == {"enum": [value]}
+
+
+def test_inference_is_recursive_and_idempotent_without_changing_enum_only_schemas():
+    spec = {
+        "properties": {
+            "type": {"const": "model_output"},
+            "events": {"items": {"properties": {"event_type": {"const": "step.delta"}}}},
+            "existing": {"enum": ["unchanged"]},
+        }
+    }
+    result = convert_const_to_enum(spec)
+    assert result["properties"]["type"] == {"type": "string", "enum": ["model_output"]}
+    event = result["properties"]["events"]["items"]["properties"]["event_type"]
+    assert event == {"type": "string", "enum": ["step.delta"]}
+    assert result["properties"]["existing"] == {"enum": ["unchanged"]}
+    expected = deepcopy(result)
+    assert convert_const_to_enum(result) == expected
 
 
 class TestOp2ConstToEnum:
