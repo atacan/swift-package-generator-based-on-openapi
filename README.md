@@ -343,13 +343,28 @@ These transformations are applied automatically to make specs compatible with `s
 |---|---|
 | Nullable handling | Makes nullable properties optional for Swift before null branches are removed |
 | anyOf simplification | Removes redundant `type: null` from `anyOf` arrays |
-| const to enum | Converts `const` values to single-element `enum` arrays |
+| const to enum | Converts `const` values to single-element `enum` arrays and infers missing non-null scalar types |
 | Float to number | Normalizes `float` type to `number` |
 | Format fixes | Converts `format: byte` to `contentEncoding: base64` |
 | Required cleanup | Removes invalid entries from `required` arrays |
+| Deprecated fields | Deletes properties marked `deprecated: true`, cleans their `required` entries, and prunes unused deprecated models |
 | Discriminated anyOf | Converts a tagged `anyOf` to `oneOf` only when every branch is an object with a required tag and disjoint string enum values; Swift can then generate a discriminated enum |
 | Discriminator mappings | Adds missing wire-value mappings for referenced object variants with required, disjoint string `const`/`enum` tags, including local references and `allOf` inheritance |
 | Overlay | Applies manual fixes from `openapi-overlay.yaml` (always last) |
+
+Const conversion infers `string`, `boolean`, `integer`, or `number` only when
+`type` is absent. This lets a tag such as `{"const": "model_output"}` generate a
+typed Swift enum instead of an unconstrained value container. Explicit types,
+including type arrays, are preserved; null and composite constants keep their
+existing conversion without type inference. Enum-only schemas are unchanged.
+
+Deprecated property removal changes the generated public API: properties marked
+`deprecated: true` are deleted, rather than retaining them without Swift warning
+annotations. Nested object properties and inline request/response schemas are
+included. API properties named `deprecated`, literal examples/defaults, and
+nondeprecated properties are preserved. Deprecated model definitions are removed
+only when no surviving schema or operation needs them; models still in use are
+retained to keep references valid. Manual overlays run after this transformation.
 
 Mapping inference runs after discriminated `anyOf` normalization. It honors the
 discriminator's property name, maps every allowed tag value to its branch's original
@@ -375,6 +390,13 @@ make format         # Run swift-format on Sources and Tests
 make test-on-linux  # Run tests in a Docker container (swift:latest)
 make merge-main     # Merge current branch into main and push
 ```
+
+Generated recipes enable Bash error handling, unset-variable checks, and pipefail
+through `SHELL`, including on macOS's bundled GNU Make 3.81, which ignores
+`.SHELLFLAGS`. Existing Makefiles are preserved: to adopt this fix, set
+`SHELL := /bin/bash -eu -o pipefail` and `.SHELLFLAGS := -c` in the package's
+Makefile. This prevents a failing command or pipeline from being hidden by a
+later successful command in the same recipe.
 
 ## File Reference
 

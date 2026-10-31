@@ -27,6 +27,8 @@ from bootstrapper.transformers.op11_multipart_required import require_multipart_
 from bootstrapper.transformers.op12_exclusive_minimum import normalize_exclusive_minimum
 from bootstrapper.transformers.op13_discriminated_anyof import normalize_discriminated_anyof
 from bootstrapper.transformers.op14_discriminator_mappings import infer_discriminator_mappings
+from bootstrapper.transformers.op15_remove_fields import remove_fields
+from bootstrapper.transformers.op16_remove_deprecated import remove_deprecated_fields
 
 _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
     # Detect nullable required properties before op1 discards their null branches.
@@ -44,6 +46,8 @@ _PIPELINE: list[tuple[str, Callable[[dict], dict]]] = [
     ("op12: normalize exclusive minimum", normalize_exclusive_minimum),
     ("op13: normalize disjoint discriminated anyOf", normalize_discriminated_anyof),
     ("op14: infer disjoint discriminator mappings", infer_discriminator_mappings),
+    ("op15: remove selected fields", remove_fields),
+    ("op16: remove deprecated schema properties", remove_deprecated_fields),
 ]
 
 
